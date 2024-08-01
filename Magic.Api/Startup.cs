@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Magic.Api.Extensions;
 using Magic.Service.Extensions;
 using Magic.DAL.Extensions;
+using Microsoft.Extensions.FileProviders;
 
 namespace Magic.Api
 {
@@ -41,10 +42,18 @@ namespace Magic.Api
                 app.UseDeveloperExceptionPage();
             }
             app.UseCustomSwagger(provider);
+            var builder = WebApplication.CreateBuilder();
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+            });
+            app.UseFileServer(new FileServerOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                Path.Combine(builder.Environment.ContentRootPath, "storage")),
+                RequestPath = "/storage",
+                EnableDirectoryBrowsing = false
             });
             #region Auth
             app.UseAuthentication();
