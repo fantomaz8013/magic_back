@@ -1,0 +1,8 @@
+#API
+docker build . -t jrub-api
+docker run -p 7021:7021 -d jrub-api
+
+docker-compose -f docker-compose.api.yml up -d --build
+
+#DB
+docker-compose -f docker-compose.db.yml up -d --build

@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  jrub_api:
+      build:
+        context: ../backend
+        dockerfile: Dockerfile
+      ports:
+        - "7021:7021"
+      restart: always
+      volumes:
+        - ../volumes/backendConfigs/appsettings.api.json:/app/appsettings.Production.json
+      environment:
+        ASPNETCORE_ENVIRONMENT: Production
+        ASPNETCORE_URLS: http://*:7021
+      expose:
+        - "7021"
