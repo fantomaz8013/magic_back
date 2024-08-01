@@ -1,5 +1,7 @@
 # Magic server
 
+open magic.migrator in terminal 
+
 dotnet ef database update - install all migration
 
 dotnet ef migrations add UserTypeAddColumn - create migration for last update configuration
