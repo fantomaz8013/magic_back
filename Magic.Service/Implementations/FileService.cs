@@ -17,7 +17,7 @@ namespace Magic.Service
     {
         public bool DeleteFile(string path)
         {
-            string fileName = Path.Combine(Environment.CurrentDirectory, path.Replace("/storage/", ""));
+            string fileName = Path.Combine(Environment.CurrentDirectory, path.Replace("/", "\\"));
             if (File.Exists(fileName))
             {
                 File.Delete(fileName);
@@ -42,7 +42,7 @@ namespace Magic.Service
                     await file.CopyToAsync(fileStream);
                 }
                 
-                return "/storage/images/" + newName;
+                return "storage/images/" + newName;
             }
             else
             {

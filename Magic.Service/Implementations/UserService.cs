@@ -205,6 +205,10 @@ namespace Magic.Service
                 user.PhoneNumber = request.PhoneNumber;
                 if (request.Avatar != null)
                 {
+                    if (user.AvatarUrl != null)
+                    {
+                        _fileService.DeleteFile(user.AvatarUrl);
+                    }
                     user.AvatarUrl = await _fileService.UploadFile(request.Avatar);
                 }
                 _dbContext.Update(user);
