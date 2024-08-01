@@ -12,15 +12,27 @@
         /// <summary>
         /// Имя
         /// </summary>
-        public string Name { get; set; }
+        public string? Name { get; set; }
         /// <summary>
         /// Электронная почта
         /// </summary>
-        public string Email { get; set; }
+        public string? Email { get; set; }
+        /// <summary>
+        /// О себе
+        /// </summary>
+        public string? Description { get; set; }
+        /// <summary>
+        /// Путь к аватару
+        /// </summary>
+        public string? AvatarUrl { get; set; }
         /// <summary>
         /// Номер телефона
         /// </summary>
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
+        /// <summary>
+        /// Опыт игры в D&D
+        /// </summary>
+        public string? GameExperience { get; set; }
         /// <summary>
         /// Хэш пароля
         /// </summary>
@@ -42,14 +54,6 @@
         /// </summary>
         public User? RefUser { get; set; }
         /// <summary>
-        /// Код для авторизация
-        /// </summary>
-        public string? Code { get; set; }
-        /// <summary>
-        /// Дата кода авторизация
-        /// </summary>
-        public DateTime? CodeDate { get; set; }
-        /// <summary>
         /// Статус блокировки
         /// </summary>
         public bool IsBlocked { get; set; }
@@ -61,5 +65,14 @@
         /// Дата создания
         /// </summary>
         public DateTime CreatedDate { get; set; }
+
+        /// <summary>
+        /// Идентификатор города
+        /// </summary>
+        public int? CityId { get; set; }
+        /// <summary>
+        /// Город
+        /// </summary>
+        public City? City { get; set; }
     }
 }

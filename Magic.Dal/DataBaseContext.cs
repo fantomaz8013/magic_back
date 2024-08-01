@@ -10,6 +10,7 @@ namespace Magic.DAL
 
         public DbSet<Log> Log { get; set; }
         public DbSet<User> User { get; set; }
+        public DbSet<City> Cities { get; set; }
 
         public DataBaseContext(DbContextOptions<DataBaseContext> options) : base(options) { }
 
@@ -19,6 +20,7 @@ namespace Magic.DAL
 
             modelBuilder.ApplyConfiguration(new LogConfiguration());
             modelBuilder.ApplyConfiguration(new UserConfiguration());
+            modelBuilder.ApplyConfiguration(new CityConfiguration());
         }
     }
 }

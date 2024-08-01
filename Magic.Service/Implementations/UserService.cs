@@ -21,12 +21,14 @@ namespace Magic.Service
         protected readonly ITokenService _jwtTokenService;
         protected readonly IUserProvider _userProvider;
         protected readonly ILogProvider _logProvider;
-        public UserService(DataBaseContext dbContext, ITokenService jwtTokenService, IUserProvider userProvider, ILogProvider logProvider)
+        protected readonly IFileService _fileService;
+        public UserService(DataBaseContext dbContext, ITokenService jwtTokenService, IUserProvider userProvider, ILogProvider logProvider, IFileService fileService)
         {
             _dbContext = dbContext;
             _jwtTokenService = jwtTokenService;
             _userProvider = userProvider;
             _logProvider = logProvider;
+            _fileService = fileService;
         }
         
         public async Task<bool> UserExists(string login)
@@ -47,9 +49,6 @@ namespace Magic.Service
             var newUser = new User
             {
                 Login = user.Login,
-                Name = user.Name,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
                 PasswordHash = passwordHash,
                 PasswordSalt = passwordSalt,
                 IsBlocked = false,
@@ -190,6 +189,28 @@ namespace Magic.Service
             //    .Where(predicate)
             //    .ToListAsync();
 
+        }
+
+        public async Task<bool> UpdateUser(UserUpdateRequest request)
+        {
+            Guid? userId = _userProvider.GetUserId();
+            var user = await _dbContext.User.FindAsync(userId);
+            if (user != null)
+            {
+                user.Name = request.Name;
+                user.Email = request.Email;
+                user.CityId = request.CityId;
+                user.Description = request.Description;
+                user.GameExperience = request.GameExperience;
+                user.PhoneNumber = request.PhoneNumber;
+                if (request.Avatar != null)
+                {
+                    user.AvatarUrl = await _fileService.UploadFile(request.Avatar);
+                }
+                _dbContext.Update(user);
+                await _dbContext.SaveChangesAsync();
+            }
+            return true;
         }
     }
 }

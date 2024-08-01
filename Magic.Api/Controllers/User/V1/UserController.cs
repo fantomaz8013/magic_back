@@ -1,4 +1,5 @@
 ﻿using Magic.Api.Controller.Base;
+using Magic.Common.Models.Request;
 using Magic.DAL.Extensions;
 using Magic.Service;
 using Microsoft.AspNetCore.Mvc;
@@ -21,12 +22,12 @@ namespace Magic.Api.Controller.User.V1
             return Ok(result);
         }
 
-        [ActionName("users")]
-        [HttpGet]
-        public async Task<IActionResult> GetUsers([FromQuery] PagedRequest request)
+        [ActionName("user")]
+        [HttpPut]
+        public async Task<IActionResult> Update([FromForm] UserUpdateRequest request)
         {
-            var payments = await _userService.ListAsync(request);
-            return Ok(payments);
+            var result = await _userService.UpdateUser(request);
+            return Ok(result);
         }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Magic.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Magic.Migrator.Migrations
 {
     [DbContext(typeof(DataBaseContext))]
-    partial class DataBaseContextModelSnapshot : ModelSnapshot
+    [Migration("20240801170606_ReworkUserModel")]
+    partial class ReworkUserModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,42 +25,6 @@ namespace Magic.Migrator.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("Magic.Domain.Entities.City", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("title");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("city", "public");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Title = "Казань"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Title = "Москва"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Title = "Екатеринбург"
-                        });
-                });
 
             modelBuilder.Entity("Magic.Domain.Entities.Log", b =>
                 {
@@ -96,33 +63,17 @@ namespace Magic.Migrator.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<string>("AvatarUrl")
-                        .HasColumnType("text")
-                        .HasColumnName("avatar_url");
-
                     b.Property<DateTime?>("BlockedDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("blocked_date");
-
-                    b.Property<int?>("CityId")
-                        .HasColumnType("integer")
-                        .HasColumnName("city_id");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_date");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
                     b.Property<string>("Email")
                         .HasColumnType("text")
                         .HasColumnName("email");
-
-                    b.Property<string>("GameExperience")
-                        .HasColumnType("text")
-                        .HasColumnName("game_experience");
 
                     b.Property<bool>("IsBlocked")
                         .HasColumnType("boolean")
@@ -161,8 +112,6 @@ namespace Magic.Migrator.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CityId");
-
                     b.HasIndex("RefUserId");
 
                     b.ToTable("user", "public");
@@ -170,17 +119,10 @@ namespace Magic.Migrator.Migrations
 
             modelBuilder.Entity("Magic.Domain.Entities.User", b =>
                 {
-                    b.HasOne("Magic.Domain.Entities.City", "City")
-                        .WithMany()
-                        .HasForeignKey("CityId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Magic.Domain.Entities.User", "RefUser")
                         .WithMany()
                         .HasForeignKey("RefUserId")
                         .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("City");
 
                     b.Navigation("RefUser");
                 });

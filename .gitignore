@@ -33,3 +33,4 @@ msbuild.err
 msbuild.wrn
 Configuration.json
 Volumes/postgresData
+Magic.Api/storage/images/*
