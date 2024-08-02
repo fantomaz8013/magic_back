@@ -11,6 +11,9 @@ namespace Magic.DAL
         public DbSet<Log> Log { get; set; }
         public DbSet<User> User { get; set; }
         public DbSet<City> Cities { get; set; }
+        public DbSet<CharacterAvatar> CharacterAvatars { get; set; }
+        public DbSet<CharacterCharacteristic> CharacterCharacteristic { get; set; }
+        public DbSet<CharacterClass> CharacterClasses { get; set; }
 
         public DataBaseContext(DbContextOptions<DataBaseContext> options) : base(options) { }
 
@@ -21,6 +24,9 @@ namespace Magic.DAL
             modelBuilder.ApplyConfiguration(new LogConfiguration());
             modelBuilder.ApplyConfiguration(new UserConfiguration());
             modelBuilder.ApplyConfiguration(new CityConfiguration());
+            modelBuilder.ApplyConfiguration(new CharacterAvatarConfiguration());
+            modelBuilder.ApplyConfiguration(new CharacterCharacteristicConfiguration());
+            modelBuilder.ApplyConfiguration(new CharacterClassConfiguration());
         }
     }
 }

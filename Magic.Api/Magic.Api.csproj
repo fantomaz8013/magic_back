@@ -22,4 +22,8 @@
     <ProjectReference Include="..\Magic.Service\Magic.Service.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="storage\character\avatar\" />
+  </ItemGroup>
+
 </Project> 

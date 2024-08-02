@@ -18,6 +18,7 @@ namespace Magic.Service.Extensions
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IUserProvider, UserProvider>();
             services.AddScoped<IFileService, FileService>();
+            services.AddScoped<ICharacterService, CharacterService>();
         }
     }
 }
