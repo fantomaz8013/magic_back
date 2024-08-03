@@ -34,3 +34,5 @@ msbuild.wrn
 Configuration.json
 Volumes/postgresData
 Magic.Api/storage/images/*
+/.idea
+/Magic.Frontend/.idea
