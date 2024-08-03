@@ -31,4 +31,10 @@
     <ProjectReference Include="..\Magic.Dal\Magic.Dal.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="appsettings.local.json">
+      <DependentUpon>appsettings.json</DependentUpon>
+    </None>
+  </ItemGroup>
+
 </Project>

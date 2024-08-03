@@ -26,7 +26,8 @@ namespace Magic.Migrator
         {
             var configurationBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false);
+                .AddJsonFile("appsettings.json", optional: false)
+                .AddJsonFile("appsettings.local.json", optional: true);
 
             var configuration = configurationBuilder.Build();
             var connectionString = configuration.GetConnectionString("DBConnectionString");
