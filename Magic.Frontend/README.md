@@ -1,18 +1,29 @@
-Based on create-react-app + typescript + MUI
+Based on create-react-app + typescript + MUI + redux RTK + react router dom
 
-Requirements
+Сначала устанавливаем все пакеты
+
+**Requirements**
 ```
-yarn global add serve
-yarn global add pm2
 yarn install
 ```
 
-Before deploying
+Для локального запуска используем react-scripts
+
+**DevRun**
+```
+yarn run start
+```
+
+Чтобы задеплоить делаем бандл, он будет находиться в /build/*
+
+**Before deploying**
 ```
 yarn run build
 ```
 
-Deploying
+Эту папку деплоим с конфигом pm2, не забудь подменить url-ы на реальные
+
+**Deploying**
 ```
-pm2 serve build 3000 --spa 
+pm2 start ecosystem.config.js
 ```
