@@ -42,5 +42,13 @@ namespace Magic.Api.Controller.User.V1
             var result = await _characterService.GetClasses();
             return Ok(result);
         }
+        [ActionName("races")]
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<List<CharacterRace>>))]
+        public async Task<IActionResult> Races()
+        {
+            var result = await _characterService.GetCharacterRaces();
+            return Ok(result);
+        }
     }
 }

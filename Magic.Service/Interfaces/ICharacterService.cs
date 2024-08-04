@@ -10,5 +10,6 @@ namespace Magic.Service.Interfaces
         Task<List<CharacterAvatar>> GetDefaultAvatar();
         Task<List<CharacterClass>> GetClasses();
         Task<List<CharacterCharacteristic>> GetCharacterCharacteristics();
+        Task<List<CharacterRace>> GetCharacterRaces();
     }
 }

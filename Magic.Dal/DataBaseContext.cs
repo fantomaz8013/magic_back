@@ -14,6 +14,8 @@ namespace Magic.DAL
         public DbSet<CharacterAvatar> CharacterAvatars { get; set; }
         public DbSet<CharacterCharacteristic> CharacterCharacteristic { get; set; }
         public DbSet<CharacterClass> CharacterClasses { get; set; }
+        public DbSet<CharacterRace> CharacterRaces { get; set; }
+        public DbSet<CharacterAbility > CharacterAbilities { get; set; }
 
         public DataBaseContext(DbContextOptions<DataBaseContext> options) : base(options) { }
 
@@ -27,6 +29,8 @@ namespace Magic.DAL
             modelBuilder.ApplyConfiguration(new CharacterAvatarConfiguration());
             modelBuilder.ApplyConfiguration(new CharacterCharacteristicConfiguration());
             modelBuilder.ApplyConfiguration(new CharacterClassConfiguration());
+            modelBuilder.ApplyConfiguration(new CharacterRaceConfiguration());
+            modelBuilder.ApplyConfiguration(new CharacterAbilityConfiguration());
         }
     }
 }

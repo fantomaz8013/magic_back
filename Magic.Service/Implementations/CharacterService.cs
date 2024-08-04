@@ -28,6 +28,12 @@ namespace Magic.Service
             return characteristics;
         }
 
+        public async Task<List<CharacterRace>> GetCharacterRaces()
+        {
+            var races = await _dbContext.CharacterRaces.ToListAsync();
+            return races;
+        }
+
         public async Task<List<CharacterClass>> GetClasses()
         {
             var classes = await _dbContext.CharacterClasses

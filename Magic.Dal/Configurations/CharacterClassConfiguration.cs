@@ -16,6 +16,9 @@ namespace Magic.DAL.Configurations
             builder.PropertyWithUnderscore(x => x.characterCharacteristicId);
             builder.PropertyWithUnderscore(x => x.description);
 
+            builder.HasForeignKey(x => x.characterCharacteristic, x => x.characterCharacteristicId);
+            builder.HasOne(x => x.characterCharacteristic);
+
             builder.HasData(new CharacterClass 
             { 
                 Id = CharacterClass.WARIOR, 

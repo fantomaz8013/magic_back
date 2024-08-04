@@ -3,6 +3,7 @@ using System;
 using Magic.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Magic.Migrator.Migrations
 {
     [DbContext(typeof(DataBaseContext))]
-    partial class DataBaseContextModelSnapshot : ModelSnapshot
+    [Migration("20240804104425_CharacterRace")]
+    partial class CharacterRace
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,319 +25,6 @@ namespace Magic.Migrator.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("Magic.Domain.Entities.CharacterAbility", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ActionType")
-                        .HasColumnType("integer")
-                        .HasColumnName("action_type");
-
-                    b.Property<int>("CoolDownType")
-                        .HasColumnType("integer")
-                        .HasColumnName("cool_down_type");
-
-                    b.Property<int?>("CubeType")
-                        .HasColumnType("integer")
-                        .HasColumnName("cube_type");
-
-                    b.Property<int>("TargetType")
-                        .HasColumnType("integer")
-                        .HasColumnName("target_type");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer")
-                        .HasColumnName("type");
-
-                    b.Property<int?>("casterCharacterCharacteristicId")
-                        .HasColumnType("integer")
-                        .HasColumnName("caster_character_characteristic_id");
-
-                    b.Property<int?>("characterClassId")
-                        .HasColumnType("integer")
-                        .HasColumnName("character_class_id");
-
-                    b.Property<int?>("coolDownCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("cool_down_count");
-
-                    b.Property<int?>("cubeCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("cube_count");
-
-                    b.Property<string>("description")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<int?>("distance")
-                        .HasColumnType("integer")
-                        .HasColumnName("distance");
-
-                    b.Property<int?>("radius")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("targetCharacterCharacteristicId")
-                        .HasColumnType("integer")
-                        .HasColumnName("target_character_characteristic_id");
-
-                    b.Property<string>("title")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("title");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("casterCharacterCharacteristicId");
-
-                    b.HasIndex("characterClassId");
-
-                    b.HasIndex("targetCharacterCharacteristicId");
-
-                    b.ToTable("character_ability", "public");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            ActionType = 1,
-                            CoolDownType = 3,
-                            CubeType = 4,
-                            TargetType = 1,
-                            Type = 1,
-                            cubeCount = 1,
-                            description = "Вы наносите урон основным оружием по выбраной цели нанося 1к10 урона",
-                            distance = 2,
-                            title = "Удар основным оружием"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            ActionType = 2,
-                            CoolDownType = 2,
-                            CubeType = 4,
-                            TargetType = 3,
-                            Type = 3,
-                            characterClassId = 1,
-                            cubeCount = 1,
-                            description = "Вы обладаете ограниченным источником выносливости, которым можете воспользоваться, чтобы уберечь себя. В свой ход вы можете бонусным действием восстановить хиты в размере 1к10",
-                            title = "Второе дыхание"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            ActionType = 2,
-                            CoolDownType = 2,
-                            TargetType = 3,
-                            Type = 4,
-                            characterClassId = 1,
-                            description = "Немедленно получите ещё одно действие в этом ходу. На следующий ход эффект порыва исчезает",
-                            title = "Порыв к действию"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            ActionType = 1,
-                            CoolDownType = 2,
-                            CubeType = 4,
-                            TargetType = 4,
-                            Type = 1,
-                            characterClassId = 1,
-                            cubeCount = 1,
-                            description = "Удар основным оружием по конусу 3 клетки перед собой. Наносит 1к10 всем, кто находится в конусе",
-                            distance = 1,
-                            radius = 3,
-                            title = "Размашистый удар"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            ActionType = 2,
-                            CoolDownType = 4,
-                            CubeType = 2,
-                            TargetType = 3,
-                            Type = 4,
-                            characterClassId = 1,
-                            cubeCount = 2,
-                            description = "Немедленно получите еще 3 очка действия в этом ходу, но получите 2к6 урона по себе",
-                            title = "Ярость"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            ActionType = 1,
-                            CoolDownType = 4,
-                            CubeType = 4,
-                            TargetType = 2,
-                            Type = 1,
-                            characterClassId = 2,
-                            cubeCount = 3,
-                            description = "Немедленно выпускает огненый шар в точку и происходит взрыв с радиюусов 1м. Дальность 30м. Все существа в радиусе взрыва получают 3к10 урона",
-                            distance = 30,
-                            radius = 1,
-                            title = "Огненый шар"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            ActionType = 1,
-                            CoolDownType = 2,
-                            CubeType = 6,
-                            TargetType = 1,
-                            Type = 5,
-                            characterClassId = 2,
-                            cubeCount = 1,
-                            description = "Вы внушаете определенный курс действий (ограниченный одной-двумя фразами) существу, видимому в пределах дистанции, способному слышать и понимать вас",
-                            distance = 30,
-                            targetCharacterCharacteristicId = 5,
-                            title = "Внушение"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            ActionType = 1,
-                            CoolDownType = 3,
-                            CubeType = 4,
-                            TargetType = 1,
-                            Type = 1,
-                            casterCharacterCharacteristicId = 5,
-                            characterClassId = 2,
-                            cubeCount = 1,
-                            description = "Вы кидаете сгусток огня в существо или предмет в пределах дистанции ( 30 м ). Совершите по цели дальнобойную атаку заклинанием. При попадании цель получает урон огнём 1к10.",
-                            distance = 30,
-                            title = "Огненный снаряд"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            ActionType = 1,
-                            CoolDownType = 2,
-                            TargetType = 3,
-                            Type = 4,
-                            characterClassId = 2,
-                            description = "Выберите точку и перелетите к ней игнорируя все препятствия",
-                            distance = 10,
-                            title = "Левитация"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            ActionType = 1,
-                            CoolDownType = 2,
-                            CubeType = 3,
-                            TargetType = 1,
-                            Type = 3,
-                            characterClassId = 4,
-                            cubeCount = 1,
-                            description = "Существо, которого вы касаетесь, восстанавливает количество хитов, равное 1к8",
-                            distance = 2,
-                            title = "Исцеление"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            ActionType = 1,
-                            CoolDownType = 2,
-                            CubeType = 3,
-                            TargetType = 1,
-                            Type = 1,
-                            characterClassId = 4,
-                            cubeCount = 1,
-                            description = "Вы выпускаете сгусток светлой энергии по противнику, наносящий 1к8 урона и оглушающий его на 1 ход",
-                            distance = 30,
-                            title = "Оглушающая кара"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            ActionType = 1,
-                            CoolDownType = 4,
-                            CubeType = 6,
-                            TargetType = 1,
-                            Type = 3,
-                            characterClassId = 4,
-                            cubeCount = 1,
-                            description = "Вы можете воскресить павшего союзника c 1к20",
-                            distance = 30,
-                            title = "Воскрешение"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            ActionType = 1,
-                            CoolDownType = 2,
-                            CubeType = 4,
-                            TargetType = 1,
-                            Type = 2,
-                            characterClassId = 4,
-                            cubeCount = 1,
-                            description = "Вы накладываете на существо божественный щит, способный похлотить 1к10 урона",
-                            distance = 30,
-                            title = "Божественный щит"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            ActionType = 1,
-                            CoolDownType = 2,
-                            CubeType = 4,
-                            TargetType = 2,
-                            Type = 1,
-                            characterClassId = 3,
-                            cubeCount = 1,
-                            description = "Выпускает град стрел по указаной области, нанося всем существам 1к10 урона",
-                            distance = 30,
-                            radius = 1,
-                            title = "Залп стрел"
-                        },
-                        new
-                        {
-                            Id = 15,
-                            ActionType = 2,
-                            CoolDownType = 2,
-                            CubeType = 4,
-                            TargetType = 3,
-                            Type = 3,
-                            characterClassId = 3,
-                            cubeCount = 1,
-                            description = "Вы обладаете бинтами, которым можете воспользоваться, чтобы исцелить себя. В свой ход вы можете бонусным действием восстановить хиты в размере 1к10",
-                            title = "Перевязка ран"
-                        },
-                        new
-                        {
-                            Id = 16,
-                            ActionType = 1,
-                            CoolDownType = 3,
-                            CubeType = 4,
-                            TargetType = 1,
-                            Type = 1,
-                            characterClassId = 3,
-                            cubeCount = 1,
-                            description = "Вы стреляете из лука по цели, нанося 1к10 урона",
-                            distance = 30,
-                            title = "Точный выстрел"
-                        },
-                        new
-                        {
-                            Id = 17,
-                            ActionType = 1,
-                            CoolDownType = 4,
-                            CubeType = 4,
-                            TargetType = 1,
-                            Type = 1,
-                            characterClassId = 3,
-                            cubeCount = 5,
-                            description = "Вы стреляете из лука по цели особой стрелой, нанося 5к10 урона",
-                            distance = 30,
-                            title = "Выстрел адамантиевой стрелой"
-                        });
-                });
 
             modelBuilder.Entity("Magic.Domain.Entities.CharacterAvatar", b =>
                 {
@@ -699,39 +389,12 @@ namespace Magic.Migrator.Migrations
                     b.ToTable("user", "public");
                 });
 
-            modelBuilder.Entity("Magic.Domain.Entities.CharacterAbility", b =>
-                {
-                    b.HasOne("Magic.Domain.Entities.CharacterCharacteristic", "CasterCharacterCharacteristic")
-                        .WithMany()
-                        .HasForeignKey("casterCharacterCharacteristicId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Magic.Domain.Entities.CharacterClass", "CharacterClass")
-                        .WithMany()
-                        .HasForeignKey("characterClassId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Magic.Domain.Entities.CharacterCharacteristic", "TargetCharacterCharacteristic")
-                        .WithMany()
-                        .HasForeignKey("targetCharacterCharacteristicId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("CasterCharacterCharacteristic");
-
-                    b.Navigation("CharacterClass");
-
-                    b.Navigation("TargetCharacterCharacteristic");
-                });
-
             modelBuilder.Entity("Magic.Domain.Entities.CharacterClass", b =>
                 {
                     b.HasOne("Magic.Domain.Entities.CharacterCharacteristic", "characterCharacteristic")
                         .WithMany()
                         .HasForeignKey("characterCharacteristicId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("characterCharacteristic");
