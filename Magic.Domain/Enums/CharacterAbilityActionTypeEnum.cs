@@ -1,17 +1,16 @@
-﻿namespace Magic.Domain.Enums
+﻿namespace Magic.Domain.Enums;
+
+/// <summary>
+/// Тип действия
+/// </summary>
+public enum CharacterAbilityActionTypeEnum
 {
     /// <summary>
-    /// Тип действия
+    /// Основное действие
     /// </summary>
-    public enum CharacterAbilityActionTypeEnum
-    {
-        /// <summary>
-        /// Основное действие
-        /// </summary>
-        MainAction = 1,
-        /// <summary>
-        /// Дополнительное действие
-        /// </summary>
-        AdditionalAction= 2,
-    }
+    MainAction = 1,
+    /// <summary>
+    /// Дополнительное действие
+    /// </summary>
+    AdditionalAction= 2,
 }

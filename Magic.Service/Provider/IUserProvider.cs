@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Security.Claims;
 
-namespace Magic.Service.Provider
+namespace Magic.Service.Provider;
+
+public interface IUserProvider
 {
-    public interface IUserProvider
-    {
-        Guid? GetUserId();
-        Guid? GetUserId(ClaimsPrincipal claimsPrincipal);
-        Auth GetAuth();
-    }
+    Guid? GetUserId();
+    Guid? GetUserId(ClaimsPrincipal claimsPrincipal);
+    Auth GetAuth();
 }

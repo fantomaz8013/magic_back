@@ -1,10 +1,9 @@
-﻿namespace Magic.Service.Provider
+﻿namespace Magic.Service.Provider;
+
+public interface ILogProvider
 {
-    public interface ILogProvider
-    {
-        Task Write(string text);
-        Task WriteError(string text);
-        Task WriteWarning(string text);
-        Task WriteInformation(string text);
-    }
+    Task Write(string text);
+    Task WriteError(string text);
+    Task WriteWarning(string text);
+    Task WriteInformation(string text);
 }

@@ -1,9 +1,8 @@
-﻿namespace Magic.Domain
-{
-    public interface IHasBlocked
-    {
-        bool IsBlocked { get; set; }
+﻿namespace Magic.Domain;
 
-        DateTime? BlockedDate { get; set; }
-    }
+public interface IHasBlocked
+{
+    bool IsBlocked { get; set; }
+
+    DateTime? BlockedDate { get; set; }
 }

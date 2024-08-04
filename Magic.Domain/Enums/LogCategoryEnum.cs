@@ -1,7 +1,6 @@
-﻿namespace Magic.Domain.Enums
+﻿namespace Magic.Domain.Enums;
+
+public enum LogCategoryEnum
 {
-    public enum LogCategoryEnum
-    {
-        None = 0,
-    }
+    None = 0,
 }

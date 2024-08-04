@@ -1,7 +1,6 @@
-﻿namespace Magic.Domain
+﻿namespace Magic.Domain;
+
+public interface IHasCreatedDate
 {
-    public interface IHasCreatedDate
-    {
-        DateTime CreatedDate { get; }
-    }
+    DateTime CreatedDate { get; }
 }

@@ -1,12 +1,9 @@
-﻿using Magic.Domain.Enums;
+﻿namespace Magic.Domain.Entities;
 
-namespace Magic.Domain.Entities
+public class CharacterAvatar : BaseEntity<int>
 {
-    public class CharacterAvatar : BaseEntity<int>
-    {
-        /// <summary>
-        /// Название города
-        /// </summary>
-        public string AvatarUrl { get; set; }
-    }
+    /// <summary>
+    /// Название города
+    /// </summary>
+    public string AvatarUrl { get; set; }
 }

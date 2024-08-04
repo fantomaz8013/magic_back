@@ -1,19 +1,18 @@
 ﻿using System.Text.Json;
 
-namespace Magic.Common.Options
+namespace Magic.Common.Options;
+
+public class UpperCaseNamingPolicy : JsonNamingPolicy
 {
-    public class UpperCaseNamingPolicy : JsonNamingPolicy
+    public static UpperCaseNamingPolicy Instance { get; } = new UpperCaseNamingPolicy();
+
+    public override string ConvertName(string name)
     {
-        public static UpperCaseNamingPolicy Instance { get; } = new UpperCaseNamingPolicy();
+        return ToSnakeCase(name);
+    }
 
-        public override string ConvertName(string name)
-        {
-            return ToSnakeCase(name);
-        }
-
-        public static string ToSnakeCase(string str)
-        {
-            return str.ToUpper();
-        }
+    public static string ToSnakeCase(string str)
+    {
+        return str.ToUpper();
     }
 }

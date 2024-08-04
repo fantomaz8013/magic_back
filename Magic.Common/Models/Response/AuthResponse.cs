@@ -1,9 +1,8 @@
-﻿namespace Magic.Common.Models.Response
+﻿namespace Magic.Common.Models.Response;
+
+public class AuthResponse
 {
-    public class AuthResponse
-    {
-        public TokenResponse? TokenResult { get; set; }
-        public bool? IsNeedEnterCode { get; set; }
-        public int ConfirmCodeLifeTime { get; set; }
-    }
+    public TokenResponse? TokenResult { get; set; }
+    public bool? IsNeedEnterCode { get; set; }
+    public int ConfirmCodeLifeTime { get; set; }
 }
