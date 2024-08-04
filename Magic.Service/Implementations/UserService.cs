@@ -78,8 +78,9 @@ namespace Magic.Service
             {
                 if (token.Password != null && !VerifyPassword(token.Password, user.PasswordHash, user.PasswordSalt))
                     return null;
-
-                authResponseModel.TokenResult = _jwtTokenService.CreateUserToken(user);
+                var expiresRefresh = DateTime.Now;
+                expiresRefresh = expiresRefresh.AddDays(7);
+                authResponseModel.TokenResult = _jwtTokenService.CreateUserToken(user, expiresRefresh);
             }
 
             await _logProvider.WriteInformation($"{user.Name} get token");
