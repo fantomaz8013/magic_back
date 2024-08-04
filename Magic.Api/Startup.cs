@@ -1,11 +1,15 @@
+using System.Text;
 using Magic.Api.Controllers.Websockets;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Magic.Api.Extensions;
+using Magic.Common;
 using Magic.Service.Extensions;
 using Magic.DAL.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Connections;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.AspNetCore.SignalR;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Magic.Api;
 
@@ -31,10 +35,43 @@ public class Startup
         services.AddCustomCors();
 
         #region Auth
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy(JwtBearerDefaults.AuthenticationScheme, policy =>
+            {
+                policy.AddRequirements()
+            });
+        });
 
         services
-            .AddAuthentication()
-            .AddJwtBearer(options => { });
+            .AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                var opt = new AppConfig(_configuration).authOptions;
+                options.TokenValidationParameters = opt.TokenValidationParameters;
+                options.Events = new JwtBearerEvents // Jwt-токен в websocket передается через query string
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var path = context.HttpContext.Request.Path;
+                        if (!path.StartsWithSegments(websocketsPath))
+                            return Task.CompletedTask;
+                        var accessToken = context.Request.Query["access_token"];
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments(websocketsPath))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
+            });
 
         #endregion
 
@@ -53,14 +90,6 @@ public class Startup
         app.UseCustomSwagger(provider);
         var builder = WebApplication.CreateBuilder();
         app.UseRouting();
-        app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
-        app.UseFileServer(new FileServerOptions
-        {
-            FileProvider = new PhysicalFileProvider(
-                Path.Combine(builder.Environment.ContentRootPath, "storage")),
-            RequestPath = "/storage",
-            EnableDirectoryBrowsing = false
-        });
 
         #region Auth
 
@@ -68,31 +97,26 @@ public class Startup
         app.UseAuthorization();
 
         #endregion
-        
-        ConfigureWebsockets(app);
+
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+            endpoints.MapHub<ChatHub>("/ws", options =>
+                {
+                    options.Transports =
+                        HttpTransportType.WebSockets |
+                        HttpTransportType.LongPolling;
+                }
+            );
+        });
+        app.UseFileServer(new FileServerOptions
+        {
+            FileProvider = new PhysicalFileProvider(
+                Path.Combine(builder.Environment.ContentRootPath, "storage")),
+            RequestPath = "/storage",
+            EnableDirectoryBrowsing = false
+        });
     }
 
     private const string websocketsPath = "/ws";
-
-    private static void ConfigureWebsockets(IApplicationBuilder app)
-    {
-        app.Map(
-            new PathString(websocketsPath), // Map применяет middleware только при обработке запросов по указанному префиксу пути
-            a =>
-            {
-                app.UseAuthentication();
-                app.UseAuthorization();
-                app.UseWebSockets();
-                app.UseRouting(); // Включает обработку UseEndpoints
-                app.UseEndpoints(endpoints =>
-                {
-                    endpoints.MapHub<ChatHub>(websocketsPath,
-                        configureOptions =>
-                        {
-                            configureOptions.Transports =
-                                HttpTransportType.WebSockets | HttpTransportType.LongPolling;
-                        });
-                });
-            });
-    }
 }

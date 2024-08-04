@@ -7,6 +7,8 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import {useGetCurrentUserQuery} from "../../redux/toolkit/api/userApi";
+import {useSelector} from "react-redux";
+import {RootState} from "../../redux";
 
 type Message = { author: string, message: string, sender?: boolean };
 
@@ -19,8 +21,10 @@ export default function Chat() {
     const [ws, setWs] = useState<signalR.HubConnection | null>(null);
     const [currentMessage, setCurrentMessage] = useState<string>('');
     const [messages, setMessages] = useState<Message[]>([...defaultMessages]);
+    const token = useSelector((state: RootState) => state.auth.token)
+
     useEffect(() => {
-        const connection = createSignalRConnection('ws', signalR.LogLevel.Information);
+        const connection = createSignalRConnection('ws', token!, signalR.LogLevel.Information);
         connection.start();
         setWs(connection);
     }, [])
@@ -31,7 +35,7 @@ export default function Chat() {
     }, [currentUser])
 
     function messageReceived(author: string, message: string) {
-        const isSender = author === currentUser!.data!.login ;
+        const isSender = author === currentUser!.data!.login;
         const newMessage = {author, message, sender: isSender};
         setMessages(prevState => [...prevState, newMessage]);
     }
