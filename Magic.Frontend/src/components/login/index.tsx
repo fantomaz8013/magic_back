@@ -13,7 +13,7 @@ import Copyright from "../copyright";
 import {useNavigate} from "react-router-dom";
 import {useDispatch} from "react-redux";
 import {useState} from "react";
-import {login as loginRequest} from "../../redux/toolkit/slices/authSlice";
+import {getToken as loginRequest} from "../../redux/toolkit/slices/tokenSlice";
 import paths from "../../consts/paths";
 import {AppDispatch} from "../../redux";
 
@@ -38,7 +38,7 @@ export default function Login() {
                     <LockOutlinedIcon/>
                 </Avatar>
                 <Typography component="h1" variant="h5">
-                    Sign in
+                    Login
                 </Typography>
                 <Box component="form" onSubmit={handleSubmit} noValidate sx={{mt: 1}}>
                     <TextField
@@ -76,7 +76,7 @@ export default function Login() {
                     <Grid container justifyContent="flex-end">
                         <Grid item>
                             <Link href={paths.register} onClick={onRegisterClick} variant="body2">
-                                {"Don't have an account? Sign Up"}
+                                {"Don't have an account? Register"}
                             </Link>
                         </Grid>
                     </Grid>

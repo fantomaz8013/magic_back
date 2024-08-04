@@ -12,6 +12,13 @@ const config: Record<string, ValidationConfig> = {
     password: {
         fieldName: "Password",
         minLength: 6,
+    },
+    phoneNumber:{
+        fieldName: "PhoneNumber",
+        regex: {
+            explain: "Should contain only numbers",
+            expression: /^[0-9]+$/
+        }
     }
 }
 

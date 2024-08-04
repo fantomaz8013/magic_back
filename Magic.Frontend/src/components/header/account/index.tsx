@@ -1,7 +1,7 @@
 import {useGetCurrentUserQuery} from "../../../redux/toolkit/api/userApi";
 import React from "react";
 import {Avatar, Box, CircularProgress, IconButton, Menu, MenuItem, Tooltip, Typography} from "@mui/material";
-import {logout} from "../../../redux/toolkit/slices/authSlice";
+import {resetToken} from "../../../redux/toolkit/slices/tokenSlice";
 import {useDispatch} from "react-redux";
 import {AppDispatch} from "../../../redux";
 import {useNavigate} from "react-router-dom";
@@ -21,7 +21,7 @@ export default function Account() {
     }, {
         text: 'Logout',
         action: () => {
-            dispatch(logout());
+            dispatch(resetToken());
             handleCloseUserMenu();
             navigate(paths.login)
         }
@@ -44,7 +44,7 @@ export default function Account() {
             <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
                     <Avatar sx={{m: 1, bgcolor: 'secondary.main'}}>
-                        {data!.login.slice(0, 1)}
+                        {data!.data.login.slice(0, 1)}
                     </Avatar>
                 </IconButton>
             </Tooltip>

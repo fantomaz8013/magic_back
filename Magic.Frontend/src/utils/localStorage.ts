@@ -1,17 +1,21 @@
 import {PaletteMode} from "@mui/material";
-import UserRequest from "../models/requests/userRequest";
 
 const keys = {
     mode: 'mode',
-    account: 'account'
+    token: 'token',
+    refreshToken: 'refreshToken'
 }
 
 export function setPaletteMode(mode: PaletteMode) {
     localStorage.setItem(keys.mode, mode);
 }
 
-export function setAccount(r: UserRequest) {
-    localStorage.setItem(keys.account, JSON.stringify(r));
+export function setToken(token: string | null, isRefresh = false) {
+    const key = isRefresh ? keys.refreshToken : keys.token;
+    if (token)
+        localStorage.setItem(key, token);
+    else
+        localStorage.removeItem(key);
 }
 
 export function getPaletteMode(): PaletteMode {
@@ -21,9 +25,10 @@ export function getPaletteMode(): PaletteMode {
     return 'light';
 }
 
-export function getAccount() {
-    const val = localStorage.getItem(keys.account);
+export function getToken(isRefresh = false) {
+    const key = isRefresh ? keys.refreshToken : keys.token;
+    const val = localStorage.getItem(key);
     if (val)
-        return JSON.parse(val) as UserRequest;
+        return val;
     return null;
 }

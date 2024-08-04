@@ -20,6 +20,9 @@ import AccessibleForwardIcon from '@mui/icons-material/AccessibleForward';
 import Typography from "@mui/material/Typography";
 import Copyright from "../copyright";
 import Profile from "../profile/profile";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "../../redux";
+import {refreshToken} from "../../redux/toolkit/slices/tokenSlice";
 
 export default function App() {
     return (

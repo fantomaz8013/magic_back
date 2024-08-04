@@ -69,17 +69,17 @@ namespace Magic.Service
             var user = await _dbContext.User.FirstOrDefaultAsync(x => x.Login == token.Login);
 
             if (user == null) 
-                return null;
+                throw new ExceptionWithApplicationCode("Нет такого", ExceptionApplicationCodeEnum.UserNotExist);
 
             if (user.IsBlocked)
-                return null;
+                throw new ExceptionWithApplicationCode("Тебя забанили, пидор", ExceptionApplicationCodeEnum.UserBanned);
 
             var authResponseModel = new AuthResponse();
 
             if (token.Password != null)
             {
                 if (token.Password != null && !VerifyPassword(token.Password, user.PasswordHash, user.PasswordSalt))
-                    return null;
+                    throw new ExceptionWithApplicationCode("Неверный пароль", ExceptionApplicationCodeEnum.InvalidPassword);
                 var expiresRefresh = DateTime.Now;
                 expiresRefresh = expiresRefresh.AddDays(7);
                 authResponseModel.TokenResult = _jwtTokenService.CreateUserToken(user, expiresRefresh);

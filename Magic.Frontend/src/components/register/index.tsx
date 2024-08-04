@@ -15,7 +15,7 @@ import paths from "../../consts/paths";
 import {useState} from "react";
 import {ValidationResult} from "../../validation";
 import {validateLogin, validatePassword} from "../../validation/userValidation";
-import {register} from "../../redux/toolkit/slices/authSlice";
+import {register} from "../../redux/toolkit/slices/tokenSlice";
 import {useDispatch} from "react-redux";
 import {AppDispatch} from "../../redux";
 

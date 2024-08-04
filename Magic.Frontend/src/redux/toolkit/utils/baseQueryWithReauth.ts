@@ -2,7 +2,7 @@ import {fetchBaseQuery, FetchBaseQueryArgs} from '@reduxjs/toolkit/query';
 import type {BaseQueryFn, FetchArgs, FetchBaseQueryError} from '@reduxjs/toolkit/query';
 import {Mutex} from 'async-mutex';
 import {RootState} from "../../index";
-import {refreshToken} from "../slices/authSlice";
+import {refreshToken} from "../slices/tokenSlice";
 import {apiProxy} from "../../../env";
 
 const mutex = new Mutex();
@@ -35,7 +35,7 @@ export const fetchBaseQueryWithAuth = (fetchArgs?: FetchBaseQueryArgs | undefine
         const state = api.getState() as RootState;
 
         const result = await baseQuery(args, api, extraOptions);
-        if (!result.error || result.error.status !== 401 || !state.auth.token) {
+        if (!result.error || result.error.status !== 401 || !state.auth.refreshToken) {
             return result;
         }
 
@@ -46,7 +46,7 @@ export const fetchBaseQueryWithAuth = (fetchArgs?: FetchBaseQueryArgs | undefine
 
         const release = await mutex.acquire();
         try {
-            const token = await api.dispatch(refreshToken(state.auth.token)).unwrap();
+            const token = await api.dispatch(refreshToken(state.auth.refreshToken)).unwrap();
             if (token) {
                 return baseQuery(args, api, extraOptions);
             }
