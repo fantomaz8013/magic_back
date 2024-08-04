@@ -47,7 +47,7 @@ export default function Profile() {
         <Container component="main" maxWidth="xs">
             <CssBaseline/>
             <Typography component="h1" variant="h3" color="inherit">
-                Profile {currentUser.data.login}
+                Profile {currentUser.data!.login}
             </Typography>
             <Paper
                 sx={{
@@ -62,9 +62,9 @@ export default function Profile() {
                 }}
             >
                 <Box component="form" noValidate onSubmit={handleSubmit} sx={{mt: 1}}>
-                    <ProfileField name={'Name'} type={'text'} defaultValue={currentUser.data.name}/>
-                    <ProfileField name={'Email'} type={'email'} defaultValue={currentUser.data.email}/>
-                    <ProfileField name={'PhoneNumber'} type={'tel'} defaultValue={currentUser.data.phoneNumber}/>
+                    <ProfileField name={'Name'} type={'text'} defaultValue={currentUser.data!.name}/>
+                    <ProfileField name={'Email'} type={'email'} defaultValue={currentUser.data!.email}/>
+                    <ProfileField name={'PhoneNumber'} type={'tel'} defaultValue={currentUser.data!.phoneNumber}/>
                     <Button
                         type="submit"
                         fullWidth

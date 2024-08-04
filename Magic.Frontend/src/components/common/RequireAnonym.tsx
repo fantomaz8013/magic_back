@@ -9,7 +9,7 @@ export default function RequireAnonym() {
     let location = useLocation();
 
     if (token) {
-        return <Navigate to={paths.register} state={{from: location}} replace/>;
+        return <Navigate to={paths.home} state={{from: location}} replace/>;
     }
 
     return <Outlet/>;

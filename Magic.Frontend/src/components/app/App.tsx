@@ -10,7 +10,7 @@ import Login from "../login";
 import Register from "../register";
 import RequireAuth from "../common/RequireAuth";
 import RequireAnonym from "../common/RequireAnonym";
-import {createTheme, Link, PaletteMode, ThemeProvider} from "@mui/material";
+import {createTheme, PaletteMode, ThemeProvider} from "@mui/material";
 import {getPaletteMode, setPaletteMode} from "../../utils/localStorage";
 import Container from "@mui/material/Container";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -20,9 +20,7 @@ import AccessibleForwardIcon from '@mui/icons-material/AccessibleForward';
 import Typography from "@mui/material/Typography";
 import Copyright from "../copyright";
 import Profile from "../profile/profile";
-import {useDispatch, useSelector} from "react-redux";
-import {RootState} from "../../redux";
-import {refreshToken} from "../../redux/toolkit/slices/tokenSlice";
+import ChatPage from "../chat/chatPage";
 
 export default function App() {
     return (
@@ -35,6 +33,7 @@ export default function App() {
                 </Route>
                 <Route element={<RequireAuth/>}>
                     <Route path={paths.profile} element={<Profile/>}/>
+                    <Route path={paths.chat} element={<ChatPage/>}/>
                 </Route>
             </Route>
         </Routes>
@@ -75,13 +74,13 @@ function HomePage() {
                 }}
             >
                 <Avatar sx={{m: 1, bgcolor: 'secondary.main'}}>
-                    <AccessibleForwardIcon />
+                    <AccessibleForwardIcon/>
                 </Avatar>
                 <Typography component="h1" variant="h5">
                     Magic
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
-                    Хуй засунь в пизду Андрея, получишь ты Альберта <br />
+                    Хуй засунь в пизду Андрея, получишь ты Альберта <br/>
                     И, хоть, бывает, может, там, денег нам давай.
                 </Typography>
             </Box>

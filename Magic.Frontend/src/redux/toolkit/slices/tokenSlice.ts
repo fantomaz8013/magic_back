@@ -54,20 +54,20 @@ export const tokenSlice = createSlice({
             setToken(state.token);
         })
         .addCase(refreshToken.fulfilled, (state, action) => {
-            state.token = action.payload.data.tokenResult.token;
-            state.refreshToken = action.payload.data.tokenResult.refreshToken;
+            state.token = action.payload.data!.tokenResult.token;
+            state.refreshToken = action.payload.data!.tokenResult.refreshToken;
             setToken(state.token);
             setToken(state.refreshToken, true);
         })
         .addCase(getToken.fulfilled, (state, action) => {
-            state.token = action.payload.data.tokenResult.token;
-            state.refreshToken = action.payload.data.tokenResult.refreshToken;
+            state.token = action.payload.data!.tokenResult.token;
+            state.refreshToken = action.payload.data!.tokenResult.refreshToken;
             setToken(state.token);
             setToken(state.refreshToken, true);
         })
         .addCase(register.fulfilled, (state, action) => {
-            state.token = action.payload.data.tokenResult.token;
-            state.refreshToken = action.payload.data.tokenResult.refreshToken;
+            state.token = action.payload.data!.tokenResult.token;
+            state.refreshToken = action.payload.data!.tokenResult.refreshToken;
             setToken(state.token);
             setToken(state.refreshToken, true);
         })

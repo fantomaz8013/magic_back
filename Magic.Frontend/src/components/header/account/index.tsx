@@ -34,7 +34,7 @@ export default function Account() {
         setAnchorElUser(null);
     };
 
-    if (!data || isLoading)
+    if (!data || !data.data || isLoading)
         return (<Box sx={{display: 'flex'}}>
             <CircularProgress/>
         </Box>);
@@ -44,7 +44,7 @@ export default function Account() {
             <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
                     <Avatar sx={{m: 1, bgcolor: 'secondary.main'}}>
-                        {data!.data.login.slice(0, 1)}
+                        {data!.data!.login.slice(0, 1)}
                     </Avatar>
                 </IconButton>
             </Tooltip>
