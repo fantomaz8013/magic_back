@@ -3,8 +3,10 @@ using Magic.Api.Controllers.Websockets;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Magic.Api.Extensions;
 using Magic.Common;
+using Magic.Common.Options;
 using Magic.Service.Extensions;
 using Magic.DAL.Extensions;
+using Magic.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Mvc;
@@ -35,13 +37,6 @@ public class Startup
         services.AddCustomCors();
 
         #region Auth
-        services.AddAuthorization(options =>
-        {
-            options.AddPolicy(JwtBearerDefaults.AuthenticationScheme, policy =>
-            {
-                policy.AddRequirements()
-            });
-        });
 
         services
             .AddAuthentication(options =>
@@ -53,20 +48,24 @@ public class Startup
             .AddJwtBearer(options =>
             {
                 var opt = new AppConfig(_configuration).authOptions;
-                options.TokenValidationParameters = opt.TokenValidationParameters;
-                options.Events = new JwtBearerEvents // Jwt-токен в websocket передается через query string
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+
+                    ValidIssuer = opt.Issuer,
+                    ValidAudience = opt.Audience,
+                    IssuerSigningKey = opt.SymmetricSecurityKey
+                };
+                options.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = context =>
                     {
-                        var path = context.HttpContext.Request.Path;
-                        if (!path.StartsWithSegments(websocketsPath))
-                            return Task.CompletedTask;
                         var accessToken = context.Request.Query["access_token"];
-                        if (!string.IsNullOrEmpty(accessToken) &&
-                            path.StartsWithSegments(websocketsPath))
-                        {
+                        if (!string.IsNullOrEmpty(accessToken))
                             context.Token = accessToken;
-                        }
 
                         return Task.CompletedTask;
                     }

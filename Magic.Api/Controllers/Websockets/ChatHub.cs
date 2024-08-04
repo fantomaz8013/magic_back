@@ -1,13 +1,11 @@
-﻿using Magic.Api.Attributes;
-using Magic.DAL;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Magic.DAL;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Magic.Api.Controllers.Websockets;
 
-[Authorize(JwtBearerDefaults.AuthenticationScheme)]
+[Authorize]
 public class ChatHub : Hub
 {
     private readonly IServiceProvider _serviceProvider;

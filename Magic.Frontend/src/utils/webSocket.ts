@@ -9,9 +9,9 @@ export function createSignalRConnection(
         .withUrl(
             baseProxy + url,
             {
-                // accessTokenFactory: () => {
-                //     return token;
-                // },
+                accessTokenFactory: () => {
+                    return token;
+                },
                 transport: signalR.HttpTransportType.WebSockets
             }
         )

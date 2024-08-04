@@ -1,4 +1,4 @@
-﻿using Magic.Api.Attributes;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Magic.Api.Controller.Base;
@@ -6,7 +6,7 @@ namespace Magic.Api.Controller.Base;
 [ApiController]
 [ApiVersion("1.0", Deprecated = false)]
 [Route("api/v{version:apiVersion}/[action]")]
-[JwtTokenAuthorize]
+[Authorize]
 public class V1ControllerBase : ControllerBase { }
 
 [ApiExplorerSettings(GroupName = "User")]
