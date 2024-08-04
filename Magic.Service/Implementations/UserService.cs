@@ -12,6 +12,8 @@ using Magic.DAL;
 using Magic.Service.Provider;
 using System.IdentityModel.Tokens.Jwt;
 using Magic.Service.Interfaces;
+using Magic.Domain.Enums;
+using Magic.Domain.Exceptions;
 
 namespace Magic.Service
 {
@@ -41,7 +43,7 @@ namespace Magic.Service
         public async Task<TokenResponse?> Register(UserRequest user)
         {
             if (await UserExists(user.Login))
-                throw new Exception("Логин занят.");
+                throw new ExceptionWithApplicationCode("Логин занят", ExceptionApplicationCodeEnum.UserExist);
 
             string passwordHash, passwordSalt;
             CreatePasswordHash(user.Password, out passwordHash, out passwordSalt);

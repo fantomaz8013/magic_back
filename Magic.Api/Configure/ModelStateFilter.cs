@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
+using Magic.Api.Attributes.Magic.Api.Attributes;
+using Magic.Domain.Exceptions;
 
 namespace Magic.Api.Configure
 {
@@ -12,12 +14,54 @@ namespace Magic.Api.Configure
             if (!context.ModelState.IsValid)
             {
                 string errorMessage = string.Join(Environment.NewLine, context.ModelState.Values.SelectMany(v => v.Errors).Select(m => m.ErrorMessage).ToArray());
-                context.Result = new BadRequestObjectResult("Bad request object result");
+                context.Result = new OkObjectResult(ResponseData<string>.Error(errorMessage));
             }
         }
 
         public void OnActionExecuted(ActionExecutedContext context)
         {
+            var isCleanResposen = context.ActionDescriptor.EndpointMetadata.Any(x => x is CleanResposeAttribute);
+            if (context.Exception != null)
+            {
+                int? errorCode = null;
+                if (context.Exception is ExceptionWithApplicationCode)
+                {
+                    var exep = (ExceptionWithApplicationCode)context.Exception;
+                    errorCode = exep.ErrorCode;
+                }
+                context.Result = new OkObjectResult(ResponseData<string>.Error(context.Exception.Message, errorCode));
+                context.Exception = null;
+            }
+            else if (context.Result is OkObjectResult && !isCleanResposen)
+            {
+                context.Result = new OkObjectResult(ResponseData<object>.Success(((OkObjectResult)context.Result).Value));
+            }
+        }
+
+        public class ResponseData<T>
+        {
+            public T? Data { get; set; }
+            public bool IsSuccess { get; set; }
+            public int? ErrorCode { get; set; }
+            public string? ErrorText { get; set; }
+
+            public static ResponseData<T> Success(T data)
+            {
+                return new ResponseData<T>
+                {
+                    Data = data,
+                    IsSuccess = true
+                };
+            }
+            public static ResponseData<T> Error(string error, int? errorCode = null)
+            {
+                return new ResponseData<T>
+                {
+                    IsSuccess = false,
+                    ErrorText = error,
+                    ErrorCode = errorCode
+                };
+            }
         }
     }
 }

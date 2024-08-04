@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Magic.Service;
 using System.Threading.Tasks;
 using Magic.Api.Controller.Base;
+using Magic.Common.Models.Response;
+using static Magic.Api.Configure.ModelStateFilter;
 
 namespace Magic.Api.Controller.UserRegister.V1
 {
@@ -16,6 +18,7 @@ namespace Magic.Api.Controller.UserRegister.V1
 
         [ActionName("user/register")]
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<TokenResponse>))]
         public async Task<IActionResult> Register([FromBody] UserRequest user)
         {
             var result = await _userService.Register(user);
