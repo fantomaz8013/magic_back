@@ -1,3 +1,4 @@
-export const baseProxy = process.env.MAGIC_PROXY || "https://localhost:7021/";
-export const apiProxy = baseProxy + (process.env.MAGIC_API_PROXY || "api/v1/");
 export const devMode = (process.env.NODE_ENV || 'development') === 'development';
+
+export const baseProxy = devMode ? "https://localhost:7021/" : "https://to.do";
+export const apiProxy = baseProxy + ("api/v1/");
