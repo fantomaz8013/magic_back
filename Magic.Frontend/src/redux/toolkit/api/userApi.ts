@@ -1,6 +1,6 @@
 import {createApi} from '@reduxjs/toolkit/query/react'
 import {fetchBaseQueryWithAuth} from "../utils/baseQueryWithReauth";
-import {UserResponse} from "../../../models/responses/userResponse";
+import {UserResponse} from "../../../models/response/userResponse";
 
 const prefix = 'user';
 

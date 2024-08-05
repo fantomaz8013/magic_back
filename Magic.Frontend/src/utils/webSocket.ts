@@ -15,6 +15,7 @@ export function createSignalRConnection(
                 transport: signalR.HttpTransportType.WebSockets
             }
         )
+        .withAutomaticReconnect()
         .configureLogging(loggingLevel)
         .build();
 }

@@ -1,4 +1,6 @@
-﻿using Magic.DAL;
+﻿using Magic.Common.Models.Websocket;
+using Magic.DAL;
+using Magic.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -9,28 +11,48 @@ namespace Magic.Api.Controllers.Websockets;
 public class ChatHub : Hub
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly IUserService _userService;
 
-    public ChatHub(IServiceProvider serviceProvider)
+    private readonly static ChatHistory chatHistory = new();
+
+    public ChatHub(IServiceProvider serviceProvider, IUserService userService)
     {
         _serviceProvider = serviceProvider;
+        _userService = userService;
     }
 
-    public async Task NewMessage(string username, string message) =>
-        await Clients.All.SendAsync("messageReceived", username, message);
+    public async Task NewMessage(string message)
+    {
+        var callerUser = await _userService.CurrentUser();
+        var chatMessage = new ChatMessage(Guid.NewGuid(), callerUser.Login, message);
+        chatHistory.Add(chatMessage);
+        await Clients.All.SendAsync("messageReceived", chatMessage);
+    }
 
     public override async Task OnConnectedAsync()
     {
-        var scope = _serviceProvider.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<DataBaseContext>();
+        // var scope = _serviceProvider.CreateScope();
+        // var db = scope.ServiceProvider.GetRequiredService<DataBaseContext>();
 
-        var messages = await db.User.ToListAsync();
-
-        foreach (var message in messages)
-        {
-            await Clients.Caller.SendAsync("messageReceived", message.Login,
-                "Привет, я тут оставлял сообщения, мне похуй");
-        }
+        await Clients.Caller.SendAsync("historyReceived", chatHistory.Messages);
 
         await base.OnConnectedAsync();
     }
+}
+
+public class ChatHistory
+{
+    private readonly List<ChatMessage> _messages = new();
+
+    public int Count => _messages.Count;
+
+    public void Add(ChatMessage message)
+    {
+        lock (_messages)
+        {
+            _messages.Add(message);
+        }
+    }
+
+    public List<ChatMessage> Messages => _messages;
 }

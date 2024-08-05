@@ -9,57 +9,55 @@ import TextField from "@mui/material/TextField";
 import {useGetCurrentUserQuery} from "../../redux/toolkit/api/userApi";
 import {useSelector} from "react-redux";
 import {RootState} from "../../redux";
+import {ChatMessage} from "../../models/websocket/ChatMessage";
 
-type Message = { author: string, message: string, sender?: boolean };
-
-const defaultMessages = [
-    {author: 'R', message: 'Приветствую в Magic! Напишите сообщение ниже и мастер скоро к вам прийдет, давать пизды!'},
-];
 
 export default function Chat() {
     const {data: currentUser} = useGetCurrentUserQuery();
     const [ws, setWs] = useState<signalR.HubConnection | null>(null);
     const [currentMessage, setCurrentMessage] = useState<string>('');
-    const [messages, setMessages] = useState<Message[]>([...defaultMessages]);
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
     const token = useSelector((state: RootState) => state.auth.token)
 
     useEffect(() => {
         const connection = createSignalRConnection('ws', token!, signalR.LogLevel.Information);
-        connection.start();
         setWs(connection);
+        connection.on("messageReceived", messageReceived);
+        connection.on("historyReceived", historyReceived);
+        connection.start();
+        return () => {
+            connection.stop();
+        }
     }, [])
 
-    useEffect(() => {
-        ws?.off("messageReceived");
-        ws?.on("messageReceived", messageReceived);
-    }, [currentUser])
+    function messageReceived(message: ChatMessage) {
+        setMessages(prevState => [...prevState, message]);
+    }
 
-    function messageReceived(author: string, message: string) {
-        const isSender = author === currentUser!.data!.login;
-        const newMessage = {author, message, sender: isSender};
-        setMessages(prevState => [...prevState, newMessage]);
+    function historyReceived(messages: ChatMessage[]) {
+        setMessages(prevState => [...messages]);
     }
 
     async function sendMessage() {
         if (!ws || currentMessage.length === 0) return;
 
         setCurrentMessage('');
-        await ws.invoke('NewMessage', currentUser?.data?.login || 'А', currentMessage);
+        await ws.invoke('NewMessage', currentMessage);
     }
 
     return (
         <>
             <ChatBox>
-                {messages.map(({author, message, sender}, index) => {
-                        if (sender) {
+                {messages.map(({userLogin, message, messageId}) => {
+                        if (userLogin === currentUser!.data!.login) {
                             return (
-                                <SenderMessage key={index} avatar={<Avatar>{author.slice(0, 1)}</Avatar>}>
+                                <SenderMessage key={messageId} avatar={<Avatar>{userLogin.slice(0, 1)}</Avatar>}>
                                     {message}
                                 </SenderMessage>
                             )
                         }
                         return (
-                            <ReceiverMessage key={index} avatar={<Avatar>{author.slice(0, 1)}</Avatar>}>
+                            <ReceiverMessage key={messageId} avatar={<Avatar>{userLogin.slice(0, 1)}</Avatar>}>
                                 {message}
                             </ReceiverMessage>
                         )

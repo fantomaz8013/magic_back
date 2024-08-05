@@ -9,7 +9,7 @@ import Paper from "@mui/material/Paper";
 import CircularProgress from "@mui/material/CircularProgress";
 import Button from "@mui/material/Button";
 import ProfileField from "../common/FieldWithValidation";
-import UserUpdateRequest from "../../models/requests/userUpdateRequest";
+import UserUpdateRequest from "../../models/request/userUpdateRequest";
 
 export default function Profile() {
     const {isLoading, data: currentUser} = useGetCurrentUserQuery();

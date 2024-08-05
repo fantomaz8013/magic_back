@@ -1,8 +1,8 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {TokenRequest} from "../../../models/requests/tokenRequest";
+import {TokenRequest} from "../../../models/request/tokenRequest";
 import {setToken, getToken as getTokenLocalStorage} from "../../../utils/localStorage";
 import {apiProxy} from "../../../env";
-import {TokenResponse} from "../../../models/responses/tokenResponse";
+import {TokenResponse} from "../../../models/response/tokenResponse";
 import {HttpMethods} from "../../../consts/httpMethods";
 
 export interface AuthState {
