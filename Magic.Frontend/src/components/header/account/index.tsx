@@ -1,14 +1,21 @@
 import {useGetCurrentUserQuery} from "../../../redux/toolkit/api/userApi";
 import React from "react";
-import {Avatar, Box, CircularProgress, IconButton, Menu, MenuItem, Tooltip, Typography} from "@mui/material";
 import {resetToken} from "../../../redux/toolkit/slices/tokenSlice";
 import {useDispatch} from "react-redux";
 import {AppDispatch} from "../../../redux";
 import {useNavigate} from "react-router-dom";
 import paths from "../../../consts/paths";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import Avatar from "@mui/material/Avatar";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Typography from "@mui/material/Typography";
 
 export default function Account() {
-    const {isLoading, data} = useGetCurrentUserQuery();
+    const {isLoading, data: currentUser} = useGetCurrentUserQuery();
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
@@ -23,7 +30,6 @@ export default function Account() {
         action: () => {
             dispatch(resetToken());
             handleCloseUserMenu();
-            navigate(paths.login)
         }
     }];
     const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -34,18 +40,24 @@ export default function Account() {
         setAnchorElUser(null);
     };
 
-    if (!data || !data.data || isLoading)
-        return (<Box sx={{display: 'flex'}}>
-            <CircularProgress/>
-        </Box>);
-
     return (
         <Box sx={{flexGrow: 0}}>
             <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
                     <Avatar sx={{m: 1, bgcolor: 'secondary.main'}}>
-                        {data!.data!.login.slice(0, 1)}
+                        {currentUser?.data?.login.slice(0, 1) || ''}
                     </Avatar>
+                    {isLoading && (
+                        <CircularProgress
+                            size={48}
+                            sx={{
+                                position: 'absolute',
+                                top: 4,
+                                left: 4,
+                                zIndex: 1,
+                            }}
+                        />
+                    )}
                 </IconButton>
             </Tooltip>
             <Menu

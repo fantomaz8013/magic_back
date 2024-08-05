@@ -24,7 +24,9 @@ public class UserService : IUserService
     protected readonly IUserProvider _userProvider;
     protected readonly ILogProvider _logProvider;
     protected readonly IFileService _fileService;
-    public UserService(DataBaseContext dbContext, ITokenService jwtTokenService, IUserProvider userProvider, ILogProvider logProvider, IFileService fileService)
+
+    public UserService(DataBaseContext dbContext, ITokenService jwtTokenService, IUserProvider userProvider,
+        ILogProvider logProvider, IFileService fileService)
     {
         _dbContext = dbContext;
         _jwtTokenService = jwtTokenService;
@@ -32,7 +34,7 @@ public class UserService : IUserService
         _logProvider = logProvider;
         _fileService = fileService;
     }
-        
+
     public async Task<bool> UserExists(string login)
     {
         if (await _dbContext.User.AnyAsync(x => x.Login == login))
@@ -43,7 +45,7 @@ public class UserService : IUserService
     public async Task<TokenResponse?> Register(UserRequest user)
     {
         if (await UserExists(user.Login))
-            throw new ExceptionWithApplicationCode("Логин занят", ExceptionApplicationCodeEnum.UserExist);
+            throw new ExceptionWithApplicationCode("Login already exists", ExceptionApplicationCodeEnum.UserExist);
 
         string passwordHash, passwordSalt;
         CreatePasswordHash(user.Password, out passwordHash, out passwordSalt);
@@ -68,18 +70,20 @@ public class UserService : IUserService
     {
         var user = await _dbContext.User.FirstOrDefaultAsync(x => x.Login == token.Login);
 
-        if (user == null) 
-            throw new ExceptionWithApplicationCode("Нет такого", ExceptionApplicationCodeEnum.UserNotExist);
+        if (user == null)
+            throw new ExceptionWithApplicationCode("Login or password incorrect",
+                ExceptionApplicationCodeEnum.UserNotExist);
 
         if (user.IsBlocked)
-            throw new ExceptionWithApplicationCode("Тебя забанили, пидор", ExceptionApplicationCodeEnum.UserBanned);
+            throw new ExceptionWithApplicationCode("User been banned", ExceptionApplicationCodeEnum.UserBanned);
 
         var authResponseModel = new AuthResponse();
 
         if (token.Password != null)
         {
             if (token.Password != null && !VerifyPassword(token.Password, user.PasswordHash, user.PasswordSalt))
-                throw new ExceptionWithApplicationCode("Неверный пароль", ExceptionApplicationCodeEnum.InvalidPassword);
+                throw new ExceptionWithApplicationCode("Login or password incorrect",
+                    ExceptionApplicationCodeEnum.InvalidPassword);
             var expiresRefresh = DateTime.Now;
             expiresRefresh = expiresRefresh.AddDays(7);
             authResponseModel.TokenResult = _jwtTokenService.CreateUserToken(user, expiresRefresh);
@@ -123,7 +127,7 @@ public class UserService : IUserService
 
         var user = await _dbContext.User.FirstOrDefaultAsync(x => x.Id == userId);
 
-        if (user == null) 
+        if (user == null)
             return null;
         else
         {
@@ -152,12 +156,14 @@ public class UserService : IUserService
                 if (computedHash[i] != passwordHashByteArray[i]) return false;
             }
         }
+
         return true;
     }
 
     private const string _prefix = "";
     private const int _numberOfSecureBytesToGenerate = 32;
     private const int _lengthOfKey = 36;
+
     private string GenerateApiSecret()
     {
         var bytes = RandomNumberGenerator.GetBytes(_numberOfSecureBytesToGenerate);
@@ -191,7 +197,6 @@ public class UserService : IUserService
         //    .AsNoTracking()
         //    .Where(predicate)
         //    .ToListAsync();
-
     }
 
     public async Task<bool> UpdateUser(UserUpdateRequest request)
@@ -212,11 +217,14 @@ public class UserService : IUserService
                 {
                     _fileService.DeleteFile(user.AvatarUrl);
                 }
+
                 user.AvatarUrl = await _fileService.UploadFile(request.Avatar);
             }
+
             _dbContext.Update(user);
             await _dbContext.SaveChangesAsync();
         }
+
         return true;
     }
 }

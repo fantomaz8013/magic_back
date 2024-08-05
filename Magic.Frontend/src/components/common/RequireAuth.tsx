@@ -5,8 +5,8 @@ import paths from "../../consts/paths";
 import * as React from "react";
 
 export default function RequireAuth() {
-    const token = useSelector((state: RootState) => state.auth.token)
-    let location = useLocation();
+    const token = useSelector((state: RootState) => state.auth.token);
+    const location = useLocation();
 
     if (!token) {
         return <Navigate to={paths.login} state={{from: location}} replace/>;

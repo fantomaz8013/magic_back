@@ -7,11 +7,13 @@ import {HttpMethods} from "../../../consts/httpMethods";
 
 export interface AuthState {
     token: string | null;
+    error: string | null;
     refreshToken: string | null;
 }
 
 const initialState: AuthState = {
     token: getTokenLocalStorage(),
+    error: null,
     refreshToken: getTokenLocalStorage(true)
 };
 
@@ -59,17 +61,30 @@ export const tokenSlice = createSlice({
             setToken(state.token);
             setToken(state.refreshToken, true);
         })
+        .addCase(refreshToken.rejected, (state, action) => {
+            state.token = null;
+            state.refreshToken = null;
+            state.error = action.payload as string;
+            setToken(state.token);
+            setToken(state.refreshToken, true);
+        })
         .addCase(getToken.fulfilled, (state, action) => {
             state.token = action.payload.data!.tokenResult.token;
             state.refreshToken = action.payload.data!.tokenResult.refreshToken;
             setToken(state.token);
             setToken(state.refreshToken, true);
         })
+        .addCase(getToken.rejected, (state, action) => {
+            state.error = action.payload as string;
+        })
         .addCase(register.fulfilled, (state, action) => {
             state.token = action.payload.data!.tokenResult.token;
             state.refreshToken = action.payload.data!.tokenResult.refreshToken;
             setToken(state.token);
             setToken(state.refreshToken, true);
+        })
+        .addCase(register.rejected, (state, action) => {
+            state.error = action.payload as string;
         })
 });
 

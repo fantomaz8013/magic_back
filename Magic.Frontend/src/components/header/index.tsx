@@ -31,9 +31,11 @@ export default function Header({mode, toggleColorMode}: HeaderProps) {
         <Box sx={{flexGrow: 1}}>
             <AppBar position="static" color="inherit">
                 <Toolbar>
-                    <Typography variant="h6" component="div" sx={{flexGrow: 1}} style={logoStyle} onClick={onHomeClick}>
-                        Magic
-                    </Typography>
+                    <Box component="div" sx={{flexGrow: 1}}>
+                        <Typography variant="h6" component="div" style={logoStyle} onClick={onHomeClick}>
+                            Magic
+                        </Typography>
+                    </Box>
                     <ToggleColorMode mode={mode} toggleColorMode={toggleColorMode}/>
                     {isLoggedIn
                         ? <Account/>

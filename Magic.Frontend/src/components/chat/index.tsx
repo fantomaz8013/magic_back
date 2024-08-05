@@ -10,6 +10,7 @@ import {useGetCurrentUserQuery} from "../../redux/toolkit/api/userApi";
 import {useSelector} from "react-redux";
 import {RootState} from "../../redux";
 import {ChatMessage} from "../../models/websocket/ChatMessage";
+import Typography from "@mui/material/Typography";
 
 
 export default function Chat() {
@@ -20,35 +21,37 @@ export default function Chat() {
     const token = useSelector((state: RootState) => state.auth.token)
 
     useEffect(() => {
-        setupConnection('default')
-            .then(c => setWs(c));
-    }, [])
+        async function setupConnection(roomName: string) {
+            if (ws) return null;
 
-    useEffect(() => {
+            const connection = createSignalRConnection('ws', token!);
+            connection.on("messageReceived", messageReceived);
+            connection.on("historyReceived", historyReceived);
+            await connection.start();
+            await connection.invoke('JoinRoom', roomName);
+            return connection;
+        }
+
+        setupConnection('default')
+            .then(c => c && setWs(c));
+
         return () => {
             ws && closeConnection(ws, 'default');
         }
-    }, [ws])
-
+    }, [token, ws])
 
     return (
-        <>
+        <Box sx={{
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+        }}>
+            <Typography mb={4} component="h1" variant="h5">
+                Save Halsin player's chat
+            </Typography>
             <ChatBox>
-                {messages.map(({userLogin, message, messageId}) => {
-                        if (userLogin === currentUser!.data!.login) {
-                            return (
-                                <SenderMessage key={messageId} avatar={<Avatar>{userLogin.slice(0, 1)}</Avatar>}>
-                                    {message}
-                                </SenderMessage>
-                            )
-                        }
-                        return (
-                            <ReceiverMessage key={messageId} avatar={<Avatar>{userLogin.slice(0, 1)}</Avatar>}>
-                                {message}
-                            </ReceiverMessage>
-                        )
-                    }
-                )}
+                {messages.map(renderMessage)}
             </ChatBox>
             <Box>
                 <TextField
@@ -62,16 +65,18 @@ export default function Chat() {
                 />
                 <Button onClick={sendMessage}>SEND</Button>
             </Box>
-        </>
+        </Box>
     );
 
-    async function setupConnection(roomName: string) {
-        const connection = createSignalRConnection('ws', token!);
-        connection.on("messageReceived", messageReceived);
-        connection.on("historyReceived", historyReceived);
-        await connection.start();
-        await connection.invoke('JoinRoom', roomName);
-        return connection;
+    function renderMessage({userLogin, message, messageId}: ChatMessage) {
+        const Message = userLogin === currentUser!.data!.login
+            ? SenderMessage
+            : ReceiverMessage;
+        return (
+            <Message key={messageId} avatar={<Avatar>{userLogin.slice(0, 1)}</Avatar>}>
+                {message}
+            </Message>
+        )
     }
 
     async function closeConnection(ws: signalR.HubConnection, roomName: string) {
@@ -99,8 +104,8 @@ export default function Chat() {
         setCurrentMessage(val);
     }
 
-    function onKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    async function onKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
         if (e.key === 'Enter')
-            sendMessage();
+            await sendMessage();
     }
 }
