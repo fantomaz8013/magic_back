@@ -20,30 +20,16 @@ export default function Chat() {
     const token = useSelector((state: RootState) => state.auth.token)
 
     useEffect(() => {
-        const connection = createSignalRConnection('ws', token!, signalR.LogLevel.Information);
-        setWs(connection);
-        connection.on("messageReceived", messageReceived);
-        connection.on("historyReceived", historyReceived);
-        connection.start();
-        return () => {
-            connection.stop();
-        }
+        setupConnection()
+            .then(c => setWs(c));
     }, [])
 
-    function messageReceived(message: ChatMessage) {
-        setMessages(prevState => [...prevState, message]);
-    }
+    useEffect(() => {
+        return () => {
+            ws && closeConnection(ws);
+        }
+    }, [ws])
 
-    function historyReceived(messages: ChatMessage[]) {
-        setMessages(prevState => [...messages]);
-    }
-
-    async function sendMessage() {
-        if (!ws || currentMessage.length === 0) return;
-
-        setCurrentMessage('');
-        await ws.invoke('NewMessage', currentMessage);
-    }
 
     return (
         <>
@@ -78,6 +64,35 @@ export default function Chat() {
             </Box>
         </>
     );
+
+    async function setupConnection() {
+        const connection = createSignalRConnection('ws', token!);
+        connection.on("messageReceived", messageReceived);
+        connection.on("historyReceived", historyReceived);
+        await connection.start();
+        await connection.invoke('JoinRoom', 'default');
+        return connection;
+    }
+
+    async function closeConnection(ws: signalR.HubConnection) {
+        await ws.invoke('LeaveRoom', 'default');
+        await ws.stop();
+    }
+
+    function messageReceived(message: ChatMessage) {
+        setMessages(prevState => [...prevState, message]);
+    }
+
+    function historyReceived(newMessages: ChatMessage[]) {
+        setMessages(newMessages);
+    }
+
+    async function sendMessage() {
+        if (!ws || currentMessage.length === 0) return;
+
+        setCurrentMessage('');
+        await ws.invoke('NewMessage', currentMessage);
+    }
 
     function onMessageChange(e: React.ChangeEvent<HTMLInputElement>) {
         const val = e.target.value;
