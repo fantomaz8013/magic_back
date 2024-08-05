@@ -36,6 +36,8 @@ public class ChatHub : Hub
     {
         Rooms.AddToRoom(Context.ConnectionId, roomName);
         await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
+        var callerUser = await _userService.CurrentUser();
+        await NewMessage($"Player \"{callerUser.Login}\" joined!");
         var messages = chatHistory.GetMessages(roomName);
         if (messages.Length > 0)
             await Clients.Caller.SendAsync("historyReceived", messages);
