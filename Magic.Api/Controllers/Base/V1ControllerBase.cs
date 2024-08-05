@@ -13,6 +13,8 @@ public class V1ControllerBase : ControllerBase { }
 public class V1UserControllerBase : V1ControllerBase { }
 [ApiExplorerSettings(GroupName = "Character")]
 public class V1CharacterControllerBase : V1ControllerBase { }
+[ApiExplorerSettings(GroupName = "GameSession")]
+public class V1GameSessionControllerBase : V1ControllerBase { }
 
 [ApiController]
 [ApiVersion("1.0", Deprecated = false)]

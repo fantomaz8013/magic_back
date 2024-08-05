@@ -74,4 +74,12 @@ public class User : BaseEntity<Guid>, IHasBlocked, IHasCreatedDate
     /// Город
     /// </summary>
     public City? City { get; set; }
+    /// <summary>
+    /// Игровые сессии в которых состоит пользователь как игрок
+    /// </summary>
+    public List<GameSession> GameSessions { get; set; } = new();
+    /// <summary>
+    /// Игровые сессии которые создал пользователь
+    /// </summary>
+    public List<GameSession> CreatedGameSessions { get; set; }
 }

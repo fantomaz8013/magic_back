@@ -16,6 +16,8 @@ public class DataBaseContext : DbContext
     public DbSet<CharacterClass> CharacterClasses { get; set; }
     public DbSet<CharacterRace> CharacterRaces { get; set; }
     public DbSet<CharacterAbility > CharacterAbilities { get; set; }
+    public DbSet<GameSession> GameSessions { get; set; }
+    public DbSet<GameSessionUser> GameSessionUser { get; set; }
 
     public DataBaseContext(DbContextOptions<DataBaseContext> options) : base(options) { }
 
@@ -31,5 +33,6 @@ public class DataBaseContext : DbContext
         modelBuilder.ApplyConfiguration(new CharacterClassConfiguration());
         modelBuilder.ApplyConfiguration(new CharacterRaceConfiguration());
         modelBuilder.ApplyConfiguration(new CharacterAbilityConfiguration());
+        modelBuilder.ApplyConfiguration(new GameSessionConfiguration());
     }
 }

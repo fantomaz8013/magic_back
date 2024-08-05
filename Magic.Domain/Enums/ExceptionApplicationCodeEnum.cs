@@ -18,4 +18,20 @@ public enum ExceptionApplicationCodeEnum
     /// Пароль плохой
     /// </summary>
     InvalidPassword = 4,
+    /// <summary>
+    /// Игровая сессия не найдена
+    /// </summary>
+    GameSessionNotFound = 5,
+    /// <summary>
+    /// Нельзя войти в комнату если вы ее создатель
+    /// </summary>
+    CreatorIdGameSessionEqualsUserIdToEnter = 6,
+    /// <summary>
+    /// Пользователь уже находится в этой игровой сессии
+    /// </summary>
+    UserInGameSession = 7,
+    /// <summary>
+    /// Ошибка доступа
+    /// </summary>
+    AccessError = 8,
 }

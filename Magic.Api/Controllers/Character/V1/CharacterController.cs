@@ -14,7 +14,7 @@ public class CharacterController : V1CharacterControllerBase
         _characterService = characterService;
     }
 
-    [ActionName("defaultavatar")]
+    [ActionName("character/defaultavatar")]
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<List<CharacterAvatar>>))]
     public async Task<IActionResult> avatars()
@@ -22,7 +22,7 @@ public class CharacterController : V1CharacterControllerBase
         var result = await _characterService.GetDefaultAvatar();
         return Ok(result);
     }
-    [ActionName("characteristics")]
+    [ActionName("character/characteristics")]
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<List<CharacterCharacteristic>>))]
     public async Task<IActionResult> Characteristics()
@@ -30,7 +30,7 @@ public class CharacterController : V1CharacterControllerBase
         var result = await _characterService.GetCharacterCharacteristics();
         return Ok(result);
     }
-    [ActionName("classes")]
+    [ActionName("character/classes")]
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<List<CharacterClass>>))]
     public async Task<IActionResult> Classes()
@@ -38,7 +38,7 @@ public class CharacterController : V1CharacterControllerBase
         var result = await _characterService.GetClasses();
         return Ok(result);
     }
-    [ActionName("races")]
+    [ActionName("character/races")]
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<List<CharacterRace>>))]
     public async Task<IActionResult> Races()

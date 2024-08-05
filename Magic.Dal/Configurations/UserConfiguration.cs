@@ -34,5 +34,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasColumnType(SqlColumnTypes.TimeStampWithTimeZone); */
 
         builder.HasForeignKey(x => x.RefUser, x => x.RefUserId);
+
+        builder.HasMany(e => e.CreatedGameSessions)
+        .WithOne(e => e.CreatorUser)
+        .HasForeignKey(e => e.CreatorUserId);
     }
 }

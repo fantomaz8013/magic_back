@@ -76,6 +76,7 @@ public class Startup
 
         services.AddValidator();
         services.AddSignalR();
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IApiVersionDescriptionProvider provider)
