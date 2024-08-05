@@ -131,7 +131,7 @@ public class UserService : IUserService
             return null;
         else
         {
-            return new UserResponse(user.Name, user.Login, user.Email, user.PhoneNumber);
+            return new UserResponse(user.Name, user.Login, user.Email, user.PhoneNumber, userId.Value);
         }
     }
 

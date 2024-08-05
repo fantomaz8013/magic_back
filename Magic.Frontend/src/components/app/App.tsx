@@ -23,7 +23,7 @@ export default function App() {
                 </Route>
                 <Route element={<RequireAuth/>}>
                     <Route path={paths.profile} element={<Profile/>}/>
-                    <Route path={paths.game} element={<Chat/>}/>
+                    <Route path={paths.game} element={<Chat gameSessionId={'945da2d0-a0ac-4257-9f9e-10b31e3955d3'}/>}/>
                 </Route>
                 <Route path={paths.default} element={<HomePage/>}/>
             </Route>

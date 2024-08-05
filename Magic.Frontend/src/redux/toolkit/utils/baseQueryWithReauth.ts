@@ -3,18 +3,17 @@ import type {BaseQueryFn, FetchArgs, FetchBaseQueryError} from '@reduxjs/toolkit
 import {Mutex} from 'async-mutex';
 import {RootState} from "../../index";
 import {refreshToken} from "../slices/tokenSlice";
-import {apiProxy} from "../../../env";
 
 const mutex = new Mutex();
 
-export const fetchBaseQueryWithAuth = (fetchArgs?: FetchBaseQueryArgs | undefined): BaseQueryFn<
+export const fetchBaseQueryWithAuth = (baseUrl: string, fetchArgs?: FetchBaseQueryArgs | undefined): BaseQueryFn<
     string | FetchArgs,
     unknown,
     FetchBaseQueryError
 > => {
     const baseQuery = fetchBaseQuery({
         ...fetchArgs,
-        baseUrl: apiProxy + (fetchArgs?.baseUrl || ''),
+        baseUrl,
         prepareHeaders: (headers, api) => {
             const rootState = api.getState() as RootState;
             const token = rootState.auth.token;

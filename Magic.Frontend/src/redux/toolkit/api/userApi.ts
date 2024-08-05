@@ -1,12 +1,13 @@
 import {createApi} from '@reduxjs/toolkit/query/react'
 import {fetchBaseQueryWithAuth} from "../utils/baseQueryWithReauth";
 import {UserResponse} from "../../../models/response/userResponse";
+import {apiProxy} from "../../../env";
 
 const prefix = 'user';
 
 export const userApi = createApi({
     reducerPath: 'userApi',
-    baseQuery: fetchBaseQueryWithAuth({baseUrl: prefix}),
+    baseQuery: fetchBaseQueryWithAuth(apiProxy + prefix),
     endpoints: (builder) => ({
         getCurrentUser: builder.query<UserResponse, void>({
             query: () => ``,

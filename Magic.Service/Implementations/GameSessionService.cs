@@ -193,4 +193,9 @@ public class GameSessionService : IGameSessionService
 
         return gameSession;
     }
+    
+    public async Task<GameSession?> GetById(Guid gameSessionId)
+    {
+        return await _dbContext.GameSessions.FirstOrDefaultAsync(g => g.Id == gameSessionId);
+    }
 }

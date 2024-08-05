@@ -4,6 +4,7 @@ import {setToken, getToken as getTokenLocalStorage} from "../../../utils/localSt
 import {apiProxy} from "../../../env";
 import {TokenResponse} from "../../../models/response/tokenResponse";
 import {HttpMethods} from "../../../consts/httpMethods";
+import {AuthResponse} from "../../../models/response/AuthResponse";
 
 export interface AuthState {
     token: string | null;
@@ -20,23 +21,23 @@ const initialState: AuthState = {
 const slicePrefix = 'token';
 
 export const refreshToken = createAsyncThunk(
-    `${slicePrefix}/refreshToken`,
-    async (token: string, {rejectWithValue}) => {
-        return parseFetch(fetch(apiProxy + `token/refreshToken`, createRequestParams({token})), rejectWithValue)
+    `${slicePrefix}/refresh`,
+    async (refreshToken: string, {rejectWithValue}) => {
+        return await parseFetch(fetch(apiProxy + `token/refresh`, createRequestParams(refreshToken)), rejectWithValue) as Promise<TokenResponse>
     }
 );
 
 export const getToken = createAsyncThunk(
     `${slicePrefix}/getToken`,
     async (r: TokenRequest, {rejectWithValue}) => {
-        return await parseFetch(fetch(apiProxy + `token`, createRequestParams({...r})), rejectWithValue)
+        return await parseFetch(fetch(apiProxy + `token`, createRequestParams({...r})), rejectWithValue) as Promise<AuthResponse>
     }
 );
 
 export const register = createAsyncThunk(
     `${slicePrefix}/register`,
     async (r: TokenRequest, {rejectWithValue}) => {
-        return await parseFetch(fetch(apiProxy + `user/register`, createRequestParams({...r})), rejectWithValue)
+        return await parseFetch(fetch(apiProxy + `user/register`, createRequestParams({...r})), rejectWithValue) as Promise<TokenResponse>
     }
 );
 
@@ -58,10 +59,11 @@ export const tokenSlice = createSlice({
             state.token = null;
             state.refreshToken = null;
             setToken(state.token);
+            setToken(state.refreshToken, true);
         })
         .addCase(refreshToken.fulfilled, (state, action) => {
-            state.token = action.payload.data!.tokenResult.token;
-            state.refreshToken = action.payload.data!.tokenResult.refreshToken;
+            state.token = action.payload.data!.token;
+            state.refreshToken = action.payload.data!.refreshToken;
             setToken(state.token);
             setToken(state.refreshToken, true);
         })
@@ -73,8 +75,8 @@ export const tokenSlice = createSlice({
             setToken(state.refreshToken, true);
         })
         .addCase(getToken.fulfilled, (state, action) => {
-            state.token = action.payload.data!.tokenResult.token;
-            state.refreshToken = action.payload.data!.tokenResult.refreshToken;
+            state.token = action.payload.data!.tokenResult!.token;
+            state.refreshToken = action.payload.data!.tokenResult!.refreshToken;
             setToken(state.token);
             setToken(state.refreshToken, true);
         })
@@ -82,8 +84,8 @@ export const tokenSlice = createSlice({
             state.error = action.payload as string;
         })
         .addCase(register.fulfilled, (state, action) => {
-            state.token = action.payload.data!.tokenResult.token;
-            state.refreshToken = action.payload.data!.tokenResult.refreshToken;
+            state.token = action.payload.data!.token;
+            state.refreshToken = action.payload.data!.refreshToken;
             setToken(state.token);
             setToken(state.refreshToken, true);
         })
@@ -124,7 +126,7 @@ function parseFetch(promise: Promise<Response>, rejectWithValue: any) {
                         return rejectWithValue(tr.errorText);
                     return tr;
                 });
-        }) as Promise<TokenResponse>);
+        }));
 }
 
 export const {resetToken, resetError} = tokenSlice.actions;

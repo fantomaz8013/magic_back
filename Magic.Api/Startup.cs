@@ -57,7 +57,8 @@ public class Startup
 
                     ValidIssuer = opt.Issuer,
                     ValidAudience = opt.Audience,
-                    IssuerSigningKey = opt.SymmetricSecurityKey
+                    IssuerSigningKey = opt.SymmetricSecurityKey,
+                    ClockSkew = TimeSpan.Zero
                 };
                 options.Events = new JwtBearerEvents
                 {

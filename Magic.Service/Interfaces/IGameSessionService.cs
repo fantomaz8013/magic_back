@@ -1,5 +1,6 @@
 ﻿using Magic.Common.Models.Request.GameSessionRequest;
 using Magic.Common.Models.Response;
+using Magic.Domain.Entities;
 
 namespace Magic.Service.Interfaces;
 
@@ -11,5 +12,5 @@ public interface IGameSessionService
     Task<bool> Delete (DeleteGameSessionRequest request);
     Task<bool> Leave(LeaveGameSessionRequest request);
     Task<List<GameSessionResponse>> GetAllGameSession();
-
+    Task<GameSession?> GetById(Guid gameSessionId);
 }

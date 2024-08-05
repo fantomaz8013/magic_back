@@ -1,44 +1,23 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {ChatBox, ReceiverMessage, SenderMessage} from "mui-chat-box";
 import {Avatar} from "@mui/material";
-import * as signalR from "@microsoft/signalr";
-import {createSignalRConnection} from "../../utils/webSocket";
+import {SignalRProps, useSignalR, WSActions, WSEvents} from "../../utils/webSocket";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import {useGetCurrentUserQuery} from "../../redux/toolkit/api/userApi";
-import {useSelector} from "react-redux";
-import {RootState} from "../../redux";
 import {ChatMessage} from "../../models/websocket/ChatMessage";
 import Typography from "@mui/material/Typography";
 
+export interface ChatProps {
+    gameSessionId: string;
+}
 
-export default function Chat() {
+export default function Chat(props: ChatProps) {
     const {data: currentUser} = useGetCurrentUserQuery();
-    const [ws, setWs] = useState<signalR.HubConnection | null>(null);
+    const ws = useSignalR(createSignalRConfig());
     const [currentMessage, setCurrentMessage] = useState<string>('');
     const [messages, setMessages] = useState<ChatMessage[]>([]);
-    const token = useSelector((state: RootState) => state.auth.token)
-
-    useEffect(() => {
-        async function setupConnection(roomName: string) {
-            if (ws) return null;
-
-            const connection = createSignalRConnection('ws', token!);
-            connection.on("messageReceived", messageReceived);
-            connection.on("historyReceived", historyReceived);
-            await connection.start();
-            await connection.invoke('JoinRoom', roomName);
-            return connection;
-        }
-
-        setupConnection('default')
-            .then(c => c && setWs(c));
-
-        return () => {
-            ws && closeConnection(ws, 'default');
-        }
-    }, [token, ws])
 
     return (
         <Box sx={{
@@ -79,9 +58,19 @@ export default function Chat() {
         )
     }
 
-    async function closeConnection(ws: signalR.HubConnection, roomName: string) {
-        await ws.invoke('LeaveRoom', roomName);
-        await ws.stop();
+    function createSignalRConfig(): SignalRProps {
+        return {
+            beforeStart: (ws) => {
+                ws.on(WSEvents.messageReceived, messageReceived);
+                ws.on(WSEvents.historyReceived, historyReceived);
+            },
+            afterStart: async (ws) => {
+                await ws.invoke(WSActions.joinGameSession, props.gameSessionId);
+            },
+            beforeStop: async (ws) => {
+                await ws.invoke(WSActions.leaveGameSession, props.gameSessionId);
+            }
+        }
     }
 
     function messageReceived(message: ChatMessage) {
