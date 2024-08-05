@@ -20,13 +20,13 @@ export default function Chat() {
     const token = useSelector((state: RootState) => state.auth.token)
 
     useEffect(() => {
-        setupConnection()
+        setupConnection('default')
             .then(c => setWs(c));
     }, [])
 
     useEffect(() => {
         return () => {
-            ws && closeConnection(ws);
+            ws && closeConnection(ws, 'default');
         }
     }, [ws])
 
@@ -65,17 +65,17 @@ export default function Chat() {
         </>
     );
 
-    async function setupConnection() {
+    async function setupConnection(roomName: string) {
         const connection = createSignalRConnection('ws', token!);
         connection.on("messageReceived", messageReceived);
         connection.on("historyReceived", historyReceived);
         await connection.start();
-        await connection.invoke('JoinRoom', 'default');
+        await connection.invoke('JoinRoom', roomName);
         return connection;
     }
 
-    async function closeConnection(ws: signalR.HubConnection) {
-        await ws.invoke('LeaveRoom', 'default');
+    async function closeConnection(ws: signalR.HubConnection, roomName: string) {
+        await ws.invoke('LeaveRoom', roomName);
         await ws.stop();
     }
 

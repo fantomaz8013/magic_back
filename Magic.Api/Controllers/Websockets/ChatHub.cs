@@ -48,20 +48,34 @@ public class ChatHub : Hub
         if (Rooms.IsRoomEmpty(roomName))
             chatHistory.ClearHistory(roomName);
     }
+
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        var roomName = Rooms.GetRoom(Context.ConnectionId);
+        if (roomName is not null)
+            await LeaveRoom(roomName);
+
+        await base.OnDisconnectedAsync(exception);
+    }
 }
 
 public class ChatHistory
 {
-    private readonly ConcurrentDictionary<string, ConcurrentBag<ChatMessage>> _messages = new();
+    private readonly ConcurrentDictionary<string, ConcurrentQueue<ChatMessage>> _messages = new();
 
     public void AddMessage(string roomName, ChatMessage message)
     {
         _messages.AddOrUpdate(
             roomName,
-            key => new ConcurrentBag<ChatMessage> { message },
+            key =>
+            {
+                var queue = new ConcurrentQueue<ChatMessage>();
+                queue.Enqueue(message);
+                return queue;
+            },
             (key, oldValue) =>
             {
-                oldValue.Add(message);
+                oldValue.Enqueue(message);
                 return oldValue;
             });
     }
