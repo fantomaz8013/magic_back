@@ -1,9 +1,7 @@
 ﻿using Magic.Common.Models.Websocket;
-using Magic.DAL;
 using Magic.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Magic.Api.Controllers.Websockets;
 
@@ -34,7 +32,7 @@ public class ChatHub : Hub
         // var scope = _serviceProvider.CreateScope();
         // var db = scope.ServiceProvider.GetRequiredService<DataBaseContext>();
 
-        await Clients.Caller.SendAsync("historyReceived", chatHistory.Messages);
+        await Clients.Caller.SendAsync("historyReceived", chatHistory.GetMessages());
 
         await base.OnConnectedAsync();
     }
@@ -54,5 +52,11 @@ public class ChatHistory
         }
     }
 
-    public List<ChatMessage> Messages => _messages;
+    public List<ChatMessage> GetMessages()
+    {
+        lock (_messages)
+        {
+            return _messages.ToList();
+        }
+    }
 }
