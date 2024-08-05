@@ -9,10 +9,10 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import {useNavigate} from "react-router-dom";
 import paths from "../../consts/paths";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {ValidationResult} from "../../validation";
 import {validateLogin, validatePassword} from "../../validation/userValidation";
-import {register} from "../../redux/toolkit/slices/tokenSlice";
+import {register, resetError} from "../../redux/toolkit/slices/tokenSlice";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "../../redux";
 import {Alert} from "@mui/material";
@@ -29,6 +29,11 @@ export default function Register() {
     const [passwordError, setPasswordError] = useState<ValidationResult | null>(null);
 
     const [runValidation, setRunValidation] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (error)
+            dispatch(resetError());
+    }, [])
 
     return (
         <Box

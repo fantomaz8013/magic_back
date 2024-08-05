@@ -46,7 +46,11 @@ export const tokenSlice = createSlice({
     reducers: {
         resetToken: (state) => {
             state.token = null;
+            state.error = null;
             setToken(state.token);
+        },
+        resetError: (state) => {
+            state.error = null;
         }
     },
     extraReducers: (builder) => builder
@@ -123,4 +127,4 @@ function parseFetch(promise: Promise<Response>, rejectWithValue: any) {
         }) as Promise<TokenResponse>);
 }
 
-export const {resetToken} = tokenSlice.actions;
+export const {resetToken, resetError} = tokenSlice.actions;

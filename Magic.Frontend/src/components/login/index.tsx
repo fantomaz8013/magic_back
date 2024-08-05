@@ -9,8 +9,8 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import {useLocation, useNavigate} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
-import {useState} from "react";
-import {getToken as loginRequest} from "../../redux/toolkit/slices/tokenSlice";
+import {useEffect, useState} from "react";
+import {getToken as loginRequest, resetError} from "../../redux/toolkit/slices/tokenSlice";
 import paths from "../../consts/paths";
 import {AppDispatch, RootState} from "../../redux";
 import {Alert} from "@mui/material";
@@ -22,6 +22,11 @@ export default function Login() {
     const [login, setLogin] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const error = useSelector((state: RootState) => state.auth.error);
+
+    useEffect(() => {
+        if (error)
+            dispatch(resetError());
+    }, [])
 
     return (
         <Box
