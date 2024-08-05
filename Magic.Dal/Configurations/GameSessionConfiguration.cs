@@ -17,7 +17,7 @@ public class GameSessionConfiguration : IEntityTypeConfiguration<GameSession>
         builder.PropertyWithUnderscore(x => x.Description);
         builder.PropertyWithUnderscore(x => x.MaxUserCount);
         builder.PropertyWithUnderscore(x => x.CreatedDate).HasDateTimeConversion()
-            .HasColumnType(SqlColumnTypes.TimeStampWithTimeZone); ;
+            .HasColumnType(SqlColumnTypes.TimeStampWithTimeZone);
 
         builder.HasMany(e => e.Users)
             .WithMany(e => e.GameSessions)

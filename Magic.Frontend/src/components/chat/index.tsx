@@ -6,7 +6,11 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import {useGetCurrentUserQuery} from "../../redux/toolkit/api/userApi";
-import {ChatMessage} from "../../models/websocket/ChatMessage";
+import {
+    BaseGameSessionMessage, ChatGameSessionMessage, DiceGameSessionMessage,
+    GameSessionMessageTypeEnum,
+    ServerGameSessionMessage,
+} from "../../models/websocket/ChatMessage";
 import Typography from "@mui/material/Typography";
 
 export interface ChatProps {
@@ -17,7 +21,7 @@ export default function Chat(props: ChatProps) {
     const {data: currentUser} = useGetCurrentUserQuery();
     const ws = useSignalR(createSignalRConfig());
     const [currentMessage, setCurrentMessage] = useState<string>('');
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [messages, setMessages] = useState<BaseGameSessionMessage[]>([]);
 
     return (
         <Box sx={{
@@ -47,13 +51,34 @@ export default function Chat(props: ChatProps) {
         </Box>
     );
 
-    function renderMessage({userLogin, message, messageId}: ChatMessage) {
-        const Message = userLogin === currentUser!.data!.login
+    function renderMessage(baseMessage: BaseGameSessionMessage) {
+        let mes, login, isSender;
+        switch (baseMessage.gameSessionMessageTypeEnum) {
+            case GameSessionMessageTypeEnum.Server:
+                const serverMessage = baseMessage as ServerGameSessionMessage;
+                mes = serverMessage.message;
+                login = 'S';
+                isSender = false;
+                break;
+            case GameSessionMessageTypeEnum.Chat:
+                const chatMessage = baseMessage as ChatGameSessionMessage;
+                mes = chatMessage.message;
+                login = chatMessage.author.login;
+                isSender = chatMessage.authorId === currentUser!.data!.id
+                break;
+            case GameSessionMessageTypeEnum.Dice:
+                const diceMessage = baseMessage as DiceGameSessionMessage;
+                mes = `Player ${diceMessage.author.login} rolled ${diceMessage.roll} on ${diceMessage.gameSessionMessageTypeEnum.toString()}`
+                login = diceMessage.author.login;
+                isSender = diceMessage.authorId === currentUser!.data!.id
+                break;
+        }
+        const Message = isSender
             ? SenderMessage
             : ReceiverMessage;
         return (
-            <Message key={messageId} avatar={<Avatar>{userLogin.slice(0, 1)}</Avatar>}>
-                {message}
+            <Message key={baseMessage.id} avatar={<Avatar>{login?.slice(0, 1)||'Й'}</Avatar>}>
+                {mes}
             </Message>
         )
     }
@@ -73,11 +98,12 @@ export default function Chat(props: ChatProps) {
         }
     }
 
-    function messageReceived(message: ChatMessage) {
+    function messageReceived(message: BaseGameSessionMessage) {
         setMessages(prevState => [...prevState, message]);
     }
 
-    function historyReceived(newMessages: ChatMessage[]) {
+    function historyReceived(newMessages: BaseGameSessionMessage[]) {
+        console.log(newMessages);
         setMessages(newMessages);
     }
 

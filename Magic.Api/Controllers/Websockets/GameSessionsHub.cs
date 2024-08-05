@@ -1,9 +1,10 @@
 ﻿using System.Collections.Concurrent;
-using Magic.Common.Models.Websocket;
+using Magic.Domain.Enums;
 using Magic.Service;
 using Magic.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using System.Text.Json;
 
 namespace Magic.Api.Controllers.Websockets;
 
@@ -12,14 +13,16 @@ public class GameSessionsHub : Hub
 {
     private readonly IUserService _userService;
     private readonly IGameSessionService _gameSessionService;
+    private readonly IGameSessionMessageService _gameSessionMessageService;
 
-    private static readonly ChatHistory ChatHistory = new();
     private static readonly ConnectedUsers ConnectedUsers = new();
 
-    public GameSessionsHub(IUserService userService, IGameSessionService gameSessionService)
+    public GameSessionsHub(IUserService userService, IGameSessionService gameSessionService,
+        IGameSessionMessageService gameSessionMessageService)
     {
         _userService = userService;
         _gameSessionService = gameSessionService;
+        _gameSessionMessageService = gameSessionMessageService;
     }
 
     public async Task NewMessage(string message)
@@ -28,14 +31,45 @@ public class GameSessionsHub : Hub
 
         if (gameSessionId is null)
             throw new HubException("GameSession not found");
+        var messageEntity = await _gameSessionMessageService.AddChatMessage(new Guid(gameSessionId), message);
+        // //TODO map to response instead of database model
+        await Clients.Group(gameSessionId).SendAsync("messageReceived", messageEntity);
+    }
 
-        var callerUser = await _userService.CurrentUser();
+    public async Task RollDice(CubeTypeEnum cubeTypeEnum)
+    {
+        var gameSessionId = ConnectedUsers.GetGameSessionId(Context.ConnectionId);
 
-        var chatMessage = new ChatMessage(Guid.NewGuid(), callerUser.Login, message);
+        if (gameSessionId is null)
+            throw new HubException("GameSession not found");
+        var rollDice = DiceUtil.RollDice(cubeTypeEnum);
+        var messageEntity =
+            await _gameSessionMessageService.AddDiceMessage(new Guid(gameSessionId), rollDice, cubeTypeEnum);
+        // //TODO map to response instead of database model
+        await Clients.Group(gameSessionId).SendAsync("messageReceived", messageEntity);
+    }
 
-        ChatHistory.AddMessage(gameSessionId, chatMessage);
+    private async Task CreateServerMessage(string message)
+    {
+        var gameSessionId = ConnectedUsers.GetGameSessionId(Context.ConnectionId);
 
-        await Clients.Group(gameSessionId).SendAsync("messageReceived", chatMessage);
+        if (gameSessionId is null)
+            throw new HubException("GameSession not found");
+        var messageEntity = await _gameSessionMessageService.AddServerMessage(new Guid(gameSessionId), message);
+
+        await Clients.Group(gameSessionId).SendAsync("messageReceived", messageEntity);
+    }
+
+    private async Task CreateDiceMessage(int diceRoll, CubeTypeEnum cubeTypeEnum)
+    {
+        var gameSessionId = ConnectedUsers.GetGameSessionId(Context.ConnectionId);
+
+        if (gameSessionId is null)
+            throw new HubException("GameSession not found");
+        var messageEntity =
+            await _gameSessionMessageService.AddDiceMessage(new Guid(gameSessionId), diceRoll, cubeTypeEnum);
+
+        await Clients.Group(gameSessionId).SendAsync("messageReceived", messageEntity);
     }
 
     public async Task JoinGameSession(string gameSessionId)
@@ -62,15 +96,41 @@ public class GameSessionsHub : Hub
 
         ConnectedUsers.Connect(gameSessionId, callerUser!.Id, Context.ConnectionId);
 
-        await NewMessage($"Player \"{callerUser.Login}\" joined!");
+        await CreateServerMessage($"Player \"{callerUser.Login}\" joined!");
 
         await Groups.AddToGroupAsync(Context.ConnectionId, gameSessionId);
 
-        var messages = ChatHistory.GetMessages(gameSessionId);
+        var messages = await _gameSessionMessageService.GetMessages(new Guid(gameSessionId));
 
-        if (messages.Length > 0)
+        // var list = new List<string>();
+        // foreach (var message in messages)
+        // {
+        //     switch (message.GameSessionMessageTypeEnum)
+        //     {
+        //         case GameSessionMessageTypeEnum.Server:
+        //             list.Add(JsonSerializer.Serialize(message as ServerGameSessionMessage));
+        //             break;
+        //         case GameSessionMessageTypeEnum.Chat:
+        //             list.Add(JsonSerializer.Serialize(message as ChatGameGameSessionMessage));
+        //             break;
+        //         case GameSessionMessageTypeEnum.Dice:
+        //             list.Add(JsonSerializer.Serialize(message as DiceGameSessionMessage));
+        //             break;
+        //         default:
+        //             throw new ArgumentOutOfRangeException();
+        //     }
+        // }
+
+        // var options = new JsonSerializerOptions
+        // {
+        //     WriteIndented = true,
+        // };
+        // var str = JsonSerializer.Serialize<object>(messages, options);
+
+        if (messages.Count > 0)
             await Clients.Caller.SendAsync("historyReceived", messages);
     }
+
 
     public async Task LeaveGameSession(string gameSessionId)
     {
@@ -79,7 +139,8 @@ public class GameSessionsHub : Hub
         {
             throw new HubException("User not connected to this session");
         }
-        await NewMessage($"Player \"{callerUser.Login}\" disconnected");
+
+        await CreateServerMessage($"Player \"{callerUser.Login}\" disconnected");
         ConnectedUsers.Disconnect(gameSessionId, callerUser.Id, Context.ConnectionId);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameSessionId);
 
@@ -138,42 +199,5 @@ public class ConnectedUsers
             .Where(c => c.Value.Values.Contains(connectionId))
             .ToList();
         return gameSessionIds.Count == 0 ? null : gameSessionIds[0].Key;
-    }
-}
-
-public class ChatHistory
-{
-    private readonly ConcurrentDictionary<string, ConcurrentQueue<ChatMessage>> _messages = new();
-
-    public void AddMessage(string gameSessionId, ChatMessage message)
-    {
-        _messages.AddOrUpdate(
-            gameSessionId,
-            key =>
-            {
-                var queue = new ConcurrentQueue<ChatMessage>();
-                queue.Enqueue(message);
-                return queue;
-            },
-            (key, oldValue) =>
-            {
-                oldValue.Enqueue(message);
-                return oldValue;
-            });
-    }
-
-    public ChatMessage[] GetMessages(string gameSessionId)
-    {
-        return _messages.TryGetValue(gameSessionId, out var chatMessages)
-            ? chatMessages.ToArray()
-            : Array.Empty<ChatMessage>();
-    }
-
-    public void ClearHistory(string roomName)
-    {
-        if (_messages.TryRemove(roomName, out var bag))
-        {
-            bag.Clear();
-        }
     }
 }

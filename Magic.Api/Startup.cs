@@ -1,15 +1,11 @@
-using System.Text;
 using Magic.Api.Controllers.Websockets;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Magic.Api.Extensions;
 using Magic.Common;
-using Magic.Common.Options;
 using Magic.Service.Extensions;
 using Magic.DAL.Extensions;
-using Magic.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Connections;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 

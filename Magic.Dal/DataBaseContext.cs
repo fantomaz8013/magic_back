@@ -18,6 +18,10 @@ public class DataBaseContext : DbContext
     public DbSet<CharacterAbility > CharacterAbilities { get; set; }
     public DbSet<GameSession> GameSessions { get; set; }
     public DbSet<GameSessionUser> GameSessionUser { get; set; }
+    public DbSet<BaseGameSessionMessage> GameSessionMessages { get; set; }
+    public DbSet<ChatGameGameSessionMessage> ChatGameSessionMessages { get; set; }
+    public DbSet<ServerGameSessionMessage> ServerSessionMessages { get; set; }
+    public DbSet<DiceGameSessionMessage> DiceSessionMessages { get; set; }
 
     public DataBaseContext(DbContextOptions<DataBaseContext> options) : base(options) { }
 
@@ -34,5 +38,9 @@ public class DataBaseContext : DbContext
         modelBuilder.ApplyConfiguration(new CharacterRaceConfiguration());
         modelBuilder.ApplyConfiguration(new CharacterAbilityConfiguration());
         modelBuilder.ApplyConfiguration(new GameSessionConfiguration());
+        modelBuilder.ApplyConfiguration(new BaseGameSessionMessageConfiguration());
+        modelBuilder.ApplyConfiguration(new ChatGameSessionMessageConfiguration());
+        modelBuilder.ApplyConfiguration(new ServerGameSessionMessageConfiguration());
+        modelBuilder.ApplyConfiguration(new DiceGameSessionMessageConfiguration());
     }
 }
