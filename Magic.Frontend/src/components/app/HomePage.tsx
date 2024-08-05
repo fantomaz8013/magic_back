@@ -56,6 +56,6 @@ export default function HomePage() {
     );
 
     function onStartClick() {
-        navigate(paths.chat)
+        navigate(paths.game)
     }
 }
