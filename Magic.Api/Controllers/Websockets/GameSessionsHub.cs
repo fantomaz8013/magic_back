@@ -7,15 +7,15 @@ using Microsoft.AspNetCore.SignalR;
 namespace Magic.Api.Controllers.Websockets;
 
 [Authorize]
-public class ChatHub : Hub
+public class GameSessionsHub : Hub
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IUserService _userService;
 
     private static readonly ChatHistory chatHistory = new();
-    private static readonly Rooms Rooms = new();
+    private static readonly GameSessions GameSessions = new();
 
-    public ChatHub(IServiceProvider serviceProvider, IUserService userService)
+    public GameSessionsHub(IServiceProvider serviceProvider, IUserService userService)
     {
         _serviceProvider = serviceProvider;
         _userService = userService;
@@ -23,39 +23,39 @@ public class ChatHub : Hub
 
     public async Task NewMessage(string message)
     {
-        var roomName = Rooms.GetRoom(Context.ConnectionId);
-        if (roomName is null)
+        var gameSessionId = GameSessions.GetSessionId(Context.ConnectionId);
+        if (gameSessionId is null)
             throw new HubException("User doesn't belong to any room!");
         var callerUser = await _userService.CurrentUser();
         var chatMessage = new ChatMessage(Guid.NewGuid(), callerUser.Login, message);
-        chatHistory.AddMessage(roomName, chatMessage);
-        await Clients.Group(roomName).SendAsync("messageReceived", chatMessage);
+        chatHistory.AddMessage(gameSessionId, chatMessage);
+        await Clients.Group(gameSessionId).SendAsync("messageReceived", chatMessage);
     }
 
-    public async Task JoinRoom(string roomName)
+    public async Task JoinGameSession(string gameSessionId)
     {
-        Rooms.AddToRoom(Context.ConnectionId, roomName);
-        await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
+        GameSessions.AddToSession(Context.ConnectionId, gameSessionId);
+        await Groups.AddToGroupAsync(Context.ConnectionId, gameSessionId);
         var callerUser = await _userService.CurrentUser();
         await NewMessage($"Player \"{callerUser.Login}\" joined!");
-        var messages = chatHistory.GetMessages(roomName);
+        var messages = chatHistory.GetMessages(gameSessionId);
         if (messages.Length > 0)
             await Clients.Caller.SendAsync("historyReceived", messages);
     }
 
-    public async Task LeaveRoom(string roomName)
+    public async Task LeaveGameSession(string gameSessionId)
     {
-        Rooms.LeaveRoom(Context.ConnectionId);
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
-        if (Rooms.IsRoomEmpty(roomName))
-            chatHistory.ClearHistory(roomName);
+        GameSessions.LeaveSession(Context.ConnectionId);
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameSessionId);
+        if (GameSessions.IsGameSessionEmpty(gameSessionId))
+            chatHistory.ClearHistory(gameSessionId);
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        var roomName = Rooms.GetRoom(Context.ConnectionId);
+        var roomName = GameSessions.GetSessionId(Context.ConnectionId);
         if (roomName is not null)
-            await LeaveRoom(roomName);
+            await LeaveGameSession(roomName);
 
         await base.OnDisconnectedAsync(exception);
     }
@@ -65,10 +65,10 @@ public class ChatHistory
 {
     private readonly ConcurrentDictionary<string, ConcurrentQueue<ChatMessage>> _messages = new();
 
-    public void AddMessage(string roomName, ChatMessage message)
+    public void AddMessage(string gameSessionId, ChatMessage message)
     {
         _messages.AddOrUpdate(
-            roomName,
+            gameSessionId,
             key =>
             {
                 var queue = new ConcurrentQueue<ChatMessage>();
@@ -82,10 +82,10 @@ public class ChatHistory
             });
     }
 
-    public ChatMessage[] GetMessages(string roomName)
+    public ChatMessage[] GetMessages(string gameSessionId)
     {
-        return _messages.TryGetValue(roomName, out var bag)
-            ? bag.ToArray()
+        return _messages.TryGetValue(gameSessionId, out var chatMessages)
+            ? chatMessages.ToArray()
             : Array.Empty<ChatMessage>();
     }
 
@@ -98,29 +98,29 @@ public class ChatHistory
     }
 }
 
-public class Rooms
+public class GameSessions
 {
     private readonly ConcurrentDictionary<string, string> _connections = new();
 
-    public void AddToRoom(string connectionId, string roomName)
+    public void AddToSession(string connectionId, string gameSessionId)
     {
-        _connections.AddOrUpdate(connectionId, roomName, (key, oldValue) => roomName);
+        _connections.AddOrUpdate(connectionId, gameSessionId, (key, oldValue) => gameSessionId);
     }
 
-    public string? GetRoom(string connectionId)
+    public string? GetSessionId(string connectionId)
     {
         return _connections.TryGetValue(connectionId, out var roomName)
             ? roomName
             : null;
     }
 
-    public bool LeaveRoom(string connectionId)
+    public bool LeaveSession(string connectionId)
     {
         return _connections.TryRemove(connectionId, out _);
     }
 
-    public bool IsRoomEmpty(string roomName)
+    public bool IsGameSessionEmpty(string gameSessionId)
     {
-        return !_connections.Values.Contains(roomName);
+        return !_connections.Values.Contains(gameSessionId);
     }
 }

@@ -100,7 +100,7 @@ public class Startup
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
-            endpoints.MapHub<ChatHub>("/ws", options =>
+            endpoints.MapHub<GameSessionsHub>("/ws", options =>
                 {
                     options.Transports =
                         HttpTransportType.WebSockets |
