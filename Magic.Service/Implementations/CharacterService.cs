@@ -29,7 +29,7 @@ public class CharacterService : ICharacterService
     public async Task<List<CharacterClass>> GetClasses()
     {
         var classes = await _dbContext.CharacterClasses
-            .Include(x => x.characterCharacteristic)
+            .Include(x => x.CharacterCharacteristic)
             .ToListAsync();
         return classes;
     }

@@ -7,23 +7,22 @@ namespace Magic.Domain.Entities;
 /// </summary>
 public class CharacterAbility : BaseEntity<int>
 {
-    public const int ATTACK = 1;
     /// <summary>
     /// Название способности
     /// </summary>
-    public string title { get; set; }
+    public string Title { get; set; }
     /// <summary>
     /// Описание способности
     /// </summary>
-    public string description {  get; set; }
+    public string Description {  get; set; }
     /// <summary>
     /// Дистанция применения способности
     /// </summary>
-    public int? distance { get; set; }
+    public int? Distance { get; set; }
     /// <summary>
     /// Радиус способности
     /// </summary>
-    public int? radius {  get; set; }
+    public int? Radius {  get; set; }
     /// <summary>
     /// Тип способности
     /// </summary>
@@ -47,22 +46,22 @@ public class CharacterAbility : BaseEntity<int>
     /// <summary>
     /// Количество ходов перезарядки, если соответствующий CoolDownType
     /// </summary>
-    public int? coolDownCount { get; set; }
+    public int? CoolDownCount { get; set; }
     /// <summary>
     /// Количество бросаемых кубиков
     /// </summary>
-    public int? cubeCount { get; set; }
-    public int? characterClassId { get; set; }
+    public int? CubeCount { get; set; }
+    public int? CharacterClassId { get; set; }
     /// <summary>
     /// Класс персонажа чья это способность. Если пусто, то способность может быть выбрана любым классом
     /// </summary>
     public CharacterClass CharacterClass { get; set; }
-    public int? casterCharacterCharacteristicId { get; set; }
+    public int? CasterCharacterCharacteristicId { get; set; }
     /// <summary>
     /// Характеристика, по которой будет выполнена проверка у того, кто применяет заклинание
     /// </summary>
     public CharacterCharacteristic CasterCharacterCharacteristic { get; set; }
-    public int? targetCharacterCharacteristicId { get; set; }
+    public int? TargetCharacterCharacteristicId { get; set; }
     /// <summary>
     /// Характеристика, по которой будет выполнена проверка у того, по кому применяют заклинание
     /// </summary>

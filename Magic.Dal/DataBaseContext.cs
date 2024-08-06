@@ -11,6 +11,7 @@ public class DataBaseContext : DbContext
     public DbSet<Log> Log { get; set; }
     public DbSet<User> User { get; set; }
     public DbSet<City> Cities { get; set; }
+    public DbSet<CharacterTemplate> CharacterTemplates { get; set; }
     public DbSet<CharacterAvatar> CharacterAvatars { get; set; }
     public DbSet<CharacterCharacteristic> CharacterCharacteristic { get; set; }
     public DbSet<CharacterClass> CharacterClasses { get; set; }
@@ -42,5 +43,6 @@ public class DataBaseContext : DbContext
         modelBuilder.ApplyConfiguration(new ChatGameSessionMessageConfiguration());
         modelBuilder.ApplyConfiguration(new ServerGameSessionMessageConfiguration());
         modelBuilder.ApplyConfiguration(new DiceGameSessionMessageConfiguration());
+        modelBuilder.ApplyConfiguration(new CharacterTemplateConfiguration());
     }
 }
