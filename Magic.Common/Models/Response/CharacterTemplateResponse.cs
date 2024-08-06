@@ -6,6 +6,7 @@ public class CharacterTemplateResponse
 {
     public CharacterTemplateResponse(CharacterTemplate template, CharacterAbility[] abilities)
     {
+        Id = template.Id;
         Name = template.Name;
         Description = template.Description;
         AvatarUrL = template.AvatarUrL;
@@ -20,6 +21,7 @@ public class CharacterTemplateResponse
         Characteristics = template.Characteristics;
     }
 
+    public Guid Id { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
     public string AvatarUrL { get; set; }

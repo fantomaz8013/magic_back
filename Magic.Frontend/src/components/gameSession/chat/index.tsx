@@ -21,12 +21,16 @@ export interface ChatProps {
 export default function Chat(props: ChatProps) {
     const [currentMessage, setCurrentMessage] = useState<string>('');
     const [messages, setMessages] = useState<BaseGameSessionMessage[]>([]);
-    const {data: currentUser, } = useGetCurrentUserQuery();
+    const {data: currentUser,} = useGetCurrentUserQuery();
 
-    useEffect(()=>{
+    useEffect(() => {
         props.ws.on(WSEvents.messageReceived, messageReceived);
         props.ws.on(WSEvents.historyReceived, historyReceived);
-    },[]);
+        return () => {
+            props.ws.off(WSEvents.messageReceived);
+            props.ws.off(WSEvents.historyReceived);
+        }
+    }, []);
 
     return (
         <>

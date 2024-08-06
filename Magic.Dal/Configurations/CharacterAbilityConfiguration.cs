@@ -44,7 +44,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             Description = "Вы наносите урон основным оружием по выбраной цели нанося 1к10 урона",
             Type = CharacterAbilityTypeEnum.Attack,
             ActionType = CharacterAbilityActionTypeEnum.MainAction,
-            TargetType = CharacterAbilityTargetTypeEnum.Targert,
+            TargetType = CharacterAbilityTargetTypeEnum.Target,
             CoolDownType = CharacterAbilityCoolDownTypeEnum.None,
             CubeType = CubeTypeEnum.D10,
             Distance = 2,
@@ -62,7 +62,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CoolDownType = CharacterAbilityCoolDownTypeEnum.AfterFight,
             CubeType = CubeTypeEnum.D10,
             CubeCount = 1,
-            CharacterClassId = CharacterClass.Warior,
+            CharacterClassId = CharacterClass.Warrior,
         });
 
         builder.HasData(new CharacterAbility
@@ -74,7 +74,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             TargetType = CharacterAbilityTargetTypeEnum.TargertSelf,
             ActionType = CharacterAbilityActionTypeEnum.AdditionalAction,
             CoolDownType = CharacterAbilityCoolDownTypeEnum.AfterFight,
-            CharacterClassId = CharacterClass.Warior,
+            CharacterClassId = CharacterClass.Warrior,
         });
 
         builder.HasData(new CharacterAbility
@@ -90,7 +90,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CubeCount = 1,
             Distance = 1,
             Radius = 3,
-            CharacterClassId = CharacterClass.Warior,
+            CharacterClassId = CharacterClass.Warrior,
         });
 
         builder.HasData(new CharacterAbility
@@ -104,7 +104,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CoolDownType = CharacterAbilityCoolDownTypeEnum.OnePerGame,
             CubeType = CubeTypeEnum.D6,
             CubeCount = 2,
-            CharacterClassId = CharacterClass.Warior,
+            CharacterClassId = CharacterClass.Warrior,
         });
 
         builder.HasData(new CharacterAbility
@@ -129,7 +129,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             Title = "Внушение",
             Description = "Вы внушаете определенный курс действий (ограниченный одной-двумя фразами) существу, видимому в пределах дистанции, способному слышать и понимать вас",
             Type = CharacterAbilityTypeEnum.DeBuff,
-            TargetType = CharacterAbilityTargetTypeEnum.Targert,
+            TargetType = CharacterAbilityTargetTypeEnum.Target,
             ActionType = CharacterAbilityActionTypeEnum.MainAction,
             CoolDownType = CharacterAbilityCoolDownTypeEnum.AfterFight,
             Distance = 30,
@@ -145,7 +145,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             Title = "Огненный снаряд",
             Description = "Вы кидаете сгусток огня в существо или предмет в пределах дистанции ( 30 м ). Совершите по цели дальнобойную атаку заклинанием. При попадании цель получает урон огнём 1к10.",
             Type = CharacterAbilityTypeEnum.Attack,
-            TargetType = CharacterAbilityTargetTypeEnum.Targert,
+            TargetType = CharacterAbilityTargetTypeEnum.Target,
             ActionType = CharacterAbilityActionTypeEnum.MainAction,
             CoolDownType = CharacterAbilityCoolDownTypeEnum.None,
             Distance = 30,
@@ -175,7 +175,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             Title = "Исцеление",
             Description = "Существо, которого вы касаетесь, восстанавливает количество хитов, равное 1к8",
             Type = CharacterAbilityTypeEnum.Healing,
-            TargetType = CharacterAbilityTargetTypeEnum.Targert,
+            TargetType = CharacterAbilityTargetTypeEnum.Target,
             ActionType = CharacterAbilityActionTypeEnum.MainAction,
             CoolDownType = CharacterAbilityCoolDownTypeEnum.AfterFight,
             Distance = 2,
@@ -190,7 +190,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             Title = "Оглушающая кара",
             Description = "Вы выпускаете сгусток светлой энергии по противнику, наносящий 1к8 урона и оглушающий его на 1 ход",
             Type = CharacterAbilityTypeEnum.Attack,
-            TargetType = CharacterAbilityTargetTypeEnum.Targert,
+            TargetType = CharacterAbilityTargetTypeEnum.Target,
             ActionType = CharacterAbilityActionTypeEnum.MainAction,
             CoolDownType = CharacterAbilityCoolDownTypeEnum.AfterFight,
             Distance = 30,
@@ -205,7 +205,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             Title = "Воскрешение",
             Description = "Вы можете воскресить павшего союзника c 1к20",
             Type = CharacterAbilityTypeEnum.Healing,
-            TargetType = CharacterAbilityTargetTypeEnum.Targert,
+            TargetType = CharacterAbilityTargetTypeEnum.Target,
             ActionType = CharacterAbilityActionTypeEnum.MainAction,
             CoolDownType = CharacterAbilityCoolDownTypeEnum.OnePerGame,
             Distance = 30,
@@ -220,7 +220,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             Title = "Божественный щит",
             Description = "Вы накладываете на существо божественный щит, способный поглотить 1к10 урона",
             Type = CharacterAbilityTypeEnum.Protection,
-            TargetType = CharacterAbilityTargetTypeEnum.Targert,
+            TargetType = CharacterAbilityTargetTypeEnum.Target,
             ActionType = CharacterAbilityActionTypeEnum.MainAction,
             CoolDownType = CharacterAbilityCoolDownTypeEnum.AfterFight,
             Distance = 30,
@@ -265,7 +265,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             Title = "Точный выстрел",
             Description = "Вы стреляете из лука по цели, нанося 1к10 урона",
             Type = CharacterAbilityTypeEnum.Attack,
-            TargetType = CharacterAbilityTargetTypeEnum.Targert,
+            TargetType = CharacterAbilityTargetTypeEnum.Target,
             ActionType = CharacterAbilityActionTypeEnum.MainAction,
             CoolDownType = CharacterAbilityCoolDownTypeEnum.None,
             CubeType = CubeTypeEnum.D10,
@@ -280,7 +280,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             Title = "Выстрел адамантиевой стрелой",
             Description = "Вы стреляете из лука по цели особой стрелой, нанося 5к10 урона",
             Type = CharacterAbilityTypeEnum.Attack,
-            TargetType = CharacterAbilityTargetTypeEnum.Targert,
+            TargetType = CharacterAbilityTargetTypeEnum.Target,
             ActionType = CharacterAbilityActionTypeEnum.MainAction,
             CoolDownType = CharacterAbilityCoolDownTypeEnum.OnePerGame,
             CubeType = CubeTypeEnum.D10,

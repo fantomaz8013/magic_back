@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using Magic.Common.Models.Response;
 using Magic.Domain.Enums;
 using Magic.Service;
 using Magic.Service.Interfaces;
@@ -17,6 +16,7 @@ public class GameSessionsHub : Hub
     private readonly IGameSessionMessageService _gameSessionMessageService;
 
     private static readonly ConnectedUsers ConnectedUsers = new();
+    private static readonly LockedCharacters LockedCharacters = new();
 
     public GameSessionsHub(IUserService userService, IGameSessionService gameSessionService,
         IGameSessionMessageService gameSessionMessageService)
@@ -92,6 +92,28 @@ public class GameSessionsHub : Hub
 
         if (messages.Count > 0)
             await Clients.Caller.SendAsync("historyReceived", messages);
+
+        //TODO FRONT
+        var locks = LockedCharacters.GetGameSessionLocks(gameSessionId);
+        var playerInfos = gameSession
+            .Users
+            .Append(gameSession.CreatorUser)
+            .Select(u => new
+                { u.Id, u.Login, IsMaster = gameSession.CreatorUserId == u.Id, LockedCharacterId = locks?[u.Id] })
+            .ToArray();
+        await Clients.Caller.SendAsync("playerInfoReceived", playerInfos);
+    }
+
+    public async Task LockCharacter(Guid characterId)
+    {
+        var gameSessionId = ConnectedUsers.GetGameSessionId(Context.ConnectionId);
+
+        if (gameSessionId is null)
+            throw new HubException("GameSession not found");
+        var callerUser = await _userService.CurrentUser();
+        LockedCharacters.Lock(gameSessionId, callerUser.Id, characterId);
+        //toDO FRONT
+        await Clients.Group(gameSessionId).SendAsync("characterLocked", callerUser.Id, characterId);
     }
 
 
@@ -103,9 +125,12 @@ public class GameSessionsHub : Hub
             throw new HubException("User not connected to this session");
         }
 
-        await CreateServerMessage($"Player \"{callerUser.Login}\" disconnected");
-        ConnectedUsers.Disconnect(gameSessionId, callerUser.Id, Context.ConnectionId);
+        ConnectedUsers.Disconnect(gameSessionId, callerUser.Id);
+        LockedCharacters.Unlock(gameSessionId, callerUser.Id);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameSessionId);
+        //todo FRONT
+        await CreateServerMessage($"Player \"{callerUser.Login}\" disconnected");
+        await Clients.Group(gameSessionId).SendAsync("playerLeft", callerUser.Id);
 
         // if (GameSessions.IsGameSessionEmpty(gameSessionId))
         //     chatHistory.ClearHistory(gameSessionId);
@@ -144,7 +169,7 @@ public class ConnectedUsers
             });
     }
 
-    public void Disconnect(string gameSessionId, Guid userId, string connectionId)
+    public void Disconnect(string gameSessionId, Guid userId)
     {
         if (_connections.TryGetValue(gameSessionId, out var connectedUsers))
             connectedUsers.TryRemove(userId, out _);
@@ -162,5 +187,44 @@ public class ConnectedUsers
             .Where(c => c.Value.Values.Contains(connectionId))
             .ToList();
         return gameSessionIds.Count == 0 ? null : gameSessionIds[0].Key;
+    }
+}
+
+public class LockedCharacters
+{
+    // gameSessionId -> dic<userId, lockedCharacterTemplateId>
+    private readonly ConcurrentDictionary<string, ConcurrentDictionary<Guid, Guid>> _connections = new();
+
+    public void Lock(string gameSessionId, Guid userId, Guid lockedCharacterTemplateId)
+    {
+        _connections.AddOrUpdate(
+            gameSessionId,
+            key =>
+            {
+                var dic = new ConcurrentDictionary<Guid, Guid>();
+                dic.TryAdd(userId, lockedCharacterTemplateId);
+                return dic;
+            },
+            (key, oldValue) =>
+            {
+                oldValue.AddOrUpdate(userId,
+                    _ => lockedCharacterTemplateId,
+                    (_, __) => lockedCharacterTemplateId
+                );
+                return oldValue;
+            });
+    }
+
+    public void Unlock(string gameSessionId, Guid userId)
+    {
+        if (_connections.TryGetValue(gameSessionId, out var lockedCharacterTemplateIds))
+            lockedCharacterTemplateIds.TryRemove(userId, out _);
+    }
+
+    public Dictionary<Guid, Guid>? GetGameSessionLocks(string gameSessionId)
+    {
+        return _connections.TryGetValue(gameSessionId, out var connectedUsers)
+            ? connectedUsers.ToDictionary()
+            : null;
     }
 }

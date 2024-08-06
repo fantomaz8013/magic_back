@@ -5,7 +5,7 @@
 /// </summary>
 public class CharacterClass : BaseEntity<int>
 {
-    public const int Warior = 1;
+    public const int Warrior = 1;
     public const int Wizard = 2;
     public const int Hunter = 3;
     public const int Priest = 4;

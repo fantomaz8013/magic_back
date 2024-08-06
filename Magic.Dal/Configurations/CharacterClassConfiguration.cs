@@ -21,7 +21,7 @@ public class CharacterClassConfiguration : IEntityTypeConfiguration<CharacterCla
 
         builder.HasData(new CharacterClass 
         { 
-            Id = CharacterClass.Warior, 
+            Id = CharacterClass.Warrior, 
             Title = "Воин",
             CharacterCharacteristicId = CharacterCharacteristic.Strength,
             Description = "Опытный гладиатор сражается на арене и хорошо знает, как использовать свои трезубец и сеть, чтобы опрокинуть противника и обойти его, вызывая ликование публики и получая тактическое преимущество",

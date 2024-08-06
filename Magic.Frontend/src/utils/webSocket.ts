@@ -41,6 +41,9 @@ export enum WSActions {
 export enum WSEvents {
     historyReceived = 'historyReceived',
     messageReceived = 'messageReceived',
+    characterLocked = 'characterLocked',
+    playerLeft = 'playerLeft',
+    playerInfoReceived = 'playerInfoReceived',
 }
 
 

@@ -8,7 +8,7 @@ public enum CharacterAbilityTargetTypeEnum
     /// <summary>
     /// Способность должна применяться на конкретную цель
     /// </summary>
-    Targert = 1,
+    Target = 1,
     /// <summary>
     /// Целью способности должна быть область
     /// </summary>

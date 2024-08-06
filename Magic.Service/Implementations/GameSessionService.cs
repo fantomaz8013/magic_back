@@ -216,6 +216,7 @@ public class GameSessionService : IGameSessionService
     {
         return await _dbContext.GameSessions
             .Include(g => g.Users)
+            .Include(g => g.CreatorUser)
             .FirstOrDefaultAsync(g => g.Id == gameSessionId);
     }
 }

@@ -46,7 +46,7 @@ public class CharacterTemplateConfiguration : IEntityTypeConfiguration<Character
             Name = "Conductor Gennady",
             Description = "A real man with a real COCK",
             AvatarUrL = "https://cumm.co.uk/wp-content/uploads/2023/08/00-a-mans-cock.jpg?v=1698757203",
-            CharacterClassId = CharacterClass.Warior,
+            CharacterClassId = CharacterClass.Warrior,
             AbilitieIds = new[]
             {
                 1, 2, 3, 4, 5
