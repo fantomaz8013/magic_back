@@ -121,7 +121,7 @@ public class UserService : IUserService
 
         return user == null
             ? null
-            : UserResponse.BuildResponse(user);
+            : new UserResponse(user);
     }
 
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using Magic.Common.Models.Response;
 using Magic.Domain.Enums;
 using Magic.Service;
 using Magic.Service.Interfaces;
@@ -32,7 +33,6 @@ public class GameSessionsHub : Hub
         if (gameSessionId is null)
             throw new HubException("GameSession not found");
         var messageEntity = await _gameSessionMessageService.AddChatMessage(new Guid(gameSessionId), message);
-        // //TODO map to response instead of database model
         await Clients.Group(gameSessionId).SendAsync("messageReceived", messageEntity);
     }
 
@@ -42,10 +42,11 @@ public class GameSessionsHub : Hub
 
         if (gameSessionId is null)
             throw new HubException("GameSession not found");
+
         var rollDice = DiceUtil.RollDice(cubeTypeEnum);
+
         var messageEntity =
             await _gameSessionMessageService.AddDiceMessage(new Guid(gameSessionId), rollDice, cubeTypeEnum);
-        // //TODO map to response instead of database model
         await Clients.Group(gameSessionId).SendAsync("messageReceived", messageEntity);
     }
 
@@ -56,18 +57,6 @@ public class GameSessionsHub : Hub
         if (gameSessionId is null)
             throw new HubException("GameSession not found");
         var messageEntity = await _gameSessionMessageService.AddServerMessage(new Guid(gameSessionId), message);
-
-        await Clients.Group(gameSessionId).SendAsync("messageReceived", messageEntity);
-    }
-
-    private async Task CreateDiceMessage(int diceRoll, CubeTypeEnum cubeTypeEnum)
-    {
-        var gameSessionId = ConnectedUsers.GetGameSessionId(Context.ConnectionId);
-
-        if (gameSessionId is null)
-            throw new HubException("GameSession not found");
-        var messageEntity =
-            await _gameSessionMessageService.AddDiceMessage(new Guid(gameSessionId), diceRoll, cubeTypeEnum);
 
         await Clients.Group(gameSessionId).SendAsync("messageReceived", messageEntity);
     }

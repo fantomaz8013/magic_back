@@ -9,17 +9,12 @@ public class UserResponse
     public string Login { get; set; }
     public string Email { get; set; }
     public string PhoneNumber { get; set; }
-    public UserResponse(string name, string login, string email, string phoneNumber, Guid id)
+    public UserResponse(User user)
     {
-        Name = name;
-        Login = login;
-        Email = email;
-        PhoneNumber = phoneNumber;
-        Id = id;
-    }
-
-    public static UserResponse BuildResponse(User user)
-    {
-        return new UserResponse(user.Name, user.Login, user.Email, user.PhoneNumber, user.Id);
+        Name = user.Name;
+        Login = user.Login;
+        Email = user.Email;
+        PhoneNumber = user.PhoneNumber;
+        Id = user.Id;
     }
 }

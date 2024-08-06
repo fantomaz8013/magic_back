@@ -1,4 +1,5 @@
-﻿using Magic.Common.Models.Response;
+﻿using System.Linq.Dynamic.Core;
+using Magic.Common.Models.Response;
 using Magic.DAL;
 using Magic.Domain.Entities;
 using Magic.Domain.Enums;
@@ -19,7 +20,7 @@ public class GameSessionMessageService : IGameSessionMessageService
         _userProvider = userProvider;
     }
 
-    public async Task<ChatGameGameSessionMessage> AddChatMessage(Guid gameSessionId, string message)
+    public async Task<ChatGameGameSessionMessageResponse> AddChatMessage(Guid gameSessionId, string message)
     {
         var userId = _userProvider.GetUserId();
 
@@ -33,12 +34,13 @@ public class GameSessionMessageService : IGameSessionMessageService
 
         await _dbContext.SaveChangesAsync();
 
-        return (await _dbContext.ChatGameSessionMessages
+        var res = await _dbContext.ChatGameSessionMessages
             .Include(m => m.Author)
-            .FirstOrDefaultAsync(m => m.Id == rEntry.Entity.Id))!;
+            .FirstOrDefaultAsync(m => m.Id == rEntry.Entity.Id)!;
+        return new ChatGameGameSessionMessageResponse(res);
     }
 
-    public async Task<ServerGameSessionMessage> AddServerMessage(Guid gameSessionId, string message)
+    public async Task<ServerGameSessionMessageResponse> AddServerMessage(Guid gameSessionId, string message)
     {
         var rEntry = await _dbContext.ServerSessionMessages.AddAsync(new ServerGameSessionMessage
         {
@@ -49,49 +51,59 @@ public class GameSessionMessageService : IGameSessionMessageService
 
         await _dbContext.SaveChangesAsync();
 
-        return (await _dbContext.ServerSessionMessages
-            .FirstOrDefaultAsync(m => m.Id == rEntry.Entity.Id))!;
+        var res = await _dbContext.ServerSessionMessages
+            .FirstOrDefaultAsync(m => m.Id == rEntry.Entity.Id)!;
+
+        return new ServerGameSessionMessageResponse(res);
     }
 
-    public async Task<DiceGameSessionMessage> AddDiceMessage(Guid gameSessionId, int diceRoll,
+    public async Task<DiceGameSessionMessageResponse> AddDiceMessage(Guid gameSessionId, int diceRoll,
         CubeTypeEnum cubeTypeEnum)
     {
+        var userId = _userProvider.GetUserId();
         var rEntry = await _dbContext.DiceSessionMessages.AddAsync(new DiceGameSessionMessage
         {
             GameSessionId = gameSessionId,
             CubeTypeEnum = cubeTypeEnum,
             Roll = diceRoll,
-            CreatedDate = DateTime.UtcNow
+            CreatedDate = DateTime.UtcNow,
+            AuthorId = userId.Value
         });
 
         await _dbContext.SaveChangesAsync();
 
-        return (await _dbContext.DiceSessionMessages
-            .FirstOrDefaultAsync(m => m.Id == rEntry.Entity.Id))!;
+        var res = await _dbContext.DiceSessionMessages
+            .Include(m => m.Author)
+            .FirstOrDefaultAsync(m => m.Id == rEntry.Entity.Id)!;
+
+        return new DiceGameSessionMessageResponse(res);
     }
 
     public async Task<List<BaseGameSessionMessageResponse>> GetMessages(Guid gameSessionId)
     {
         var messages = await _dbContext.GameSessionMessages
             .Include(m => (m as ChatGameGameSessionMessage).Author)
+            .Include(m => (m as DiceGameSessionMessage).Author)
             .Where(g => g.GameSessionId == gameSessionId)
             .OrderBy(g => g.CreatedDate)
             .ToListAsync();
 
-        var responses = messages
-            .Select(m =>
+
+        var responses = new List<BaseGameSessionMessageResponse>();
+        foreach (var message in messages)
+        {
+            BaseGameSessionMessageResponse response = message switch
             {
-                return m switch
-                {
-                    ChatGameGameSessionMessage chatGameGameSessionMessage => ChatGameGameSessionMessageResponse
-                        .BuildResponse(chatGameGameSessionMessage) as BaseGameSessionMessageResponse,
-                    ServerGameSessionMessage serverGameSessionMessage => ServerGameSessionMessageResponse.BuildResponse(
-                        serverGameSessionMessage),
-                    DiceGameSessionMessage diceGameSessionMessage => DiceGameSessionMessageResponse.BuildResponse(
-                        diceGameSessionMessage),
-                    _ => throw new Exception("Message type not supported")
-                };
-            }).ToList();
+                ChatGameGameSessionMessage chatGameGameSessionMessage
+                    => new ChatGameGameSessionMessageResponse(chatGameGameSessionMessage),
+                ServerGameSessionMessage serverGameSessionMessage
+                    => new ServerGameSessionMessageResponse(serverGameSessionMessage),
+                DiceGameSessionMessage diceGameSessionMessage
+                    => new DiceGameSessionMessageResponse(diceGameSessionMessage),
+                _ => throw new Exception($"{message.GetType().FullName} is not supported")
+            };
+            responses.Add(response);
+        }
 
         return responses;
     }

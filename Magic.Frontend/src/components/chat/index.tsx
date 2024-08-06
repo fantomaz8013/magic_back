@@ -7,11 +7,12 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import {useGetCurrentUserQuery} from "../../redux/toolkit/api/userApi";
 import {
-    BaseGameSessionMessage, ChatGameSessionMessage, DiceGameSessionMessage,
+    BaseGameSessionMessage, ChatGameSessionMessage, CubeTypeEnum, DiceGameSessionMessage,
     GameSessionMessageTypeEnum,
     ServerGameSessionMessage,
 } from "../../models/websocket/ChatMessage";
 import Typography from "@mui/material/Typography";
+import Dice from "../dice/Dice";
 
 export interface ChatProps {
     gameSessionId: string;
@@ -47,9 +48,14 @@ export default function Chat(props: ChatProps) {
                     onChange={onMessageChange}
                 />
                 <Button onClick={sendMessage}>SEND</Button>
+                <Dice onDiceRoll={rollDice}/>
             </Box>
         </Box>
     );
+
+    async function rollDice() {
+        await ws.invoke(WSActions.rollDice, CubeTypeEnum.D6);
+    }
 
     function renderMessage(baseMessage: BaseGameSessionMessage) {
         let mes, login, isSender;
@@ -68,7 +74,7 @@ export default function Chat(props: ChatProps) {
                 break;
             case GameSessionMessageTypeEnum.Dice:
                 const diceMessage = baseMessage as DiceGameSessionMessage;
-                mes = `Player ${diceMessage.author.login} rolled ${diceMessage.roll} on ${diceMessage.gameSessionMessageTypeEnum.toString()}`
+                mes = `Player ${diceMessage.author.login} rolled ${diceMessage.roll} on ${CubeTypeEnum[diceMessage.cubeTypeEnum]}`
                 login = diceMessage.author.login;
                 isSender = diceMessage.authorId === currentUser!.data!.id
                 break;
@@ -77,7 +83,7 @@ export default function Chat(props: ChatProps) {
             ? SenderMessage
             : ReceiverMessage;
         return (
-            <Message key={baseMessage.id} avatar={<Avatar>{login?.slice(0, 1)||'Й'}</Avatar>}>
+            <Message key={baseMessage.id} avatar={<Avatar>{login?.slice(0, 1) || 'Й'}</Avatar>}>
                 {mes}
             </Message>
         )
