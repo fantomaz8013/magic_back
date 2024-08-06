@@ -107,7 +107,7 @@ public class GameSessionsHub : Hub
                 }
             )
             .ToArray();
-        await Clients.Caller.SendAsync("playerInfoReceived", playerInfos);
+        await Clients.Group(gameSessionId).SendAsync("playerInfoReceived", playerInfos);
     }
 
     public record PlayerInfo(Guid Id, string Login, bool IsMaster, Guid? LockedCharacterId);
@@ -234,7 +234,7 @@ public class LockedCharacters
             ? connectedUsers.ToDictionary()
             : null;
     }
-    
+
     // public bool IsCharacterLocked(string gameSessionId)
     // {
     //     return _connections.TryGetValue(gameSessionId, out var connectedUsers)
