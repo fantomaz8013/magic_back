@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore;
 using Magic.DAL;
+using Microsoft.Extensions.Configuration;
 
 namespace Magic.Migrator;
 
