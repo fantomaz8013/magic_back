@@ -123,7 +123,7 @@ public static class OuterEntitiesClaimsExtensions
     {
         var userClaims = httpContext.User.Claims;
 
-        AuthTyoe authType = AuthTyoe.Unknown;
+        var authType = AuthTyoe.Unknown;
         var _authType = httpContext.User.Identity.AuthenticationType;
         if (_authType == null)
             authType = AuthTyoe.Unknown;

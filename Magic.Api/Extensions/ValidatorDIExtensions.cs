@@ -1,7 +1,7 @@
-﻿using Magic.Common.Models.Request;
-using FluentValidation;
+﻿using FluentValidation;
 using FluentValidation.AspNetCore;
 using Magic.Api.Configure;
+using Magic.Common.Models.Request;
 
 namespace Magic.Api.Extensions;
 

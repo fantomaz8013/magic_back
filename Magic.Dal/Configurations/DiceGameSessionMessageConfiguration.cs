@@ -1,6 +1,5 @@
 ﻿using Magic.DAL.Extensions;
 using Magic.Domain.Entities;
-using Magic.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

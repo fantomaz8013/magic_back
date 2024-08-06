@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc;
-using Magic.Api.Attributes.Magic.Api.Attributes;
+﻿using Magic.Api.Attributes.Magic.Api.Attributes;
 using Magic.Domain.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Magic.Api.Configure;
 
@@ -9,16 +9,14 @@ public class ModelStateFilter : IActionFilter
 {
     public void OnActionExecuting(ActionExecutingContext context)
     {
-        if (!context.ModelState.IsValid)
-        {
-            string errorMessage = string.Join(Environment.NewLine, context.ModelState.Values.SelectMany(v => v.Errors).Select(m => m.ErrorMessage).ToArray());
-            context.Result = new OkObjectResult(ResponseData<string>.Error(errorMessage));
-        }
+        if (context.ModelState.IsValid) return;
+        var errorMessage = string.Join(Environment.NewLine, context.ModelState.Values.SelectMany(v => v.Errors).Select(m => m.ErrorMessage).ToArray());
+        context.Result = new OkObjectResult(ResponseData<string>.Error(errorMessage));
     }
 
     public void OnActionExecuted(ActionExecutedContext context)
     {
-        var isCleanResposen = context.ActionDescriptor.EndpointMetadata.Any(x => x is CleanResposeAttribute);
+        var isCleanResponse = context.ActionDescriptor.EndpointMetadata.Any(x => x is CleanResposeAttribute);
         if (context.Exception != null)
         {
             int? errorCode = null;
@@ -30,7 +28,7 @@ public class ModelStateFilter : IActionFilter
             context.Result = new OkObjectResult(ResponseData<string>.Error(context.Exception.Message, errorCode));
             context.Exception = null;
         }
-        else if (context.Result is OkObjectResult && !isCleanResposen)
+        else if (context.Result is OkObjectResult && !isCleanResponse)
         {
             context.Result = new OkObjectResult(ResponseData<object>.Success(((OkObjectResult)context.Result).Value));
         }

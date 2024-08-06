@@ -2,9 +2,9 @@
 using Magic.Domain.Enums;
 using Magic.Service;
 using Magic.Service.Interfaces;
+using Magic.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using System.Text.Json;
 
 namespace Magic.Api.Controllers.Websockets;
 

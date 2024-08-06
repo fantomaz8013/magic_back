@@ -1,13 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
-using System.Linq.Expressions;
-using System.Linq.Dynamic.Core;
 using Magic.Common.Models.Response;
 using Magic.Common.Models.Request;
-using Magic.DAL.Dto.Implementations;
 using Magic.Domain.Entities;
-using Magic.DAL.Extensions;
 using Magic.DAL;
 using Magic.Service.Provider;
 using System.IdentityModel.Tokens.Jwt;
@@ -123,7 +119,7 @@ public class UserService : IUserService
     public async Task<UserResponse?> CurrentUser()
     {
         var auth = _userProvider.GetAuth();
-        Guid? userId = _userProvider.GetUserId();
+        var userId = _userProvider.GetUserId();
 
         var user = await _dbContext.User.FirstOrDefaultAsync(x => x.Id == userId);
 
@@ -151,7 +147,7 @@ public class UserService : IUserService
         {
             var passwordHashByteArray = Convert.FromBase64String(passwordHash);
             var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-            for (int i = 0; i < computedHash.Length; i++)
+            for (var i = 0; i < computedHash.Length; i++)
             {
                 if (computedHash[i] != passwordHashByteArray[i]) return false;
             }
@@ -175,33 +171,9 @@ public class UserService : IUserService
             .AsSpan(0, _lengthOfKey - _prefix.Length));
     }
 
-    public async Task<UserDto?> GetByIdAsync(Guid id)
-    {
-        throw new NotImplementedException();
-        //return await _dbContext.User
-        //    .AsNoTracking()
-        //    .FirstOrDefaultAsync(x => x.Id == id);
-    }
-
-    public async Task<PagedResult<UserDto>> ListAsync(PagedRequest request)
-    {
-        return await _dbContext.User
-            .AsNoTracking()
-            .ApplyRequestAsync(request, x => new UserDto(x));
-    }
-
-    public async Task<IEnumerable<UserDto>> ListAsync(Expression<Func<User, bool>> predicate)
-    {
-        throw new NotImplementedException();
-        //return await _dbContext.User
-        //    .AsNoTracking()
-        //    .Where(predicate)
-        //    .ToListAsync();
-    }
-
     public async Task<bool> UpdateUser(UserUpdateRequest request)
     {
-        Guid? userId = _userProvider.GetUserId();
+        var userId = _userProvider.GetUserId();
         var user = await _dbContext.User.FindAsync(userId);
         if (user != null)
         {

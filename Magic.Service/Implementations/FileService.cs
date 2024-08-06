@@ -7,7 +7,7 @@ public class FileService : IFileService
 {
     public bool DeleteFile(string path)
     {
-        string fileName = Path.Combine(Environment.CurrentDirectory, path.Replace("/", "\\"));
+        var fileName = Path.Combine(Environment.CurrentDirectory, path.Replace("/", "\\"));
         if (File.Exists(fileName))
         {
             File.Delete(fileName);
@@ -18,7 +18,7 @@ public class FileService : IFileService
 
     public async Task<string> UploadFile(IFormFile file)
     {
-        string path = "";
+        var path = "";
         if (file.Length > 0)
         {
             path = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "storage/images"));

@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Magic.DAL;
 
 namespace Magic.Migrator;
@@ -9,9 +8,9 @@ public class Program : IDesignTimeDbContextFactory<DataBaseContext>
 {
     static async Task Main(string[] args)
     {
-        Program program = new Program();
+        var program = new Program();
 
-        await using (DataBaseContext dbContext = program.CreateDbContext())
+        await using (var dbContext = program.CreateDbContext())
         {
             await dbContext.Database.MigrateAsync();
         }

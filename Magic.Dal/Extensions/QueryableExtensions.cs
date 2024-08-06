@@ -1,6 +1,4 @@
 ﻿using Magic.DAL.Dto;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 
 namespace Magic.DAL.Extensions;
@@ -20,9 +18,9 @@ public static class QueryableExtensions
         IQueryable<TEntity> p = query;
         foreach (var param in filters.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()))
         {
-            var separatorIndex = param.IndexOf(SEPARATOR);
-            var expressionLeft = param.Substring(0, separatorIndex);
-            var expressionRight = param.Substring(separatorIndex + 1);
+            var separatorIndex = param.IndexOf(SEPARATOR, StringComparison.Ordinal);
+            var expressionLeft = param[..separatorIndex];
+            var expressionRight = param[(separatorIndex + 1)..];
 
             DtoProperty<TEntity> dtoProperty;
             if (!builder.TryGetProperty(expressionLeft, out dtoProperty))
@@ -47,9 +45,9 @@ public static class QueryableExtensions
         IQueryable<TEntity> p = query;
         foreach (var param in searches.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()))
         {
-            var separatorIndex = param.IndexOf(SEPARATOR);
-            var expressionLeft = param.Substring(0, separatorIndex);
-            var expressionRight = param.Substring(separatorIndex + 1);
+            var separatorIndex = param.IndexOf(SEPARATOR, StringComparison.Ordinal);
+            var expressionLeft = param[..separatorIndex];
+            var expressionRight = param[(separatorIndex + 1)..];
 
             DtoProperty<TEntity> dtoProperty;
             if (!builder.TryGetProperty(expressionLeft, out dtoProperty))
@@ -85,10 +83,9 @@ public static class QueryableExtensions
                 continue;
 
             if (param.EndsWith(":desc"))
-                if (p == null)
-                    p = query.OrderByDescending(predicate);
-                else
-                    p = p.ThenByDescending(predicate);
+                p = p == null 
+                    ? query.OrderByDescending(predicate) 
+                    : p.ThenByDescending(predicate);
             else
             if (p == null)
                 p = query.OrderBy(predicate);
@@ -98,39 +95,39 @@ public static class QueryableExtensions
 
         return p ?? query;
     }
-    public static async Task<PagedResult<TReturn>> GetPagedAsync<TEntity, TReturn>(this IQueryable<TEntity> query, int pageIndex, int pageSize, Expression<Func<TEntity, TReturn>> selector)
-        where TEntity : class
-        where TReturn : IDtoConfiguration<TEntity>, new()
-    {
-        var result = new PagedResult<TReturn>();
-        result.CurrentPage = pageIndex;
-        result.PageSize = pageSize;
-        result.RowCount = await query.CountAsync();
-
-        var pageCount = pageSize == 0 ? 0 : result.RowCount / pageSize;
-        result.PageCount = pageCount;
-
-        var skip = (pageIndex - 1) * pageSize;
-
-        result.Queryable = query
-            .Select(selector)
-            .Skip(skip)
-            .Take(pageSize);
-
-        return result;
-    }
-    public static async Task<PagedResult<TReturn>> ApplyRequestAsync<TEntity, TReturn>(this IQueryable<TEntity> query, PagedRequest request, Expression<Func<TEntity, TReturn>> selector)
-        where TEntity : class
-        where TReturn : IDtoConfiguration<TEntity>, new()
-    {
-        var builder = new DtoBuilder<TEntity>();
-        var dto = new TReturn();
-        dto.Configure(builder);
-
-        return await query
-            .ApplyFilter<TEntity, TReturn>(builder, request.Filter)
-            .ApplySearch<TEntity, TReturn>(builder, request.Searches)
-            .ApplySort<TEntity, TReturn>(builder, request.OrderBy)
-            .GetPagedAsync(request.Page, request.Size, selector);
-    }
+    // public static async Task<PagedResult<TReturn>> GetPagedAsync<TEntity, TReturn>(this IQueryable<TEntity> query, int pageIndex, int pageSize, Expression<Func<TEntity, TReturn>> selector)
+    //     where TEntity : class
+    //     where TReturn : IDtoConfiguration<TEntity>, new()
+    // {
+    //     var result = new PagedResult<TReturn>();
+    //     result.CurrentPage = pageIndex;
+    //     result.PageSize = pageSize;
+    //     result.RowCount = await query.CountAsync();
+    //
+    //     var pageCount = pageSize == 0 ? 0 : result.RowCount / pageSize;
+    //     result.PageCount = pageCount;
+    //
+    //     var skip = (pageIndex - 1) * pageSize;
+    //
+    //     result.Queryable = query
+    //         .Select(selector)
+    //         .Skip(skip)
+    //         .Take(pageSize);
+    //
+    //     return result;
+    // }
+    // public static async Task<PagedResult<TReturn>> ApplyRequestAsync<TEntity, TReturn>(this IQueryable<TEntity> query, PagedRequest request, Expression<Func<TEntity, TReturn>> selector)
+    //     where TEntity : class
+    //     where TReturn : IDtoConfiguration<TEntity>, new()
+    // {
+    //     var builder = new DtoBuilder<TEntity>();
+    //     var dto = new TReturn();
+    //     dto.Configure(builder);
+    //
+    //     return await query
+    //         .ApplyFilter<TEntity, TReturn>(builder, request.Filter)
+    //         .ApplySearch<TEntity, TReturn>(builder, request.Searches)
+    //         .ApplySort<TEntity, TReturn>(builder, request.OrderBy)
+    //         .GetPagedAsync(request.Page, request.Size, selector);
+    // }
 }

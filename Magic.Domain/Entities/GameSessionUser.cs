@@ -1,9 +1,8 @@
-﻿namespace Magic.Domain.Entities
+﻿namespace Magic.Domain.Entities;
+
+public class GameSessionUser : BaseEntity<int>
 {
-    public class GameSessionUser : BaseEntity<int>
-    {
-        public Guid GameSessionId { get; set; }
-        public Guid UserId { get; set; }
+    public Guid GameSessionId { get; set; }
+    public Guid UserId { get; set; }
         
-    }
 }

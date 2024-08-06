@@ -1,11 +1,9 @@
 ﻿using Magic.Common.Models.Request;
 using Magic.Common.Models.Response;
-using Magic.DAL.Dto.Implementations;
-using Magic.Domain.Entities;
 
 namespace Magic.Service;
 
-public interface IUserService : IBaseEntityService<User, UserDto>
+public interface IUserService
 {
     Task<AuthResponse?> Login(TokenRequest token);
     Task<TokenResponse?> RefreshToken(string token);

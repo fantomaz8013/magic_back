@@ -15,16 +15,14 @@ public class GameSessionController : V1GameSessionControllerBase
         _gameSessionService = gameSessionService;
     }
 
-    [ActionName("gamesession")]
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<List<GameSessionResponse>>))]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> List()
     {
         var result = await _gameSessionService.GetAllGameSession();
         return Ok(result);
     }
 
-    [ActionName("gamesession/create")]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<bool>))]
     public async Task<IActionResult> Create([FromForm] CreateGameSessionRequest request)
@@ -33,7 +31,6 @@ public class GameSessionController : V1GameSessionControllerBase
         return Ok(result);
     }
 
-    [ActionName("gamesession/enter")]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<bool>))]
     public async Task<IActionResult> Enter([FromForm] EnterToGameSessionRequest request)
@@ -42,7 +39,6 @@ public class GameSessionController : V1GameSessionControllerBase
         return Ok(result);
     }
 
-    [ActionName("gamesession/kick")]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<bool>))]
     public async Task<IActionResult> Kick([FromForm] KickUserForGameSessionRequest request)
@@ -51,7 +47,6 @@ public class GameSessionController : V1GameSessionControllerBase
         return Ok(result);
     }
 
-    [ActionName("gamesession/leave")]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<bool>))]
     public async Task<IActionResult> Leave([FromForm] LeaveGameSessionRequest request)
@@ -60,7 +55,6 @@ public class GameSessionController : V1GameSessionControllerBase
         return Ok(result);
     }
 
-    [ActionName("gamesession/delete")]
     [HttpDelete]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<bool>))]
     public async Task<IActionResult> Delete([FromForm] DeleteGameSessionRequest request)

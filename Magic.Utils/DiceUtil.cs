@@ -1,5 +1,7 @@
 ﻿using Magic.Domain.Enums;
 
+namespace Magic.Utils;
+
 public static class DiceUtil
 {
     private static readonly Random rnd = new();

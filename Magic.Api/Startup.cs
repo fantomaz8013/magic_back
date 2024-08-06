@@ -1,13 +1,14 @@
 using Magic.Api.Controllers.Websockets;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Magic.Api.Extensions;
 using Magic.Common;
-using Magic.Service.Extensions;
 using Magic.DAL.Extensions;
+using Magic.Service.Extensions;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 namespace Magic.Api;
 
@@ -15,6 +16,7 @@ public class Startup
 {
     private readonly IConfiguration _configuration;
     private readonly string _dbConnectionString;
+    private const string WEBSOCKETS_PATH = "/ws";
 
     public Startup(IConfiguration configuration)
     {
@@ -27,10 +29,35 @@ public class Startup
         services.AddSingleton(_configuration);
         services.AddCustomDbContext(_dbConnectionString);
         services.AddControllers();
-        services.AddCustomApiVersion();
         services.AddCustomService();
-        services.AddCustomSwagger();
         services.AddCustomCors();
+        services.AddSwaggerGen(option =>
+        {
+            option.SwaggerDoc("v1", new OpenApiInfo { Title = "Magic API", Version = "v1" });
+            option.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+            {
+                In = ParameterLocation.Header,
+                Description = "Please enter a valid token",
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                BearerFormat = "JWT",
+                Scheme = JwtBearerDefaults.AuthenticationScheme
+            });
+            option.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = JwtBearerDefaults.AuthenticationScheme
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+        });
 
         #region Auth
 
@@ -76,7 +103,7 @@ public class Startup
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     }
 
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IApiVersionDescriptionProvider provider)
+    public void Configure(WebApplication app, IWebHostEnvironment env)
     {
         app.UseCustomCors();
         if (env.IsDevelopment())
@@ -84,9 +111,9 @@ public class Startup
             app.UseDeveloperExceptionPage();
         }
 
-        app.UseCustomSwagger(provider);
-        var builder = WebApplication.CreateBuilder();
         app.UseRouting();
+        app.UseSwagger();
+        app.UseSwaggerUI();
 
         #region Auth
 
@@ -98,7 +125,7 @@ public class Startup
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
-            endpoints.MapHub<GameSessionsHub>("/ws", options =>
+            endpoints.MapHub<GameSessionsHub>(WEBSOCKETS_PATH, options =>
                 {
                     options.Transports =
                         HttpTransportType.WebSockets |
@@ -109,11 +136,11 @@ public class Startup
         app.UseFileServer(new FileServerOptions
         {
             FileProvider = new PhysicalFileProvider(
-                Path.Combine(builder.Environment.ContentRootPath, "storage")),
+                Path.Combine(env.ContentRootPath, "storage")),
             RequestPath = "/storage",
             EnableDirectoryBrowsing = false
         });
-    }
 
-    private const string websocketsPath = "/ws";
+        app.UseSwaggerUI();
+    }
 }

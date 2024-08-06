@@ -7,27 +7,25 @@ using static Magic.Api.Configure.ModelStateFilter;
 
 namespace Magic.Api.Controller.Token.V1;
 
-public class UserRegisterController : V1TokenControllerBase
+public class TokenController : V1TokenControllerBase
 {
     protected readonly IUserService _userService;
-    public UserRegisterController(IUserService userService)
+    public TokenController(IUserService userService)
     {
         _userService = userService;
     }
 
-    [ActionName("token")]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<AuthResponse>))]
-    public async Task<IActionResult> Token([FromBody] TokenRequest token)
+    public async Task<IActionResult> ByLogin([FromBody] TokenRequest token)
     {
         var tokenResponse = await _userService.Login(token);
         return Ok(tokenResponse);
     }
 
-    [ActionName("token/refresh")]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<TokenResponse>))]
-    public async Task<IActionResult> Token([FromBody] string token)
+    public async Task<IActionResult> Refresh([FromBody] string token)
     {
         var tokenResponse = await _userService.RefreshToken(token);
         return Ok(tokenResponse);
