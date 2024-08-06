@@ -98,11 +98,19 @@ public class GameSessionsHub : Hub
         var playerInfos = gameSession
             .Users
             .Append(gameSession.CreatorUser)
-            .Select(u => new
-                { u.Id, u.Login, IsMaster = gameSession.CreatorUserId == u.Id, LockedCharacterId = locks?[u.Id] })
+            .Select(u =>
+                {
+                    Guid? lockedCharacterId = null;
+                    if (locks != null && locks.TryGetValue(u.Id, out var value))
+                        lockedCharacterId = value;
+                    return new PlayerInfo(u.Id, u.Login, gameSession.CreatorUserId == u.Id, lockedCharacterId);
+                }
+            )
             .ToArray();
         await Clients.Caller.SendAsync("playerInfoReceived", playerInfos);
     }
+
+    public record PlayerInfo(Guid Id, string Login, bool IsMaster, Guid? LockedCharacterId);
 
     public async Task LockCharacter(Guid characterId)
     {
@@ -129,8 +137,12 @@ public class GameSessionsHub : Hub
         LockedCharacters.Unlock(gameSessionId, callerUser.Id);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameSessionId);
         //todo FRONT
-        await CreateServerMessage($"Player \"{callerUser.Login}\" disconnected");
-        await Clients.Group(gameSessionId).SendAsync("playerLeft", callerUser.Id);
+        gameSessionId = ConnectedUsers.GetGameSessionId(Context.ConnectionId);
+        if (gameSessionId is not null)
+        {
+            await CreateServerMessage($"Player \"{callerUser.Login}\" disconnected");
+            await Clients.Group(gameSessionId).SendAsync("playerLeft", callerUser.Id);
+        }
 
         // if (GameSessions.IsGameSessionEmpty(gameSessionId))
         //     chatHistory.ClearHistory(gameSessionId);

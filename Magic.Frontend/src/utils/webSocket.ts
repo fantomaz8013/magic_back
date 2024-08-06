@@ -36,6 +36,7 @@ export enum WSActions {
     joinGameSession = 'JoinGameSession',
     leaveGameSession = 'LeaveGameSession',
     rollDice = 'RollDice',
+    lockCharacter = 'LockCharacter',
 }
 
 export enum WSEvents {
