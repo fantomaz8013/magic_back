@@ -133,16 +133,11 @@ public class GameSessionsHub : Hub
             throw new HubException("User not connected to this session");
         }
 
+        await CreateServerMessage($"Player \"{callerUser.Login}\" disconnected");
         ConnectedUsers.Disconnect(gameSessionId, callerUser.Id);
         LockedCharacters.Unlock(gameSessionId, callerUser.Id);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameSessionId);
-        //todo FRONT
-        gameSessionId = ConnectedUsers.GetGameSessionId(Context.ConnectionId);
-        if (gameSessionId is not null)
-        {
-            await CreateServerMessage($"Player \"{callerUser.Login}\" disconnected");
-            await Clients.Group(gameSessionId).SendAsync("playerLeft", callerUser.Id);
-        }
+        await Clients.Group(gameSessionId).SendAsync("playerLeft", callerUser.Id);
 
         // if (GameSessions.IsGameSessionEmpty(gameSessionId))
         //     chatHistory.ClearHistory(gameSessionId);
@@ -239,4 +234,11 @@ public class LockedCharacters
             ? connectedUsers.ToDictionary()
             : null;
     }
+    
+    // public bool IsCharacterLocked(string gameSessionId)
+    // {
+    //     return _connections.TryGetValue(gameSessionId, out var connectedUsers)
+    //         ? connectedUsers.TryGetValue()
+    //         : false;
+    // }
 }
