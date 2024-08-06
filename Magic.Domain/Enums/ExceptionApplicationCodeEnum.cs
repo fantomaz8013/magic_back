@@ -34,4 +34,8 @@ public enum ExceptionApplicationCodeEnum
     /// Ошибка доступа
     /// </summary>
     AccessError = 8,
+    /// <summary>
+    /// Игра запущена
+    /// </summary>
+    GameStarted = 9,
 }

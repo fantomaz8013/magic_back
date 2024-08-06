@@ -65,7 +65,6 @@ public class GameSessionsHub : Hub
     {
         var gameSession = await _gameSessionService.GetById(new Guid(gameSessionId));
 
-
         if (gameSession is null)
         {
             throw new HubException("GameSession doesn't exists");

@@ -10,7 +10,13 @@ public class ModelStateFilter : IActionFilter
     public void OnActionExecuting(ActionExecutingContext context)
     {
         if (context.ModelState.IsValid) return;
-        var errorMessage = string.Join(Environment.NewLine, context.ModelState.Values.SelectMany(v => v.Errors).Select(m => m.ErrorMessage).ToArray());
+        var errorMessage = string.Join(Environment.NewLine,
+            context.ModelState
+                .Values
+                .SelectMany(v => v.Errors)
+                .Select(m => m.ErrorMessage)
+                .ToArray()
+        );
         context.Result = new OkObjectResult(ResponseData<string>.Error(errorMessage));
     }
 
@@ -20,17 +26,17 @@ public class ModelStateFilter : IActionFilter
         if (context.Exception != null)
         {
             int? errorCode = null;
-            if (context.Exception is ExceptionWithApplicationCode)
+            if (context.Exception is ExceptionWithApplicationCode exep)
             {
-                var exep = (ExceptionWithApplicationCode)context.Exception;
                 errorCode = exep.ErrorCode;
             }
+
             context.Result = new OkObjectResult(ResponseData<string>.Error(context.Exception.Message, errorCode));
             context.Exception = null;
         }
-        else if (context.Result is OkObjectResult && !isCleanResponse)
+        else if (context.Result is OkObjectResult result && !isCleanResponse)
         {
-            context.Result = new OkObjectResult(ResponseData<object>.Success(((OkObjectResult)context.Result).Value));
+            context.Result = new OkObjectResult(ResponseData<object>.Success(result.Value));
         }
     }
 
@@ -49,6 +55,7 @@ public class ModelStateFilter : IActionFilter
                 IsSuccess = true
             };
         }
+
         public static ResponseData<T> Error(string error, int? errorCode = null)
         {
             return new ResponseData<T>

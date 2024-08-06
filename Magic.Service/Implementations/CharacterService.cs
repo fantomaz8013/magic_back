@@ -1,4 +1,5 @@
-﻿using Magic.DAL;
+﻿using Magic.Common.Models.Response;
+using Magic.DAL;
 using Magic.Domain.Entities;
 using Magic.Service.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -9,8 +10,8 @@ public class CharacterService : ICharacterService
 {
     protected readonly DataBaseContext _dbContext;
 
-    public CharacterService(DataBaseContext dbContext) 
-    { 
+    public CharacterService(DataBaseContext dbContext)
+    {
         _dbContext = dbContext;
     }
 
@@ -26,6 +27,34 @@ public class CharacterService : ICharacterService
         return races;
     }
 
+    public async Task<List<CharacterTemplateResponse>> GetCharacterTemplates()
+    {
+        var templates = await _dbContext
+            .CharacterTemplates
+            .Include(x => x.CharacterRace)
+            .Include(x => x.CharacterClass)
+            .ThenInclude(c => c.CharacterCharacteristic)
+            .ToListAsync();
+        var requiredAbilities = templates
+            .SelectMany(t => t.AbilitieIds)
+            .Distinct()
+            .ToList();
+        var abilities = await _dbContext
+            .CharacterAbilities
+            .Include(a => a.CasterCharacterCharacteristic)
+            .Include(a => a.TargetCharacterCharacteristic)
+            .Where(a => requiredAbilities.Contains(a.Id))
+            .ToDictionaryAsync(ability => ability.Id, ability => ability);
+
+        return templates
+            .Select(t =>
+                new CharacterTemplateResponse(t, t.AbilitieIds
+                    .Select(aId => abilities[aId])
+                    .ToArray())
+            )
+            .ToList();
+    }
+
     public async Task<List<CharacterClass>> GetClasses()
     {
         var classes = await _dbContext.CharacterClasses
@@ -39,5 +68,4 @@ public class CharacterService : ICharacterService
         var avatars = await _dbContext.CharacterAvatars.ToListAsync();
         return avatars;
     }
-
 }

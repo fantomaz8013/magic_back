@@ -1,36 +1,35 @@
-import React, {useState} from "react";
-import {ChatBox, ReceiverMessage, SenderMessage} from "mui-chat-box";
-import {Avatar} from "@mui/material";
-import {SignalRProps, useSignalR, WSActions, WSEvents} from "../../utils/webSocket";
-import Button from "@mui/material/Button";
-import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
-import {useGetCurrentUserQuery} from "../../redux/toolkit/api/userApi";
+import React, {useEffect, useState} from "react";
+import * as signalR from "@microsoft/signalr";
 import {
     BaseGameSessionMessage, ChatGameSessionMessage, CubeTypeEnum, DiceGameSessionMessage,
     GameSessionMessageTypeEnum,
-    ServerGameSessionMessage,
-} from "../../models/websocket/ChatMessage";
+    ServerGameSessionMessage
+} from "../../../models/websocket/ChatMessage";
+import {ChatBox, ReceiverMessage, SenderMessage} from "mui-chat-box";
+import Box from "@mui/material/Box";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import {Avatar} from "@mui/material";
+import {useGetCurrentUserQuery} from "../../../redux/toolkit/api/userApi";
+import {WSActions, WSEvents} from "../../../utils/webSocket";
 import Typography from "@mui/material/Typography";
-import Dice from "../dice/Dice";
 
 export interface ChatProps {
-    gameSessionId: string;
+    ws: signalR.HubConnection;
 }
 
 export default function Chat(props: ChatProps) {
-    const {data: currentUser} = useGetCurrentUserQuery();
-    const ws = useSignalR(createSignalRConfig());
     const [currentMessage, setCurrentMessage] = useState<string>('');
     const [messages, setMessages] = useState<BaseGameSessionMessage[]>([]);
+    const {data: currentUser, } = useGetCurrentUserQuery();
+
+    useEffect(()=>{
+        props.ws.on(WSEvents.messageReceived, messageReceived);
+        props.ws.on(WSEvents.historyReceived, historyReceived);
+    },[]);
 
     return (
-        <Box sx={{
-            marginTop: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-        }}>
+        <>
             <Typography mb={4} component="h1" variant="h5">
                 Save Halsin player's chat
             </Typography>
@@ -48,14 +47,9 @@ export default function Chat(props: ChatProps) {
                     onChange={onMessageChange}
                 />
                 <Button onClick={sendMessage}>SEND</Button>
-                <Dice onDiceRoll={rollDice}/>
             </Box>
-        </Box>
+        </>
     );
-
-    async function rollDice() {
-        await ws.invoke(WSActions.rollDice, CubeTypeEnum.D6);
-    }
 
     function renderMessage(baseMessage: BaseGameSessionMessage) {
         let mes, login, isSender;
@@ -89,35 +83,19 @@ export default function Chat(props: ChatProps) {
         )
     }
 
-    function createSignalRConfig(): SignalRProps {
-        return {
-            beforeStart: (ws) => {
-                ws.on(WSEvents.messageReceived, messageReceived);
-                ws.on(WSEvents.historyReceived, historyReceived);
-            },
-            afterStart: async (ws) => {
-                await ws.invoke(WSActions.joinGameSession, props.gameSessionId);
-            },
-            beforeStop: async (ws) => {
-                await ws.invoke(WSActions.leaveGameSession, props.gameSessionId);
-            }
-        }
-    }
-
     function messageReceived(message: BaseGameSessionMessage) {
         setMessages(prevState => [...prevState, message]);
     }
 
     function historyReceived(newMessages: BaseGameSessionMessage[]) {
-        console.log(newMessages);
         setMessages(newMessages);
     }
 
     async function sendMessage() {
-        if (!ws || currentMessage.length === 0) return;
+        if (currentMessage.length === 0) return;
 
         setCurrentMessage('');
-        await ws.invoke('NewMessage', currentMessage);
+        await props.ws.invoke(WSActions.newMessage, currentMessage);
     }
 
     function onMessageChange(e: React.ChangeEvent<HTMLInputElement>) {
