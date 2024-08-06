@@ -30,7 +30,7 @@ export const refreshToken = createAsyncThunk(
 export const getToken = createAsyncThunk(
     `${slicePrefix}/getToken`,
     async (r: TokenRequest, {rejectWithValue}) => {
-        return await parseFetch(fetch(apiProxy + `token`, createRequestParams({...r})), rejectWithValue) as Promise<AuthResponse>
+        return await parseFetch(fetch(apiProxy + `token/byLogin`, createRequestParams({...r})), rejectWithValue) as Promise<AuthResponse>
     }
 );
 

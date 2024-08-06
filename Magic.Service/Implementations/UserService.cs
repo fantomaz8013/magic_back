@@ -33,9 +33,7 @@ public class UserService : IUserService
 
     public async Task<bool> UserExists(string login)
     {
-        if (await _dbContext.User.AnyAsync(x => x.Login == login))
-            return true;
-        return false;
+        return await _dbContext.User.AnyAsync(x => x.Login == login);
     }
 
     public async Task<TokenResponse?> Register(UserRequest user)
@@ -43,8 +41,7 @@ public class UserService : IUserService
         if (await UserExists(user.Login))
             throw new ExceptionWithApplicationCode("Login already exists", ExceptionApplicationCodeEnum.UserExist);
 
-        string passwordHash, passwordSalt;
-        CreatePasswordHash(user.Password, out passwordHash, out passwordSalt);
+        CreatePasswordHash(user.Password, out var passwordHash, out var passwordSalt);
 
         var newUser = new User
         {
@@ -110,10 +107,9 @@ public class UserService : IUserService
             return null!; // hint: это только для IDE
         }
 
-        if (user.IsBlocked)
-            return null;
-
-        return _jwtTokenService.CreateUserToken(user, date.Date);
+        return user.IsBlocked 
+            ? null 
+            : _jwtTokenService.CreateUserToken(user, date.Date);
     }
 
     public async Task<UserResponse?> CurrentUser()
@@ -123,12 +119,9 @@ public class UserService : IUserService
 
         var user = await _dbContext.User.FirstOrDefaultAsync(x => x.Id == userId);
 
-        if (user == null)
-            return null;
-        else
-        {
-            return new UserResponse(user.Name, user.Login, user.Email, user.PhoneNumber, userId.Value);
-        }
+        return user == null
+            ? null
+            : UserResponse.BuildResponse(user);
     }
 
 

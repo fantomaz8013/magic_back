@@ -1,7 +1,11 @@
-﻿using Magic.Domain.Enums;
+﻿using System.Text.Json.Serialization;
+using Magic.Domain.Enums;
 
 namespace Magic.Domain.Entities;
 
+[JsonDerivedType(typeof(ChatGameGameSessionMessage))]
+[JsonDerivedType(typeof(DiceGameSessionMessage))]
+[JsonDerivedType(typeof(ServerGameSessionMessage))]
 public abstract class BaseGameSessionMessage : BaseEntity<Guid>, IHasCreatedDate
 {
     public virtual GameSessionMessageTypeEnum GameSessionMessageTypeEnum { get; set; }

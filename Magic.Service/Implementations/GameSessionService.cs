@@ -141,7 +141,7 @@ public class GameSessionService : IGameSessionService
     {
         var userId = _userProvider.GetUserId();
         var gameSession = await GetGameSessions(request.GameSessionId);
-        var user = await _dbContext.User.FindAsync(userId);
+
 
         var gameSessionUser = await _dbContext.GameSessionUser
             .FirstOrDefaultAsync(x => x.GameSessionId == gameSession.Id && x.UserId == userId);

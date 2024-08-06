@@ -1,4 +1,5 @@
-﻿using Magic.DAL;
+﻿using Magic.Common.Models.Response;
+using Magic.DAL;
 using Magic.Domain.Entities;
 using Magic.Domain.Enums;
 using Magic.Service.Interfaces;
@@ -69,12 +70,29 @@ public class GameSessionMessageService : IGameSessionMessageService
             .FirstOrDefaultAsync(m => m.Id == rEntry.Entity.Id))!;
     }
 
-    public async Task<List<BaseGameSessionMessage>> GetMessages(Guid gameSessionId)
+    public async Task<List<BaseGameSessionMessageResponse>> GetMessages(Guid gameSessionId)
     {
-        return await _dbContext.GameSessionMessages
+        var messages = await _dbContext.GameSessionMessages
             .Include(m => (m as ChatGameGameSessionMessage).Author)
             .Where(g => g.GameSessionId == gameSessionId)
             .OrderBy(g => g.CreatedDate)
             .ToListAsync();
+
+        var responses = messages
+            .Select(m =>
+            {
+                return m switch
+                {
+                    ChatGameGameSessionMessage chatGameGameSessionMessage => ChatGameGameSessionMessageResponse
+                        .BuildResponse(chatGameGameSessionMessage) as BaseGameSessionMessageResponse,
+                    ServerGameSessionMessage serverGameSessionMessage => ServerGameSessionMessageResponse.BuildResponse(
+                        serverGameSessionMessage),
+                    DiceGameSessionMessage diceGameSessionMessage => DiceGameSessionMessageResponse.BuildResponse(
+                        diceGameSessionMessage),
+                    _ => throw new Exception("Message type not supported")
+                };
+            }).ToList();
+
+        return responses;
     }
 }

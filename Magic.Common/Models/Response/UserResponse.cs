@@ -1,4 +1,6 @@
-﻿namespace Magic.Common.Models.Response;
+﻿using Magic.Domain.Entities;
+
+namespace Magic.Common.Models.Response;
 
 public class UserResponse
 {
@@ -14,5 +16,10 @@ public class UserResponse
         Email = email;
         PhoneNumber = phoneNumber;
         Id = id;
+    }
+
+    public static UserResponse BuildResponse(User user)
+    {
+        return new UserResponse(user.Name, user.Login, user.Email, user.PhoneNumber, user.Id);
     }
 }

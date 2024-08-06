@@ -102,31 +102,6 @@ public class GameSessionsHub : Hub
 
         var messages = await _gameSessionMessageService.GetMessages(new Guid(gameSessionId));
 
-        // var list = new List<string>();
-        // foreach (var message in messages)
-        // {
-        //     switch (message.GameSessionMessageTypeEnum)
-        //     {
-        //         case GameSessionMessageTypeEnum.Server:
-        //             list.Add(JsonSerializer.Serialize(message as ServerGameSessionMessage));
-        //             break;
-        //         case GameSessionMessageTypeEnum.Chat:
-        //             list.Add(JsonSerializer.Serialize(message as ChatGameGameSessionMessage));
-        //             break;
-        //         case GameSessionMessageTypeEnum.Dice:
-        //             list.Add(JsonSerializer.Serialize(message as DiceGameSessionMessage));
-        //             break;
-        //         default:
-        //             throw new ArgumentOutOfRangeException();
-        //     }
-        // }
-
-        // var options = new JsonSerializerOptions
-        // {
-        //     WriteIndented = true,
-        // };
-        // var str = JsonSerializer.Serialize<object>(messages, options);
-
         if (messages.Count > 0)
             await Clients.Caller.SendAsync("historyReceived", messages);
     }

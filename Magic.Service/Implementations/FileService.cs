@@ -8,35 +8,30 @@ public class FileService : IFileService
     public bool DeleteFile(string path)
     {
         var fileName = Path.Combine(Environment.CurrentDirectory, path.Replace("/", "\\"));
-        if (File.Exists(fileName))
-        {
-            File.Delete(fileName);
-            return true;
-        }
-        return false;
+        if (!File.Exists(fileName)) return false;
+
+        File.Delete(fileName);
+
+        return true;
     }
 
     public async Task<string> UploadFile(IFormFile file)
     {
-        var path = "";
-        if (file.Length > 0)
+        if (file.Length <= 0) throw new Exception("Ошибка загрузки файла");
+
+        var path = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "storage/images"));
+        var newName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+        if (!Directory.Exists(path))
         {
-            path = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "storage/images"));
-            var newName = Guid.NewGuid().ToString() + System.IO.Path.GetExtension(file.FileName);
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-            using (var fileStream = new FileStream(Path.Combine(path, newName), FileMode.Create))
-            {
-                await file.CopyToAsync(fileStream);
-            }
+            Directory.CreateDirectory(path);
+        }
+
+        await using (var fileStream = new FileStream(Path.Combine(path, newName), FileMode.Create))
+        {
+            await file.CopyToAsync(fileStream);
+        }
                 
-            return "storage/images/" + newName;
-        }
-        else
-        {
-            throw new Exception("Ошибка загрузки файла");
-        }
+        return "storage/images/" + newName;
+
     }
 }

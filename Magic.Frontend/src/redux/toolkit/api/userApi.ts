@@ -10,7 +10,7 @@ export const userApi = createApi({
     baseQuery: fetchBaseQueryWithAuth(apiProxy + prefix),
     endpoints: (builder) => ({
         getCurrentUser: builder.query<UserResponse, void>({
-            query: () => ``,
+            query: () => `currentUser`,
         }),
         // updateCurrentUser: builder.query<UserResponse, UserUpdateRequest>({
         //     query: (params) => ({
