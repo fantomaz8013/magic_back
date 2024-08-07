@@ -132,7 +132,9 @@ export function useGameSessionWS(logsEnabled?: boolean) {
         state,
         unlockCharacter
     };
+
     socket = toReturn;
+
 
     return toReturn;
 

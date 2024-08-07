@@ -35,7 +35,16 @@ export default function GameSession() {
         }
     }, [gameSessionId, state])
 
-    return renderGameSessionPage();
+    return (
+        <Box sx={{
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+        }}>
+            {renderGameSessionPage()}
+        </Box>
+    )
 
     function renderGameSessionPage() {
         if (!gameSessionFullState || !gameSessionFullState.gameSessionInfo)
@@ -46,24 +55,14 @@ export default function GameSession() {
         switch (gameSessionFullState.gameSessionInfo.gameSessionStatus) {
             case GameSessionStatusTypeEnum.WaitingForStart:
                 return (
-                    <Box sx={{
-                        marginTop: 8,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                    }}>
+                    <>
                         <CharactersList/>
                         <Chat/>
-                    </Box>
+                    </>
                 );
             case GameSessionStatusTypeEnum.InGame:
                 return (
-                    <Box sx={{
-                        marginTop: 8,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                    }}>
+                    <>
                         НИХУЯ СЕ ИГРА НАЧАЛАСЬ
                         {gameSessionFullState.gameSessionInfo.characters?.map((c: GameSessionCharacter) => {
                             return (
@@ -72,7 +71,7 @@ export default function GameSession() {
                         })}
                         <Chat/>
                         <Dice/>
-                    </Box>
+                    </>
                 );
             case GameSessionStatusTypeEnum.Finished:
                 break;
