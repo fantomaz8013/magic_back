@@ -226,11 +226,11 @@ public class GameSessionsHub : Hub
         if (locks is null)
             throw new HubException("There is no locked characters, game can not be started");
 
-        var characters =
-            await _characterService.ChooseCharacters(
-                locks,
-                gameSessionId
-            );
+
+        await _characterService.ChooseCharacters(
+            locks,
+            gameSessionId
+        );
         LockedCharacters.UnlockByGameSession(gameSessionId);
         if (!await _gameSessionService.ChangeGameSessionStatus(gameSessionId, GameSessionStatusTypeEnum.InGame))
             throw new HubException("Couldn't start game");

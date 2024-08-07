@@ -5,12 +5,14 @@ import {devMode} from "../env";
 import {userApi} from "./toolkit/api/userApi";
 import {characterApi} from "./toolkit/api/characterApi";
 import {gameSessionSlice} from "./toolkit/slices/gameSessionSlice";
+import {gameSessionApi} from "./toolkit/api/gameSessionApi";
 
 export const rootReducer = combineReducers({
     auth: tokenSlice.reducer,
     gameSession: gameSessionSlice.reducer,
     [userApi.reducerPath]: userApi.reducer,
     [characterApi.reducerPath]: characterApi.reducer,
+    [gameSessionApi.reducerPath]: gameSessionApi.reducer,
 });
 
 export const store = configureStore({
@@ -19,7 +21,8 @@ export const store = configureStore({
         getDefaultMiddleware({immutableCheck: false})
             .concat([
                 userApi.middleware,
-                characterApi.middleware
+                characterApi.middleware,
+                gameSessionApi.middleware,
             ]),
     devTools: devMode,
 });

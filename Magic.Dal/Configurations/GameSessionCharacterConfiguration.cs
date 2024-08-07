@@ -44,7 +44,8 @@ public class GameSessionCharacterConfiguration : IEntityTypeConfiguration<GameSe
             .WithMany(x => x.GameSessionsCharacters);
 
         builder.PropertyWithUnderscore(x => x.GameSessionId);
-        builder.HasForeignKey(x => x.GameSession, x => x.GameSessionId);
+        builder.HasForeignKey(x => x.GameSession, x => x.GameSessionId)
+            .OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(x => x.GameSession);
 
 

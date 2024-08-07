@@ -1,4 +1,6 @@
-﻿namespace Magic.Common.Models.Response;
+﻿using Magic.Domain.Entities;
+
+namespace Magic.Common.Models.Response;
 
 public class GameSessionResponse
 {
@@ -8,13 +10,14 @@ public class GameSessionResponse
     public int MaxUserCount { get; set; }
     public Guid CreatorUserId { get; set; }
     public DateTime CreatedDate { get; set; }
-    public GameSessionResponse(Guid id, string title, string description, int maxUserCount, Guid creatorUserId, DateTime createdDate)
+
+    public GameSessionResponse(GameSession gameSession)
     {
-        Id = id;
-        Title = title;
-        Description = description;
-        MaxUserCount = maxUserCount;
-        CreatorUserId = creatorUserId;
-        CreatedDate = createdDate;
+        Id = gameSession.Id;
+        Title = gameSession.Title;
+        Description = gameSession.Description;
+        MaxUserCount = gameSession.MaxUserCount;
+        CreatorUserId = gameSession.CreatorUserId;
+        CreatedDate = gameSession.CreatedDate;
     }
 }

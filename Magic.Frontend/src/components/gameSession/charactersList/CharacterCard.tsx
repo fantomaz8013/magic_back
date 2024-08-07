@@ -21,13 +21,13 @@ export default function CharacterCard({template}: CharacterTemplateProps) {
     const {data: characteristics} = useGetCharacteristicsQuery();
 
     return (
-        <Card sx={{maxWidth: 350, height:'70%', overflow: 'hidden',overflowY: 'scroll'}}>
+        <Card sx={{maxWidth: 350, height: '70%'}}>
             <CardMedia
                 sx={{height: 150}}
                 image={template.avatarUrL}
                 title={template.name}
             />
-            <CardContent >
+            <CardContent sx={{overflow: 'hidden', display: 'flex-column', height: '75%', overflowY: 'auto'}}>
                 <Typography gutterBottom variant="h5" component="div">
                     {template.name}
                 </Typography>
@@ -39,7 +39,7 @@ export default function CharacterCard({template}: CharacterTemplateProps) {
                     <br/>
                     CLASS: {template.characterClass.title}
                     <br/>
-                    <Box sx={{display: 'flex', flexDirection: 'column' }}>
+                    <Box sx={{display: 'flex', flexDirection: 'column'}}>
                         {characteristics && characteristics.data && characteristics.data.map(renderCharacteristics)}
                     </Box>
                 </Typography>

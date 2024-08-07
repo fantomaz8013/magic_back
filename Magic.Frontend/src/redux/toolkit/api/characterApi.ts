@@ -2,7 +2,6 @@ import {createApi} from '@reduxjs/toolkit/query/react'
 import {fetchBaseQueryWithAuth} from "../utils/baseQueryWithReauth";
 import {apiProxy} from "../../../env";
 import {
-    CharacterCharacteristic,
     CharacterCharacteristicResponse,
     CharacterTemplateResponse
 } from "../../../models/response/characterTemplateResponse";

@@ -10,6 +10,7 @@ namespace Magic.Api.Controller.User.V1;
 public class GameSessionController : V1GameSessionControllerBase
 {
     protected readonly IGameSessionService _gameSessionService;
+
     public GameSessionController(IGameSessionService gameSessionService)
     {
         _gameSessionService = gameSessionService;
@@ -25,7 +26,7 @@ public class GameSessionController : V1GameSessionControllerBase
 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<bool>))]
-    public async Task<IActionResult> Create([FromForm] CreateGameSessionRequest request)
+    public async Task<IActionResult> Create([FromBody] CreateGameSessionRequest request)
     {
         var result = await _gameSessionService.Create(request);
         return Ok(result);
@@ -33,7 +34,7 @@ public class GameSessionController : V1GameSessionControllerBase
 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<bool>))]
-    public async Task<IActionResult> Enter([FromForm] EnterToGameSessionRequest request)
+    public async Task<IActionResult> Enter([FromBody] EnterToGameSessionRequest request)
     {
         var result = await _gameSessionService.Enter(request);
         return Ok(result);
@@ -57,7 +58,7 @@ public class GameSessionController : V1GameSessionControllerBase
 
     [HttpDelete]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<bool>))]
-    public async Task<IActionResult> Delete([FromForm] DeleteGameSessionRequest request)
+    public async Task<IActionResult> Delete([FromBody] DeleteGameSessionRequest request)
     {
         var result = await _gameSessionService.Delete(request);
         return Ok(result);

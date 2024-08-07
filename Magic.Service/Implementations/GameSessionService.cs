@@ -26,10 +26,10 @@ public class GameSessionService : IGameSessionService
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    public async Task<bool> Create(CreateGameSessionRequest request)
+    public async Task<GameSessionResponse> Create(CreateGameSessionRequest request)
     {
         var userId = _userProvider.GetUserId();
-        await _dbContext.GameSessions.AddAsync(new GameSession
+        var entity = await _dbContext.GameSessions.AddAsync(new GameSession
         {
             Title = request.Title,
             Description = request.Description,
@@ -42,7 +42,7 @@ public class GameSessionService : IGameSessionService
 
         await _dbContext.SaveChangesAsync();
 
-        return true;
+        return new GameSessionResponse(entity.Entity);
     }
 
     /// <summary>
@@ -76,6 +76,13 @@ public class GameSessionService : IGameSessionService
     {
         var userId = _userProvider.GetUserId();
         var gameSession = await GetGameSessionById(request.GameSessionId);
+        
+        var user = await _dbContext.User.FindAsync(userId);
+
+        if (gameSession.Users.Contains(user!))
+        {
+            return true;
+        }
 
         if (gameSession.CreatorUserId == userId)
         {
@@ -88,19 +95,9 @@ public class GameSessionService : IGameSessionService
             throw new ExceptionWithApplicationCode("Нельзя войти в игровую сессию, if game already started",
                 ExceptionApplicationCodeEnum.GameStarted);
         }
-
-        var user = await _dbContext.User.FindAsync(userId);
-
-        if (gameSession.Users.Contains(user!))
-        {
-            throw new ExceptionWithApplicationCode("Вы уже находитесь в этой игровой сессии",
-                ExceptionApplicationCodeEnum.UserInGameSession);
-        }
-
+        
         gameSession.Users.Add(user!);
-
         _dbContext.Update(gameSession);
-
         await _dbContext.SaveChangesAsync();
 
         return true;
@@ -200,14 +197,7 @@ public class GameSessionService : IGameSessionService
     public async Task<List<GameSessionResponse>> GetAllGameSession()
     {
         var gameSession = await _dbContext.GameSessions
-            .Select(x => new GameSessionResponse(
-                x.Id,
-                x.Title,
-                x.Description,
-                x.MaxUserCount,
-                x.CreatorUserId,
-                x.CreatedDate
-            ))
+            .Select(x => new GameSessionResponse(x))
             .ToListAsync();
 
         return gameSession;

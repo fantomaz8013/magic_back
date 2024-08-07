@@ -7,7 +7,10 @@ import {GameSessionInfo} from "../models/websocket/gameStartedInfo";
 import {BaseGameSessionMessage, CubeTypeEnum} from "../models/websocket/ChatMessage";
 import {PlayerInfo} from "../components/gameSession";
 import {
-    addMessage, characterLocked, characterUnlocked, playerLeft,
+    addMessage,
+    characterLocked,
+    characterUnlocked,
+    playerLeft,
     setGameSessionInfo,
     setMessages,
     setPlayerInfos

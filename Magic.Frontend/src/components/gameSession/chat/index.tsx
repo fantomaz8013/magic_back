@@ -24,17 +24,17 @@ export default function Chat() {
 
     useEffect(() => {
         if (scrollRef.current) {
-            scrollRef.current.scrollIntoView({ behavior: "smooth" });
+            (scrollRef.current?.parentNode as HTMLElement).scrollTop = scrollRef.current.offsetTop;
         }
     }, [messages]);
 
     return (
         <Box>
             <Typography mb={4} component="h1" variant="h5">
-                Save Halsin player's chat
+                Player's chat
             </Typography>
-            <Box sx={{height: 300, overflowY: 'scroll'}} >
-                <ChatBox >
+            <Box sx={{height: 300, overflowY: 'scroll'}}>
+                <ChatBox>
                     {messages.map(renderMessage)}
                 </ChatBox>
                 <div ref={scrollRef}></div>

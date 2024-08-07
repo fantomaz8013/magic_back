@@ -12,7 +12,7 @@ public class BaseGameSessionMessageConfiguration : IEntityTypeConfiguration<Base
     {
         builder.HasTableNameUnderscoreStyle("GameSessionMessages");
         builder.HasBaseEntityGuid();
-        
+
         builder
             .HasDiscriminator(x => x.GameSessionMessageTypeEnum)
             .HasValue<ServerGameSessionMessage>(GameSessionMessageTypeEnum.Server)
@@ -25,7 +25,8 @@ public class BaseGameSessionMessageConfiguration : IEntityTypeConfiguration<Base
             .HasConversion<int>();
 
         builder.PropertyWithUnderscore(x => x.GameSessionId);
-        builder.HasForeignKey(x => x.GameSession, x => x.GameSessionId);
+        builder.HasForeignKey(x => x.GameSession, x => x.GameSessionId)
+            .OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(x => x.GameSession);
     }
 }

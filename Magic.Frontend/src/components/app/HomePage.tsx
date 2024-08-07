@@ -8,13 +8,24 @@ import {Card, CardActions, CardContent} from "@mui/material";
 import Button from "@mui/material/Button";
 import paths from "../../consts/paths";
 import * as React from "react";
-import {useEffect, useState} from "react";
-import TextField from "@mui/material/TextField";
+import {useEffect} from "react";
+import {
+    useCreateMutation,
+    useDeleteRequestMutation,
+    useEnterMutation,
+    useListQuery
+} from "../../redux/toolkit/api/gameSessionApi";
+import {GameSessionResponse} from "../../models/response/gameSessionResponse";
+import {useGetCurrentUserQuery} from "../../redux/toolkit/api/userApi";
 
 export default function HomePage() {
     const navigate = useNavigate();
     const location = useLocation();
-    const [gameSessionId, setGameSessionId] = useState('945da2d0-a0ac-4257-9f9e-10b31e3955d3');
+    const {data: list} = useListQuery();
+    const [enterSession] = useEnterMutation();
+    const [createSession] = useCreateMutation();
+    const [deleteRequest] = useDeleteRequestMutation();
+    const {data: currentUser} = useGetCurrentUserQuery();
 
     useEffect(() => {
         if (location.pathname !== paths.home) {
@@ -59,21 +70,77 @@ export default function HomePage() {
                         </Typography>
                     </CardContent>
                     <CardActions>
-                        <Button disabled={gameSessionId.length !== 36} onClick={onStartClick} size="small">
+                        <Button onClick={onCreateClick} size="small">
                             Save Halsin!
                         </Button>
-                        <TextField value={gameSessionId} onChange={onGameSessionIdChange} type={'text'}/>
                     </CardActions>
                 </Card>
             </Grid>
+
+            {list?.data?.map((r: GameSessionResponse) => (
+                <Grid item xs={12}>
+                    <Card>
+                        <CardContent>
+                            <Typography variant="h5" component="div">
+                                {r.title}
+                            </Typography>
+                            <Typography sx={{mb: 1.5}} color="text.secondary">
+                                For {r.maxUserCount} player(s)
+                            </Typography>
+                            <Typography variant="body2">
+                                {r.description}
+                            </Typography>
+                        </CardContent>
+                        <CardActions>
+
+                            {
+                                currentUser?.data?.id === r.creatorUserId
+                                    ? <>
+                                        <Button id={r.id} onClick={onJoinClick} size="small">
+                                            JOIN
+                                        </Button>
+                                        <Button id={r.id} onClick={onDeleteClick} size="small">
+                                            DELETE
+                                        </Button>
+                                    </>
+                                    : <Button id={r.id} onClick={onAskToJoinClick} size="small">
+                                        ASK TO JOIN
+                                    </Button>
+                            }
+                        </CardActions>
+                    </Card>
+                </Grid>
+            ))}
         </Grid>
     );
 
-    function onGameSessionIdChange(e: React.ChangeEvent<HTMLInputElement>) {
-        setGameSessionId(e.target.value);
+    function onAskToJoinClick(e: React.MouseEvent<HTMLButtonElement>) {
+        const gameSessionId = e.currentTarget.id;
+        enterSession({gameSessionId})
+            .then(r => {
+                r.data?.data && navigate(`${paths.game}/${gameSessionId}`);
+            })
     }
 
-    function onStartClick() {
+    function onJoinClick(e: React.MouseEvent<HTMLButtonElement>) {
+        const gameSessionId = e.currentTarget.id;
         navigate(`${paths.game}/${gameSessionId}`);
+    }
+
+    function onDeleteClick(e: React.MouseEvent<HTMLButtonElement>) {
+        const gameSessionId = e.currentTarget.id;
+        deleteRequest({gameSessionId});
+    }
+
+    function onCreateClick() {
+        createSession({
+            startDt: new Date().toJSON(),
+            title: 'Save Halsin!',
+            description: 'default game',
+            maxUserCount: 4
+        }).then(r => {
+            if (r.data?.isSuccess)
+                navigate(`${paths.game}/${r.data!.data!.id}`);
+        })
     }
 }
