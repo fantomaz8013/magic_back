@@ -10,6 +10,7 @@ import Chat from "./chat";
 import CharacterCards from "./charactersList";
 import {useGetCharacteristicsQuery, useGetCharacterTemplatesQuery} from "../../redux/toolkit/api/characterApi";
 import Button from "@mui/material/Button";
+import {useGetCurrentUserQuery} from "../../redux/toolkit/api/userApi";
 
 export interface GameSessionProps {
     gameSessionId: string;
@@ -25,6 +26,7 @@ export interface PlayerInfo {
 export default function GameSession(props: GameSessionProps) {
     const ws = useSignalR(createSignalRConfig());
     const {data: characterTemplates} = useGetCharacterTemplatesQuery();
+    const {data: currentUser} = useGetCurrentUserQuery();
     const {data: characteristics} = useGetCharacteristicsQuery();
     const [playerInfos, setPlayerInfos] = useState<Record<string, PlayerInfo>>();
 
@@ -37,18 +39,29 @@ export default function GameSession(props: GameSessionProps) {
         }}>
             <Grid container spacing={10} sx={{maxWidth: '100%'}}>
                 {
-                    playerInfos && characteristics?.data && characterTemplates?.data?.map(t => {
-                        const isLocked = Object
+                    currentUser && currentUser.data && playerInfos && characteristics?.data && characterTemplates?.data?.map(t => {
+                        const lockInfo = Object
                             .values(playerInfos)
                             .filter(p => p.lockedCharacterId === t.id)
                             ?.[0];
+                        const isLocked = lockInfo && lockInfo.id !== currentUser.data!.id;
+                        const text = lockInfo
+                            ? isLocked
+                                ? `LOCKED BY ${lockInfo.login}`
+                                : `UNLOCK`
+                            : `LOCK`
+                        const lockFunc = lockInfo
+                            ? isLocked
+                                ? lockCharacter
+                                : unlockCharacter
+                            : lockCharacter
                         return (
                             <Grid key={t.name} xs={3}>
                                 <CharacterCards template={t} characteristics={characteristics.data!}/>
                                 <Button
-                                    disabled={!!isLocked} id={t.id} sx={{marginTop: 4,}}
-                                    onClick={lockCharacter}>
-                                    LOCK{isLocked && `ED BY ${isLocked.login}`}
+                                    disabled={isLocked} id={t.id} sx={{marginTop: 4,}}
+                                    onClick={lockFunc}>
+                                    {text}
                                 </Button>
                             </Grid>
                         );
@@ -64,6 +77,10 @@ export default function GameSession(props: GameSessionProps) {
         await ws.invoke(WSActions.lockCharacter, e.currentTarget.id)
     }
 
+    async function unlockCharacter(e: React.MouseEvent<HTMLButtonElement>) {
+        await ws.invoke(WSActions.unlockCharacter)
+    }
+
     async function rollDice() {
         await ws.invoke(WSActions.rollDice, CubeTypeEnum.D6);
     }
@@ -73,6 +90,7 @@ export default function GameSession(props: GameSessionProps) {
             beforeStart: (ws) => {
                 ws.on(WSEvents.playerInfoReceived, playerInfoReceived);
                 ws.on(WSEvents.characterLocked, characterLocked);
+                ws.on(WSEvents.characterUnlocked, characterUnlocked);
                 ws.on(WSEvents.playerLeft, playerLeft);
             },
             afterStart: async (ws) => {
@@ -81,6 +99,7 @@ export default function GameSession(props: GameSessionProps) {
             beforeStop: async (ws) => {
                 ws.off(WSEvents.playerInfoReceived);
                 ws.off(WSEvents.characterLocked);
+                ws.off(WSEvents.characterUnlocked);
                 ws.off(WSEvents.playerLeft);
                 await ws.invoke(WSActions.leaveGameSession);
             }
@@ -100,6 +119,15 @@ export default function GameSession(props: GameSessionProps) {
             const newState = {...prevState} || {};
             newState[userId] = {...newState[userId], lockedCharacterId: lockedCharacterTemplateId};
             console.log(WSEvents.characterLocked, newState);
+            return newState;
+        });
+    }
+
+    function characterUnlocked(userId: string) {
+        setPlayerInfos(prevState => {
+            const newState = {...prevState} || {};
+            newState[userId] = {...newState[userId], lockedCharacterId: null};
+            console.log(WSEvents.characterUnlocked, newState);
             return newState;
         });
     }

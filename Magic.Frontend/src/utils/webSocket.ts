@@ -37,12 +37,14 @@ export enum WSActions {
     leaveGameSession = 'LeaveGameSession',
     rollDice = 'RollDice',
     lockCharacter = 'LockCharacter',
+    unlockCharacter = 'UnlockCharacter',
 }
 
 export enum WSEvents {
     historyReceived = 'historyReceived',
     messageReceived = 'messageReceived',
     characterLocked = 'characterLocked',
+    characterUnlocked = 'characterUnlocked',
     playerLeft = 'playerLeft',
     playerInfoReceived = 'playerInfoReceived',
 }

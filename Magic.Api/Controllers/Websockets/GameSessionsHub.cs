@@ -141,13 +141,26 @@ public class GameSessionsHub : Hub
         if (LockedCharacters.IsCharacterLocked(gameSessionId, characterId))
             throw new HubException("Character already locked!");
 
-        await Lock_Internal(gameSessionId, caller.Id, characterId);
+        await LockCharacter_Internal(gameSessionId, caller.Id, characterId);
     }
 
-    private async Task Lock_Internal(Guid gameSessionId, Guid callerUserId, Guid characterId)
+    private async Task LockCharacter_Internal(Guid gameSessionId, Guid callerUserId, Guid characterId)
     {
         LockedCharacters.Lock(gameSessionId, callerUserId, characterId);
         await Clients.Group(gameSessionId.ToString()).SendAsync(Events.CharacterLocked, callerUserId, characterId);
+    }
+
+    public async Task UnlockCharacter()
+    {
+        var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
+
+        await UnlockCharacter_Internal(gameSessionId, caller.Id);
+    }
+
+    private async Task UnlockCharacter_Internal(Guid gameSessionId, Guid callerUserId)
+    {
+        LockedCharacters.Unlock(gameSessionId, callerUserId);
+        await Clients.Group(gameSessionId.ToString()).SendAsync(Events.CharacterUnlocked, callerUserId);
     }
 
     public async Task LeaveGameSession()
