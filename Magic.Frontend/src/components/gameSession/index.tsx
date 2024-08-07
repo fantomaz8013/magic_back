@@ -1,9 +1,11 @@
 import React, {useEffect} from "react";
 import {useGameSessionWS} from "../../utils/webSocket";
 import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
 import Dice from "../dice/Dice";
 import Chat from "./chat";
 import CharactersList from "./charactersList/CharactersList";
+import CharacterLeftMenu from "./charactersList/CharacterLeftMenu";
 import {useParams} from "react-router-dom";
 import {LinearProgress} from "@mui/material";
 import {GameSessionStatusTypeEnum} from "../../models/websocket/gameSessionStatus";
@@ -57,20 +59,56 @@ export default function GameSession() {
                 return (
                     <>
                         <CharactersList/>
-                        <Chat/>
+                        <Box sx={{
+                            width: '95%',
+                            display: 'flex',
+                            flexDirection: ' row-reverse',
+                        }}>
+                            <Chat/>
+                        </Box>
                     </>
                 );
             case GameSessionStatusTypeEnum.InGame:
                 return (
                     <>
-                        НИХУЯ СЕ ИГРА НАЧАЛАСЬ
-                        {gameSessionFullState.gameSessionInfo.characters?.map((c: GameSessionCharacter) => {
-                            return (
-                                <CharacterCard key={c.id} template={{...c, name: `${c.name} (${c.ownerId})`}}/>
-                            );
-                        })}
-                        <Chat/>
-                        <Dice/>
+                    <Grid container spacing={2}>
+                        <Grid item xs={1}>
+                            <Box sx={{display: 'flex', flexDirection: 'column'}}>
+                                {gameSessionFullState.gameSessionInfo.characters?.map((c: GameSessionCharacter) => {
+                                    return (
+                                        <CharacterLeftMenu key={c.id} template={{...c, name: `${c.name} (${c.ownerId})`}}/>
+                                    );
+                                })}
+                            </Box>
+                        </Grid>
+                        <Grid item xs={11}>
+                            <Box sx={{
+                                height: '85vh',
+                                display: 'flex',
+                                alignItems: 'end'
+                            }}>
+                                <Grid container>
+                                    <Grid item xs={1} sx={{
+                                        display: 'flex',
+                                        alignItems: 'end'
+                                    }}>
+                                        <Box >
+                                            <Dice/>
+                                        </Box>
+                                    </Grid>
+                                    <Grid item xs={11}>
+                                        <Box sx={{
+                                            width: '95%',
+                                            display: 'flex',
+                                            flexDirection: ' row-reverse',
+                                        }}>
+                                            <Chat/>
+                                        </Box>
+                                    </Grid>
+                                </Grid>
+                            </Box>
+                        </Grid>
+                    </Grid>
                     </>
                 );
             case GameSessionStatusTypeEnum.Finished:

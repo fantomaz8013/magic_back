@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import {
     BaseGameSessionMessage, ChatGameSessionMessage, CubeTypeEnum, DiceGameSessionMessage,
     GameSessionMessageTypeEnum,
@@ -17,18 +17,28 @@ import {socket} from "../../../utils/webSocket";
 
 
 export default function Chat() {
+    const scrollRef = useRef<HTMLDivElement | null>(null);
     const [currentMessage, setCurrentMessage] = useState<string>('');
     const messages = useSelector((state: RootState) => state.gameSession.messages)
     const {data: currentUser,} = useGetCurrentUserQuery();
+
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [messages]);
 
     return (
         <Box>
             <Typography mb={4} component="h1" variant="h5">
                 Save Halsin player's chat
             </Typography>
-            <ChatBox>
-                {messages.map(renderMessage)}
-            </ChatBox>
+            <Box sx={{height: 300, overflowY: 'scroll'}} >
+                <ChatBox >
+                    {messages.map(renderMessage)}
+                </ChatBox>
+                <div ref={scrollRef}></div>
+            </Box>
             <Box>
                 <TextField
                     type={'text'}

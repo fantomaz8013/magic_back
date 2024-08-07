@@ -7,14 +7,6 @@ export default function Dice() {
     return (
         <Button
             onClick={_rollDice}
-            sx={{
-                position: 'fixed',
-                bottom: 0,
-                width: '25%',
-                height: 40,
-                right: '75%',
-                textAlign: 'center'
-            }}
         >
             ROLL
         </Button>

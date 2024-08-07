@@ -4,6 +4,7 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import InfoIcon from '@mui/icons-material/Info';
+import Box from "@mui/material/Box";
 import {
     CharacterCharacteristic,
     CharacterTemplate
@@ -20,13 +21,13 @@ export default function CharacterCard({template}: CharacterTemplateProps) {
     const {data: characteristics} = useGetCharacteristicsQuery();
 
     return (
-        <Card sx={{maxWidth: 350, height:'70%'}}>
+        <Card sx={{maxWidth: 350, height:'70%', overflow: 'hidden',overflowY: 'scroll'}}>
             <CardMedia
                 sx={{height: 150}}
                 image={template.avatarUrL}
                 title={template.name}
             />
-            <CardContent>
+            <CardContent >
                 <Typography gutterBottom variant="h5" component="div">
                     {template.name}
                 </Typography>
@@ -38,7 +39,9 @@ export default function CharacterCard({template}: CharacterTemplateProps) {
                     <br/>
                     CLASS: {template.characterClass.title}
                     <br/>
-                    {characteristics && characteristics.data && characteristics.data.map(renderCharacteristics)}
+                    <Box sx={{display: 'flex', flexDirection: 'column' }}>
+                        {characteristics && characteristics.data && characteristics.data.map(renderCharacteristics)}
+                    </Box>
                 </Typography>
             </CardContent>
         </Card>
@@ -46,12 +49,19 @@ export default function CharacterCard({template}: CharacterTemplateProps) {
 
     function renderCharacteristics(c: CharacterCharacteristic) {
         return (
-            <span key={c.id}>
-                {c.title}:{template.characteristics[c.id]}
-                <Tooltip title={c.description}>
-                    <InfoIcon fontSize={'small'}/>
-                </Tooltip>
-            </span>
+            <Box sx={{
+                display: 'flex',
+                justifyContent: 'space-between'
+            }} key={c.id}>
+                <Box>
+                    <Tooltip title={c.description}>
+                        <InfoIcon fontSize={'small'}/>
+                    </Tooltip>
+                    {c.title}:
+                </Box>
+                <Box>{template.characteristics[c.id]}</Box>
+
+            </Box>
         );
     }
 }
