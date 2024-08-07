@@ -56,7 +56,7 @@ public class GameSessionService : IGameSessionService
         if (gameSession == null)
         {
             throw new ExceptionWithApplicationCode("Игровая сессия не найдена",
-                Domain.Enums.ExceptionApplicationCodeEnum.GameSessionNotFound);
+                ExceptionApplicationCodeEnum.GameSessionNotFound);
         }
 
         _dbContext.GameSessions.Remove(gameSession!);
@@ -75,12 +75,12 @@ public class GameSessionService : IGameSessionService
     public async Task<bool> Enter(EnterToGameSessionRequest request)
     {
         var userId = _userProvider.GetUserId();
-        var gameSession = await GetGameSessions(request.GameSessionId);
+        var gameSession = await GetGameSessionById(request.GameSessionId);
 
         if (gameSession.CreatorUserId == userId)
         {
             throw new ExceptionWithApplicationCode("Нельзя войти в игровую сессию, если вы ее создатель",
-                Domain.Enums.ExceptionApplicationCodeEnum.CreatorIdGameSessionEqualsUserIdToEnter);
+                ExceptionApplicationCodeEnum.CreatorIdGameSessionEqualsUserIdToEnter);
         }
 
         if (gameSession.GameSessionStatus != GameSessionStatusTypeEnum.WaitingForStart)
@@ -94,7 +94,7 @@ public class GameSessionService : IGameSessionService
         if (gameSession.Users.Contains(user!))
         {
             throw new ExceptionWithApplicationCode("Вы уже находитесь в этой игровой сессии",
-                Domain.Enums.ExceptionApplicationCodeEnum.UserInGameSession);
+                ExceptionApplicationCodeEnum.UserInGameSession);
         }
 
         gameSession.Users.Add(user!);
@@ -115,13 +115,13 @@ public class GameSessionService : IGameSessionService
     public async Task<bool> Kick(KickUserForGameSessionRequest request)
     {
         var userId = _userProvider.GetUserId();
-        var gameSession = await GetGameSessions(request.GameSessionId);
+        var gameSession = await GetGameSessionById(request.GameSessionId);
 
         if (gameSession.CreatorUserId != userId)
         {
             throw new ExceptionWithApplicationCode(
                 "Ошибка доступа. Вы не можете выполнить это действие для данной игровой сессии",
-                Domain.Enums.ExceptionApplicationCodeEnum.AccessError);
+                ExceptionApplicationCodeEnum.AccessError);
         }
 
         var user = await _dbContext.User.Include(x => x.GameSessions).FirstOrDefaultAsync(x => x.Id == request.UserId);
@@ -129,7 +129,7 @@ public class GameSessionService : IGameSessionService
         if (user == null)
         {
             throw new ExceptionWithApplicationCode("Пользователь не найден",
-                Domain.Enums.ExceptionApplicationCodeEnum.UserNotExist);
+                ExceptionApplicationCodeEnum.UserNotExist);
         }
 
         var gameSessionUser = await _dbContext.GameSessionUser
@@ -138,7 +138,7 @@ public class GameSessionService : IGameSessionService
         if (gameSessionUser == null)
         {
             throw new ExceptionWithApplicationCode("Пользователь не найден",
-                Domain.Enums.ExceptionApplicationCodeEnum.UserNotExist);
+                ExceptionApplicationCodeEnum.UserNotExist);
         }
 
         _dbContext.GameSessionUser.Remove(gameSessionUser!);
@@ -156,7 +156,7 @@ public class GameSessionService : IGameSessionService
     public async Task<bool> Leave(LeaveGameSessionRequest request)
     {
         var userId = _userProvider.GetUserId();
-        var gameSession = await GetGameSessions(request.GameSessionId);
+        var gameSession = await GetGameSessionById(request.GameSessionId);
 
 
         var gameSessionUser = await _dbContext.GameSessionUser
@@ -165,7 +165,7 @@ public class GameSessionService : IGameSessionService
         if (gameSessionUser == null)
         {
             throw new ExceptionWithApplicationCode("Пользователь не найден",
-                Domain.Enums.ExceptionApplicationCodeEnum.UserNotExist);
+                ExceptionApplicationCodeEnum.UserNotExist);
         }
 
         _dbContext.GameSessionUser.Remove(gameSessionUser!);
@@ -175,18 +175,19 @@ public class GameSessionService : IGameSessionService
         return true;
     }
 
-    public async Task<GameSession> GetGameSessions(Guid gameSessionId)
+    public async Task<GameSession> GetGameSessionById(Guid gameSessionId)
     {
         var gameSession = await _dbContext.GameSessions
             .Include(x => x.CreatorUser)
             .Include(x => x.Users)
             .Where(x => x.Id == gameSessionId)
+            .AsTracking()
             .FirstOrDefaultAsync();
 
         if (gameSession == null)
         {
             throw new ExceptionWithApplicationCode("Игровая сессия не найдена",
-                Domain.Enums.ExceptionApplicationCodeEnum.GameSessionNotFound);
+                ExceptionApplicationCodeEnum.GameSessionNotFound);
         }
 
         return gameSession;
@@ -218,5 +219,22 @@ public class GameSessionService : IGameSessionService
             .Include(g => g.Users)
             .Include(g => g.CreatorUser)
             .FirstOrDefaultAsync(g => g.Id == gameSessionId);
+    }
+
+    public async Task<bool> ChangeGameSessionStatus(Guid gameSessionId, GameSessionStatusTypeEnum status)
+    {
+        var gameSession = await GetGameSessionById(gameSessionId);
+
+        if (gameSession.GameSessionStatus > status)
+        {
+            return false;
+        }
+
+        gameSession.GameSessionStatus = status;
+
+        _dbContext.Update(gameSession);
+        await _dbContext.SaveChangesAsync();
+
+        return true;
     }
 }

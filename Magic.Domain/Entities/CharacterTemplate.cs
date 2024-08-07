@@ -26,14 +26,3 @@ public class CharacterTemplate : BaseEntity<Guid>
     public Dictionary<int, int> Characteristics { get; set; }
 }
 
-public class GameSessionCharacter : CharacterTemplate
-{
-    public int CurrentHP { get; set; }
-    public int? CurrentShield { get; set; }
-    public int? PositionX { get; set; }
-    public int? PositionY { get; set; }
-    public Guid? OwnerId { get; set; }
-    public User? Owner { get; set; }
-    public Guid GameSessionId { get; set; }
-    public GameSession GameSession { get; set; }
-}

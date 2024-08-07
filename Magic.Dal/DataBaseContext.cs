@@ -23,6 +23,7 @@ public class DataBaseContext : DbContext
     public DbSet<ChatGameGameSessionMessage> ChatGameSessionMessages { get; set; }
     public DbSet<ServerGameSessionMessage> ServerSessionMessages { get; set; }
     public DbSet<DiceGameSessionMessage> DiceSessionMessages { get; set; }
+    public DbSet<GameSessionCharacter> GameSessionCharacters { get; set; }
 
     public DataBaseContext(DbContextOptions<DataBaseContext> options) : base(options) { }
 
@@ -44,5 +45,6 @@ public class DataBaseContext : DbContext
         modelBuilder.ApplyConfiguration(new ServerGameSessionMessageConfiguration());
         modelBuilder.ApplyConfiguration(new DiceGameSessionMessageConfiguration());
         modelBuilder.ApplyConfiguration(new CharacterTemplateConfiguration());
+        modelBuilder.ApplyConfiguration(new GameSessionCharacterConfiguration());
     }
 }

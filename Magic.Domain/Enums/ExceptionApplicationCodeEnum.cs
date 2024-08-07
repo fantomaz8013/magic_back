@@ -38,4 +38,8 @@ public enum ExceptionApplicationCodeEnum
     /// Игра запущена
     /// </summary>
     GameStarted = 9,
+    /// <summary>
+    /// Шаблон персонажа не существует
+    /// </summary>
+    CharacterTemplateNotExist = 10,
 }
