@@ -27,6 +27,37 @@ export const gameSessionSlice = createSlice({
         setPlayerInfos: (state, action) => {
             state.playerInfos = action.payload;
         },
+        playerLeft: (state, action) => {
+            const userId = action.payload;
+            state.playerInfos = {
+                ...state.playerInfos,
+                [userId]: {
+                    ...state.playerInfos[userId],
+                    lockedCharacterId: null,
+                    isOnline: null,
+                }
+            };
+        },
+        characterLocked: (state, action) => {
+            const {userId, lockedCharacterTemplateId} = action.payload;
+            state.playerInfos = {
+                ...state.playerInfos,
+                [userId]: {
+                    ...state.playerInfos[userId],
+                    lockedCharacterId: lockedCharacterTemplateId,
+                }
+            };
+        },
+        characterUnlocked: (state, action) => {
+            const userId = action.payload;
+            state.playerInfos = {
+                ...state.playerInfos,
+                [userId]: {
+                    ...state.playerInfos[userId],
+                    lockedCharacterId: null,
+                }
+            };
+        },
         setMessages: (state, action) => {
             state.messages = action.payload;
         },
@@ -36,4 +67,12 @@ export const gameSessionSlice = createSlice({
     },
 });
 
-export const {setGameSessionInfo, setPlayerInfos, setMessages, addMessage} = gameSessionSlice.actions;
+export const {
+    setGameSessionInfo,
+    setPlayerInfos,
+    setMessages,
+    addMessage,
+    playerLeft,
+    characterLocked,
+    characterUnlocked,
+} = gameSessionSlice.actions;

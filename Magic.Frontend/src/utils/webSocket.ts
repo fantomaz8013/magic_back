@@ -7,7 +7,7 @@ import {GameSessionInfo} from "../models/websocket/gameStartedInfo";
 import {BaseGameSessionMessage, CubeTypeEnum} from "../models/websocket/ChatMessage";
 import {PlayerInfo} from "../components/gameSession";
 import {
-    addMessage,
+    addMessage, characterLocked, characterUnlocked, playerLeft,
     setGameSessionInfo,
     setMessages,
     setPlayerInfos
@@ -98,17 +98,16 @@ export function useGameSessionWS(logsEnabled?: boolean) {
     logsEnabled ??= true;
     const {ws, state} = useSignalR(wsPath);
     const dispatch = useDispatch<AppDispatch>();
-    const gameSessionFullState = useSelector((state: RootState) => state.gameSession)
 
     useEffect(() => {
-        ws.on(WSEvents.gameSessionInfoReceived, gameSessionInfoReceived);
-        ws.on(WSEvents.gameStarted, gameStarted);
-        ws.on(WSEvents.messageReceived, messageReceived);
-        ws.on(WSEvents.historyReceived, historyReceived);
-        ws.on(WSEvents.playerInfoReceived, playerInfoReceived);
-        ws.on(WSEvents.characterLocked, characterLocked);
-        ws.on(WSEvents.characterUnlocked, characterUnlocked);
-        ws.on(WSEvents.playerLeft, playerLeft);
+        ws.on(WSEvents.gameSessionInfoReceived, onGameSessionInfoReceived);
+        ws.on(WSEvents.gameStarted, onGameStarted);
+        ws.on(WSEvents.messageReceived, onMessageReceived);
+        ws.on(WSEvents.historyReceived, onHistoryReceived);
+        ws.on(WSEvents.playerInfoReceived, onPlayerInfoReceived);
+        ws.on(WSEvents.characterLocked, onCharacterLocked);
+        ws.on(WSEvents.characterUnlocked, onCharacterUnlocked);
+        ws.on(WSEvents.playerLeft, onPlayerLeft);
 
         return () => {
             ws.off(WSEvents.gameSessionInfoReceived);
@@ -173,7 +172,7 @@ export function useGameSessionWS(logsEnabled?: boolean) {
         await ws.invoke(WSActions.rollDice, cubeType);
     }
 
-    function playerInfoReceived(playerInfos: PlayerInfo[]) {
+    function onPlayerInfoReceived(playerInfos: PlayerInfo[]) {
         logsEnabled && console.log(WSEvents.playerInfoReceived, playerInfos);
         dispatch(setPlayerInfos(playerInfos.reduce((pv, cv) => {
             pv[cv.id] = cv;
@@ -181,44 +180,38 @@ export function useGameSessionWS(logsEnabled?: boolean) {
         }, {} as Record<string, PlayerInfo>)));
     }
 
-    function characterLocked(userId: string, lockedCharacterTemplateId: string) {
-        const newState = {...gameSessionFullState.playerInfos} || {};
-        newState[userId] = {...newState[userId], lockedCharacterId: lockedCharacterTemplateId};
-        logsEnabled && console.log(WSEvents.characterLocked, newState);
-
-        dispatch(setPlayerInfos(newState));
+    function onCharacterLocked(userId: string, lockedCharacterTemplateId: string) {
+        const data = {userId, lockedCharacterTemplateId};
+        logsEnabled && console.log(WSEvents.characterLocked, data);
+        dispatch(characterLocked(data));
     }
 
-    function characterUnlocked(userId: string) {
-        const newState = {...gameSessionFullState.playerInfos} || {};
-        newState[userId] = {...newState[userId], lockedCharacterId: null};
-        logsEnabled && console.log(WSEvents.characterUnlocked, newState);
-        dispatch(setPlayerInfos(newState));
+    function onCharacterUnlocked(userId: string) {
+        logsEnabled && console.log(WSEvents.characterUnlocked, userId);
+        dispatch(characterUnlocked(userId));
     }
 
-    function playerLeft(userId: string) {
-        const newState = {...gameSessionFullState.playerInfos} || {};
-        newState[userId] = {...newState[userId], isOnline: false, lockedCharacterId: null};
-        logsEnabled && console.log(WSEvents.playerLeft, newState);
-        dispatch(setPlayerInfos(newState));
+    function onPlayerLeft(userId: string) {
+        logsEnabled && console.log(WSEvents.playerLeft, userId);
+        dispatch(playerLeft(userId));
     }
 
-    function gameSessionInfoReceived(data: GameSessionInfo) {
+    function onGameSessionInfoReceived(data: GameSessionInfo) {
         logsEnabled && console.log(WSEvents.gameSessionInfoReceived, data)
         dispatch(setGameSessionInfo(data));
     }
 
-    function gameStarted(data: GameSessionInfo) {
+    function onGameStarted(data: GameSessionInfo) {
         logsEnabled && console.log(WSEvents.gameStarted, data)
         dispatch(setGameSessionInfo(data));
     }
 
-    function messageReceived(message: BaseGameSessionMessage) {
+    function onMessageReceived(message: BaseGameSessionMessage) {
         logsEnabled && console.log(WSEvents.messageReceived, message)
         dispatch(addMessage(message));
     }
 
-    function historyReceived(newMessages: BaseGameSessionMessage[]) {
+    function onHistoryReceived(newMessages: BaseGameSessionMessage[]) {
         logsEnabled && console.log(WSEvents.historyReceived, newMessages)
         dispatch(setMessages(newMessages));
     }

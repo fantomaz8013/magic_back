@@ -13,12 +13,12 @@ import {socket} from "../../../utils/webSocket";
 export default function CharacterList() {
     const {data: characterTemplates} = useGetCharacterTemplatesQuery();
     const {data: currentUser} = useGetCurrentUserQuery();
-    const gameSessionFullState = useSelector((state: RootState) => state.gameSession);
+    const playerInfos = useSelector((state: RootState) => state.gameSession?.playerInfos);
 
-    const isDataLoaded = currentUser && currentUser.data && gameSessionFullState.playerInfos && characterTemplates?.data != null;
-    const isGameMaster = isDataLoaded && gameSessionFullState.playerInfos[currentUser.data!.id].isMaster;
+    const isDataLoaded = currentUser && currentUser.data && playerInfos && characterTemplates?.data != null;
+    const isGameMaster = isDataLoaded && playerInfos[currentUser.data!.id].isMaster;
     const isAnyCharacterLocked = isDataLoaded && Object
-        .values(gameSessionFullState.playerInfos)
+        .values(playerInfos)
         .filter(p => p.lockedCharacterId !== null)
         .length > 0;
 
@@ -39,7 +39,7 @@ export default function CharacterList() {
 
     function renderCharacterTemplate(t: CharacterTemplate) {
         const lockInfo = Object
-            .values(gameSessionFullState.playerInfos!)
+            .values(playerInfos!)
             .filter(p => p.lockedCharacterId === t.id)
             ?.[0];
         const isLocked = isGameMaster || (lockInfo && lockInfo.id !== currentUser!.data!.id);
@@ -66,7 +66,7 @@ export default function CharacterList() {
     async function _lock(e: React.MouseEvent<HTMLButtonElement>) {
         const characterId = e.currentTarget.id;
         const lockInfo = Object
-            .values(gameSessionFullState.playerInfos!)
+            .values(playerInfos!)
             .filter(p => p.lockedCharacterId === characterId)
             ?.[0];
         const isLocked = isGameMaster || (lockInfo && lockInfo.id !== currentUser!.data!.id);
