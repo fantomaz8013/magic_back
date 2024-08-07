@@ -7,15 +7,14 @@ import {
 } from "../../../models/response/characterTemplateResponse";
 
 
-
 export interface CharacterTemplateProps {
     template: CharacterTemplate;
+    onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
-export default function CharacterCard({template}: CharacterTemplateProps) {
-
+export default function CharacterCard({template, onClick}: CharacterTemplateProps) {
     return (
-        <Card >
+        <Card onClick={onClick}>
             <CardMedia
                 sx={{height: 150}}
                 image={template.avatarUrL}
