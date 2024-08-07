@@ -1,12 +1,12 @@
 import * as React from "react";
 import Button from "@mui/material/Button";
-import {WithWS, WSActions} from "../../utils/webSocket";
 import {CubeTypeEnum} from "../../models/websocket/ChatMessage";
+import {socket} from "../../utils/webSocket";
 
-export default function Dice({ws}: WithWS) {
+export default function Dice() {
     return (
         <Button
-            onClick={rollDice}
+            onClick={_rollDice}
             sx={{
                 position: 'fixed',
                 bottom: 0,
@@ -20,7 +20,7 @@ export default function Dice({ws}: WithWS) {
         </Button>
     );
 
-    async function rollDice() {
-        await ws.invoke(WSActions.rollDice, CubeTypeEnum.D6);
+    async function _rollDice() {
+        await socket!.rollDice(CubeTypeEnum.D6);
     }
 }

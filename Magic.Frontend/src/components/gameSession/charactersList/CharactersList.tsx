@@ -2,36 +2,23 @@ import * as React from 'react';
 import Grid from "@mui/material/Unstable_Grid2";
 import CharacterCard from "./CharacterCard";
 import Button from "@mui/material/Button";
-import {WithWS, WSActions, WSEvents} from "../../../utils/webSocket";
 import {useGetCharacterTemplatesQuery} from "../../../redux/toolkit/api/characterApi";
 import {useGetCurrentUserQuery} from "../../../redux/toolkit/api/userApi";
-import {useEffect, useState} from "react";
-import {PlayerInfo} from "../index";
 import {CharacterTemplate} from "../../../models/response/characterTemplateResponse";
 import Box from "@mui/material/Box";
+import {useSelector} from "react-redux";
+import {RootState} from "../../../redux";
+import {socket} from "../../../utils/webSocket";
 
-export default function CharacterList({ws}: WithWS) {
+export default function CharacterList() {
     const {data: characterTemplates} = useGetCharacterTemplatesQuery();
     const {data: currentUser} = useGetCurrentUserQuery();
-    const [playerInfos, setPlayerInfos] = useState<Record<string, PlayerInfo>>();
+    const gameSessionFullState = useSelector((state: RootState) => state.gameSession);
 
-    useEffect(() => {
-        ws.on(WSEvents.playerInfoReceived, playerInfoReceived);
-        ws.on(WSEvents.characterLocked, characterLocked);
-        ws.on(WSEvents.characterUnlocked, characterUnlocked);
-        ws.on(WSEvents.playerLeft, playerLeft);
-        return () => {
-            ws.off(WSEvents.playerInfoReceived);
-            ws.off(WSEvents.characterLocked);
-            ws.off(WSEvents.characterUnlocked);
-            ws.off(WSEvents.playerLeft);
-        }
-    }, []);
-
-    const isDataLoaded = currentUser && currentUser.data && playerInfos && characterTemplates?.data != null;
-    const isGameMaster = isDataLoaded && playerInfos[currentUser.data!.id].isMaster;
+    const isDataLoaded = currentUser && currentUser.data && gameSessionFullState.playerInfos && characterTemplates?.data != null;
+    const isGameMaster = isDataLoaded && gameSessionFullState.playerInfos[currentUser.data!.id].isMaster;
     const isAnyCharacterLocked = isDataLoaded && Object
-        .values(playerInfos)
+        .values(gameSessionFullState.playerInfos)
         .filter(p => p.lockedCharacterId !== null)
         .length > 0;
 
@@ -46,17 +33,13 @@ export default function CharacterList({ws}: WithWS) {
                     isDataLoaded && characterTemplates.data?.map(renderCharacterTemplate)
                 }
             </Grid>
-            {isGameMaster && <Button onClick={startGame} disabled={!isAnyCharacterLocked}>START GAME</Button>}
+            {isGameMaster && <Button onClick={socket?.startGame} disabled={!isAnyCharacterLocked}>START GAME</Button>}
         </Box>
     );
 
-    async function startGame() {
-        await ws.invoke(WSActions.startGame);
-    }
-
     function renderCharacterTemplate(t: CharacterTemplate) {
         const lockInfo = Object
-            .values(playerInfos!)
+            .values(gameSessionFullState.playerInfos!)
             .filter(p => p.lockedCharacterId === t.id)
             ?.[0];
         const isLocked = isGameMaster || (lockInfo && lockInfo.id !== currentUser!.data!.id);
@@ -65,65 +48,35 @@ export default function CharacterList({ws}: WithWS) {
                 ? `LOCKED BY ${lockInfo.login}`
                 : `UNLOCK`
             : isGameMaster
-                ? 'WAITING TO BO LOCKED'
+                ? 'WAITING TO BE LOCKED'
                 : `LOCK`
-        const lockFunc = lockInfo
-            ? isLocked
-                ? lockCharacter
-                : unlockCharacter
-            : lockCharacter
+
         return (
             <Grid key={t.name} xs={3}>
                 <CharacterCard template={t}/>
                 <Button
                     disabled={isLocked} id={t.id} sx={{marginTop: 4,}}
-                    onClick={lockFunc}>
+                    onClick={_lock}>
                     {text}
                 </Button>
             </Grid>
         );
     }
 
-    async function lockCharacter(e: React.MouseEvent<HTMLButtonElement>) {
-        await ws.invoke(WSActions.lockCharacter, e.currentTarget.id)
-    }
+    async function _lock(e: React.MouseEvent<HTMLButtonElement>) {
+        const characterId = e.currentTarget.id;
+        const lockInfo = Object
+            .values(gameSessionFullState.playerInfos!)
+            .filter(p => p.lockedCharacterId === characterId)
+            ?.[0];
+        const isLocked = isGameMaster || (lockInfo && lockInfo.id !== currentUser!.data!.id);
 
-    async function unlockCharacter() {
-        await ws.invoke(WSActions.unlockCharacter)
-    }
+        const lockFunc = lockInfo
+            ? isLocked
+                ? socket!.lockCharacter
+                : socket!.unlockCharacter
+            : socket!.lockCharacter;
 
-    function playerInfoReceived(playerInfos: PlayerInfo[]) {
-        console.log(WSEvents.playerInfoReceived, playerInfos);
-        setPlayerInfos(playerInfos.reduce((pv, cv) => {
-            pv[cv.id] = cv;
-            return pv;
-        }, {} as Record<string, PlayerInfo>));
-    }
-
-    function characterLocked(userId: string, lockedCharacterTemplateId: string) {
-        setPlayerInfos(prevState => {
-            const newState = {...prevState} || {};
-            newState[userId] = {...newState[userId], lockedCharacterId: lockedCharacterTemplateId};
-            console.log(WSEvents.characterLocked, newState);
-            return newState;
-        });
-    }
-
-    function characterUnlocked(userId: string) {
-        setPlayerInfos(prevState => {
-            const newState = {...prevState} || {};
-            newState[userId] = {...newState[userId], lockedCharacterId: null};
-            console.log(WSEvents.characterUnlocked, newState);
-            return newState;
-        });
-    }
-
-    function playerLeft(userId: string) {
-        setPlayerInfos(prevState => {
-            const newState = {...prevState} || {};
-            delete newState[userId];
-            console.log(WSEvents.playerLeft, newState);
-            return newState;
-        });
+        await lockFunc(characterId);
     }
 }

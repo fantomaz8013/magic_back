@@ -4,9 +4,11 @@ import {configureStore} from "@reduxjs/toolkit";
 import {devMode} from "../env";
 import {userApi} from "./toolkit/api/userApi";
 import {characterApi} from "./toolkit/api/characterApi";
+import {gameSessionSlice} from "./toolkit/slices/gameSessionSlice";
 
 export const rootReducer = combineReducers({
     auth: tokenSlice.reducer,
+    gameSession: gameSessionSlice.reducer,
     [userApi.reducerPath]: userApi.reducer,
     [characterApi.reducerPath]: characterApi.reducer,
 });

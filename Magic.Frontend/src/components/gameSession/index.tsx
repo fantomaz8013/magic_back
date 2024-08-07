@@ -1,36 +1,49 @@
-import React, {useState} from "react";
-import {SignalRProps, useSignalR, WSActions, WSEvents} from "../../utils/webSocket";
+import React, {useEffect} from "react";
+import {useGameSessionWS} from "../../utils/webSocket";
 import Box from "@mui/material/Box";
 import Dice from "../dice/Dice";
 import Chat from "./chat";
 import CharactersList from "./charactersList/CharactersList";
 import {useParams} from "react-router-dom";
-import {GameSessionInfo} from "../../models/websocket/gameStartedInfo";
 import {LinearProgress} from "@mui/material";
 import {GameSessionStatusTypeEnum} from "../../models/websocket/gameSessionStatus";
 import CharacterCard from "./charactersList/CharacterCard";
+import {useSelector} from "react-redux";
+import {RootState} from "../../redux";
+import {GameSessionCharacter} from "../../models/websocket/gameStartedInfo";
 
 export interface PlayerInfo {
     id: string;
     login: string;
     isMaster: boolean | null;
     lockedCharacterId: string | null;
+    isOnline?: boolean;
 }
 
+
 export default function GameSession() {
-    const ws = useSignalR(createSignalRConfig());
+    const {state, ...api} = useGameSessionWS();
     const {gameSessionId} = useParams();
-    const [gameSessionInfo, setGameSessionInfo] = useState<GameSessionInfo | null>(null);
+    const gameSessionFullState = useSelector((state: RootState) => state.gameSession)
+
+    useEffect(() => {
+        if (gameSessionId && state === "Connected")
+            api.joinGameSession(gameSessionId);
+        return () => {
+            if (state === "Connected")
+                api.leaveGameSession();
+        }
+    }, [gameSessionId, state])
 
     return renderGameSessionPage();
 
     function renderGameSessionPage() {
-        if (!gameSessionInfo)
+        if (!gameSessionFullState || !gameSessionFullState.gameSessionInfo)
             return (
                 <LinearProgress color="inherit"/>
             )
 
-        switch (gameSessionInfo.gameSessionStatus) {
+        switch (gameSessionFullState.gameSessionInfo.gameSessionStatus) {
             case GameSessionStatusTypeEnum.WaitingForStart:
                 return (
                     <Box sx={{
@@ -39,8 +52,8 @@ export default function GameSession() {
                         flexDirection: 'column',
                         alignItems: 'center',
                     }}>
-                        <CharactersList ws={ws}/>
-                        <Chat ws={ws}/>
+                        <CharactersList/>
+                        <Chat/>
                     </Box>
                 );
             case GameSessionStatusTypeEnum.InGame:
@@ -52,44 +65,17 @@ export default function GameSession() {
                         alignItems: 'center',
                     }}>
                         НИХУЯ СЕ ИГРА НАЧАЛАСЬ
-                        {gameSessionInfo.characters && gameSessionInfo.characters.map(c => {
+                        {gameSessionFullState.gameSessionInfo.characters?.map((c: GameSessionCharacter) => {
                             return (
                                 <CharacterCard key={c.id} template={{...c, name: `${c.name} (${c.ownerId})`}}/>
                             );
                         })}
-                        <Chat ws={ws}/>
-                        <Dice ws={ws}/>
+                        <Chat/>
+                        <Dice/>
                     </Box>
                 );
             case GameSessionStatusTypeEnum.Finished:
                 break;
         }
-    }
-
-    function createSignalRConfig(): SignalRProps {
-        return {
-            beforeStart: (ws) => {
-                ws.on(WSEvents.gameSessionInfoReceived, gameSessionInfoReceived);
-                ws.on(WSEvents.gameStarted, (data) => console.log(WSEvents.gameStarted, data));
-            },
-            afterStart: async (ws) => {
-                await ws.invoke(WSActions.joinGameSession, gameSessionId);
-            },
-            beforeStop: async (ws) => {
-                ws.off(WSEvents.gameSessionInfoReceived);
-                ws.off(WSEvents.gameStarted);
-                await ws.invoke(WSActions.leaveGameSession);
-            }
-        }
-    }
-
-    function gameSessionInfoReceived(data: GameSessionInfo) {
-        console.log(WSEvents.gameSessionInfoReceived, data)
-        setGameSessionInfo(data);
-    }
-
-    function gameStarted(data: GameSessionInfo) {
-        console.log(WSEvents.gameStarted, data)
-        setGameSessionInfo(data);
     }
 }

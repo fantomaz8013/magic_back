@@ -1,5 +1,4 @@
-import React, {useEffect, useState} from "react";
-import * as signalR from "@microsoft/signalr";
+import React, {useState} from "react";
 import {
     BaseGameSessionMessage, ChatGameSessionMessage, CubeTypeEnum, DiceGameSessionMessage,
     GameSessionMessageTypeEnum,
@@ -11,29 +10,19 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import {Avatar} from "@mui/material";
 import {useGetCurrentUserQuery} from "../../../redux/toolkit/api/userApi";
-import {WSActions, WSEvents} from "../../../utils/webSocket";
 import Typography from "@mui/material/Typography";
+import {useSelector} from "react-redux";
+import {RootState} from "../../../redux";
+import {socket} from "../../../utils/webSocket";
 
-export interface ChatProps {
-    ws: signalR.HubConnection;
-}
 
-export default function Chat(props: ChatProps) {
+export default function Chat() {
     const [currentMessage, setCurrentMessage] = useState<string>('');
-    const [messages, setMessages] = useState<BaseGameSessionMessage[]>([]);
+    const messages = useSelector((state: RootState) => state.gameSession.messages)
     const {data: currentUser,} = useGetCurrentUserQuery();
 
-    useEffect(() => {
-        props.ws.on(WSEvents.messageReceived, messageReceived);
-        props.ws.on(WSEvents.historyReceived, historyReceived);
-        return () => {
-            props.ws.off(WSEvents.messageReceived);
-            props.ws.off(WSEvents.historyReceived);
-        }
-    }, []);
-
     return (
-        <>
+        <Box>
             <Typography mb={4} component="h1" variant="h5">
                 Save Halsin player's chat
             </Typography>
@@ -52,7 +41,7 @@ export default function Chat(props: ChatProps) {
                 />
                 <Button onClick={sendMessage}>SEND</Button>
             </Box>
-        </>
+        </Box>
     );
 
     function renderMessage(baseMessage: BaseGameSessionMessage) {
@@ -87,19 +76,11 @@ export default function Chat(props: ChatProps) {
         )
     }
 
-    function messageReceived(message: BaseGameSessionMessage) {
-        setMessages(prevState => [...prevState, message]);
-    }
-
-    function historyReceived(newMessages: BaseGameSessionMessage[]) {
-        setMessages(newMessages);
-    }
-
     async function sendMessage() {
         if (currentMessage.length === 0) return;
 
         setCurrentMessage('');
-        await props.ws.invoke(WSActions.newMessage, currentMessage);
+        await socket?.newMessage(currentMessage);
     }
 
     function onMessageChange(e: React.ChangeEvent<HTMLInputElement>) {
