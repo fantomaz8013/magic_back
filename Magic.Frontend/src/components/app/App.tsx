@@ -12,21 +12,31 @@ import Profile from "../profile/profile";
 import Layout from "./Layout";
 import HomePage from "./HomePage";
 import GameSession from "../gameSession";
+import Page from "../common/Page";
+import CssBaseline from "@mui/material/CssBaseline";
 
 export default function App() {
     return (
         <Routes>
             <Route element={<Layout/>}>
-                <Route element={<RequireAnonym/>}>
+                <Route element={
+                    <Page>
+                        <RequireAnonym/>
+                    </Page>
+                }>
                     <Route path={paths.login} element={<Login/>}/>
                     <Route path={paths.register} element={<Register/>}/>
                 </Route>
                 <Route element={<RequireAuth/>}>
-                    <Route path={paths.profile} element={<Profile/>}/>
+                    <Route path={paths.profile} element={<Page><Profile/></Page>}/>
                     <Route path={paths.game}
-                           element={<GameSession gameSessionId={'945da2d0-a0ac-4257-9f9e-10b31e3955d3'}/>}/>
+                           element={
+                               <>
+                                   <CssBaseline/>
+                                   <GameSession gameSessionId={'945da2d0-a0ac-4257-9f9e-10b31e3955d3'}/>
+                               </>}/>
                 </Route>
-                <Route path={paths.default} element={<HomePage/>}/>
+                <Route path={paths.default} element={<Page><HomePage/></Page>}/>
             </Route>
         </Routes>
     );

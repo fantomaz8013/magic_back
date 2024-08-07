@@ -20,14 +20,12 @@ public class GameSessionMessageService : IGameSessionMessageService
         _userProvider = userProvider;
     }
 
-    public async Task<ChatGameGameSessionMessageResponse> AddChatMessage(Guid gameSessionId, string message)
+    public async Task<ChatGameGameSessionMessageResponse> AddChatMessage(Guid gameSessionId, string message, Guid userId)
     {
-        var userId = _userProvider.GetUserId();
-
         var rEntry = await _dbContext.ChatGameSessionMessages.AddAsync(new ChatGameGameSessionMessage
         {
             GameSessionId = gameSessionId,
-            AuthorId = userId!.Value,
+            AuthorId = userId,
             Message = message,
             CreatedDate = DateTime.UtcNow
         });
@@ -58,16 +56,15 @@ public class GameSessionMessageService : IGameSessionMessageService
     }
 
     public async Task<DiceGameSessionMessageResponse> AddDiceMessage(Guid gameSessionId, int diceRoll,
-        CubeTypeEnum cubeTypeEnum)
+        CubeTypeEnum cubeTypeEnum, Guid userId)
     {
-        var userId = _userProvider.GetUserId();
         var rEntry = await _dbContext.DiceSessionMessages.AddAsync(new DiceGameSessionMessage
         {
             GameSessionId = gameSessionId,
             CubeTypeEnum = cubeTypeEnum,
             Roll = diceRoll,
             CreatedDate = DateTime.UtcNow,
-            AuthorId = userId.Value
+            AuthorId = userId
         });
 
         await _dbContext.SaveChangesAsync();

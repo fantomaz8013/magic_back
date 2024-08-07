@@ -45,8 +45,11 @@ export default function GameSession(props: GameSessionProps) {
                         return (
                             <Grid key={t.name} xs={3}>
                                 <CharacterCards template={t} characteristics={characteristics.data!}/>
-                                <Button disabled={!!isLocked} id={t.id} sx={{marginTop: 4,}}
-                                        onClick={lockCharacter}>LOCK{isLocked && `ED BY ${isLocked.login}`}</Button>
+                                <Button
+                                    disabled={!!isLocked} id={t.id} sx={{marginTop: 4,}}
+                                    onClick={lockCharacter}>
+                                    LOCK{isLocked && `ED BY ${isLocked.login}`}
+                                </Button>
                             </Grid>
                         );
                     })
@@ -79,7 +82,7 @@ export default function GameSession(props: GameSessionProps) {
                 ws.off(WSEvents.playerInfoReceived);
                 ws.off(WSEvents.characterLocked);
                 ws.off(WSEvents.playerLeft);
-                await ws.invoke(WSActions.leaveGameSession, props.gameSessionId);
+                await ws.invoke(WSActions.leaveGameSession);
             }
         }
     }

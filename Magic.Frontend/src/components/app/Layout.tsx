@@ -2,7 +2,6 @@ import * as React from "react";
 import {createTheme, PaletteMode, ThemeProvider} from "@mui/material";
 import {getPaletteMode, setPaletteMode} from "../../utils/localStorage";
 import Header from "../header";
-import Page from "../common/Page";
 import {Outlet} from "react-router-dom";
 
 export default function Layout() {
@@ -20,9 +19,7 @@ export default function Layout() {
     return (
         <ThemeProvider theme={defaultTheme}>
             <Header mode={mode} toggleColorMode={toggleColorMode}/>
-            <Page>
-                <Outlet/>
-            </Page>
+            <Outlet/>
         </ThemeProvider>
     );
 }
