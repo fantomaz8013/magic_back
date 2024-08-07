@@ -15,16 +15,18 @@ public class GameSessionsHub : Hub
     private readonly IUserService _userService;
     private readonly IGameSessionService _gameSessionService;
     private readonly IGameSessionMessageService _gameSessionMessageService;
+    private readonly ICharacterService _characterService;
 
     private static readonly ConnectedUsers ConnectedUsers = new();
     private static readonly LockedCharacters LockedCharacters = new();
 
     public GameSessionsHub(IUserService userService, IGameSessionService gameSessionService,
-        IGameSessionMessageService gameSessionMessageService)
+        IGameSessionMessageService gameSessionMessageService, ICharacterService characterService)
     {
         _userService = userService;
         _gameSessionService = gameSessionService;
         _gameSessionMessageService = gameSessionMessageService;
+        _characterService = characterService;
     }
 
     private async Task<(Guid GameSessionId, UserResponse user)> GetConnectionInfoOrThrow()
@@ -97,8 +99,9 @@ public class GameSessionsHub : Hub
         }
 
         await ConnectPlayer_Internal(gameSessionId, callerUser);
-        await SendHistory_ToCaller(gameSession.Id);
-        await SendPlayerInfos_ToGameSession(gameSession);
+        await SendHistory(gameSession.Id, Clients.Caller);
+        await SendPlayerInfos(gameSession, Clients.Group(gameSession.Id.ToString()));
+        await SendGameSessionInfo(gameSession.Id, gameSession.GameSessionStatus, Clients.Caller);
     }
 
     private async Task ConnectPlayer_Internal(Guid gameSessionId, UserResponse callerUser)
@@ -108,15 +111,15 @@ public class GameSessionsHub : Hub
         await CreateServerMessage_Internal(gameSessionId, $"Player \"{callerUser.Login}\" joined!");
     }
 
-    private async Task SendHistory_ToCaller(Guid gameSessionId)
+    private async Task SendHistory(Guid gameSessionId, IClientProxy clientProxy)
     {
         var messages = await _gameSessionMessageService.GetMessages(gameSessionId);
 
         if (messages.Count > 0)
-            await Clients.Caller.SendAsync(Events.HistoryReceived, messages);
+            await clientProxy.SendAsync(Events.HistoryReceived, messages);
     }
 
-    private async Task SendPlayerInfos_ToGameSession(GameSession gameSession)
+    private async Task SendPlayerInfos(GameSession gameSession, IClientProxy clientProxy)
     {
         var locks = LockedCharacters.GetGameSessionLocks(gameSession.Id);
         var playerInfos = gameSession
@@ -131,15 +134,40 @@ public class GameSessionsHub : Hub
                 }
             )
             .ToArray();
-        await Clients.Group(gameSession.Id.ToString()).SendAsync(Events.PlayerInfoReceived, playerInfos);
+        await clientProxy.SendAsync(Events.PlayerInfoReceived, playerInfos);
     }
+
+    private async Task SendGameSessionInfo(
+        Guid gameSessionId,
+        GameSessionStatusTypeEnum gameSessionStatus,
+        IClientProxy clientProxy)
+    {
+        var gameSessionInfo = new GameSessionInfo(gameSessionStatus);
+        if (gameSessionStatus == GameSessionStatusTypeEnum.InGame)
+        {
+            gameSessionInfo = gameSessionInfo with
+            {
+                Characters = await _characterService.GetGameSessionCharacters(gameSessionId)
+            };
+        }
+
+        await clientProxy.SendAsync(Events.GameSessionInfoReceived, gameSessionInfo);
+    }
+
+    public record GameSessionInfo(
+        GameSessionStatusTypeEnum GameSessionStatus,
+        List<GameSessionCharacter>? Characters = null
+    );
 
     public async Task LockCharacter(Guid characterId)
     {
         var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
+        var gameSession = await _gameSessionService.GetById(gameSessionId);
+        if (gameSession.CreatorUserId == caller.Id)
+            throw new HubException("GameMaster can't lock characters");
 
         if (LockedCharacters.IsCharacterLocked(gameSessionId, characterId))
-            throw new HubException("Character already locked!");
+            throw new HubException("Character already locked");
 
         await LockCharacter_Internal(gameSessionId, caller.Id, characterId);
     }
@@ -159,7 +187,7 @@ public class GameSessionsHub : Hub
 
     private async Task UnlockCharacter_Internal(Guid gameSessionId, Guid callerUserId)
     {
-        LockedCharacters.Unlock(gameSessionId, callerUserId);
+        LockedCharacters.UnlockByUser(gameSessionId, callerUserId);
         await Clients.Group(gameSessionId.ToString()).SendAsync(Events.CharacterUnlocked, callerUserId);
     }
 
@@ -179,9 +207,36 @@ public class GameSessionsHub : Hub
     {
         await CreateServerMessage_Internal(gameSessionId, $"Player \"{callerUser.Login}\" disconnected");
         ConnectedUsers.Disconnect(gameSessionId, callerUser.Id);
-        LockedCharacters.Unlock(gameSessionId, callerUser.Id);
+        LockedCharacters.UnlockByUser(gameSessionId, callerUser.Id);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameSessionId.ToString());
         await Clients.Group(gameSessionId.ToString()).SendAsync(Events.PlayerLeft, callerUser.Id);
+    }
+
+    public async Task StartGame()
+    {
+        var (gameSessionId, callerUser) = await GetConnectionInfoOrThrow();
+        var gameSession = await _gameSessionService.GetById(gameSessionId);
+
+        if (gameSession == null || gameSession.CreatorUserId != callerUser.Id)
+        {
+            throw new HubException("You have no rights to run this action");
+        }
+
+        var locks = LockedCharacters.GetGameSessionLocks(gameSessionId);
+        if (locks is null)
+            throw new HubException("There is no locked characters, game can not be started");
+
+        var characters =
+            await _characterService.ChooseCharacters(
+                locks,
+                gameSessionId
+            );
+        LockedCharacters.UnlockByGameSession(gameSessionId);
+        if (!await _gameSessionService.ChangeGameSessionStatus(gameSessionId, GameSessionStatusTypeEnum.InGame))
+            throw new HubException("Couldn't start game");
+
+        var group = Clients.Group(gameSessionId.ToString());
+        await SendGameSessionInfo(gameSession.Id, GameSessionStatusTypeEnum.InGame, group);
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)

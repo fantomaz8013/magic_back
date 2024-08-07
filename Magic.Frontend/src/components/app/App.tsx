@@ -19,24 +19,25 @@ export default function App() {
     return (
         <Routes>
             <Route element={<Layout/>}>
-                <Route element={
-                    <Page>
-                        <RequireAnonym/>
-                    </Page>
-                }>
-                    <Route path={paths.login} element={<Login/>}/>
-                    <Route path={paths.register} element={<Register/>}/>
+                <Route element={<Page/>}>
+                    <Route element={<RequireAnonym/>}>
+                        <Route path={paths.login} element={<Login/>}/>
+                        <Route path={paths.register} element={<Register/>}/>
+                    </Route>
+                    <Route element={<RequireAuth/>}>
+                        <Route path={paths.profile} element={<Profile/>}/>
+                    </Route>
+                    <Route path={paths.default} element={<HomePage/>}/>
                 </Route>
                 <Route element={<RequireAuth/>}>
-                    <Route path={paths.profile} element={<Page><Profile/></Page>}/>
-                    <Route path={paths.game}
+                    <Route path={paths.game + "/:gameSessionId"}
                            element={
                                <>
                                    <CssBaseline/>
-                                   <GameSession gameSessionId={'945da2d0-a0ac-4257-9f9e-10b31e3955d3'}/>
-                               </>}/>
+                                   <GameSession/>
+                               </>}
+                    />
                 </Route>
-                <Route path={paths.default} element={<Page><HomePage/></Page>}/>
             </Route>
         </Routes>
     );

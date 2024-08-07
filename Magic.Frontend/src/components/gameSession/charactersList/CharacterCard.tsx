@@ -11,18 +11,20 @@ import {
     CharacterTemplate
 } from "../../../models/response/characterTemplateResponse";
 import Tooltip from "@mui/material/Tooltip";
+import {useGetCharacteristicsQuery} from "../../../redux/toolkit/api/characterApi";
 
 
 export interface CharacterTemplateProps {
     template: CharacterTemplate;
-    characteristics: CharacterCharacteristic[];
 }
 
-export default function CharacterCards({template, characteristics}: CharacterTemplateProps) {
+export default function CharacterCard({template}: CharacterTemplateProps) {
+    const {data: characteristics} = useGetCharacteristicsQuery();
+
     return (
-        <Card sx={{maxWidth: 345}}>
+        <Card sx={{maxWidth: 350, height:'70%'}}>
             <CardMedia
-                sx={{height: 140}}
+                sx={{height: 150}}
                 image={template.avatarUrL}
                 title={template.name}
             />
@@ -34,20 +36,24 @@ export default function CharacterCards({template, characteristics}: CharacterTem
                     {template.description}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                    RACE:{template.characterRace.title}
+                    RACE: {template.characterRace.title}
                     <br/>
-                    CLASS:{template.characterClass.title}
+                    CLASS: {template.characterClass.title}
                     <br/>
-                    {characteristics.map(c => {
-                        return (<span key={c.id}>
-                            {c.title}:{template.characteristics[c.id]}
-                            <Tooltip title={c.description}>
-                                <InfoIcon fontSize={'small'}/>
-                            </Tooltip>
-                        </span>);
-                    })}
+                    {characteristics && characteristics.data && characteristics.data.map(renderCharacteristics)}
                 </Typography>
             </CardContent>
         </Card>
     );
+
+    function renderCharacteristics(c: CharacterCharacteristic) {
+        return (
+            <span key={c.id}>
+                {c.title}:{template.characteristics[c.id]}
+                <Tooltip title={c.description}>
+                    <InfoIcon fontSize={'small'}/>
+                </Tooltip>
+            </span>
+        );
+    }
 }

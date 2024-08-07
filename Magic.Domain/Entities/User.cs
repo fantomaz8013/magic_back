@@ -82,4 +82,6 @@ public class User : BaseEntity<Guid>, IHasBlocked, IHasCreatedDate
     /// Игровые сессии которые создал пользователь
     /// </summary>
     public List<GameSession> CreatedGameSessions { get; set; }
+    
+    public List<GameSessionCharacter> GameSessionsCharacters { get; set; }
 }

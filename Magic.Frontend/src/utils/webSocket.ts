@@ -4,6 +4,10 @@ import React, {useEffect, useMemo, useRef} from "react";
 import {RootState,} from "../redux";
 import {useSelector} from "react-redux";
 
+export interface WithWS {
+    ws: signalR.HubConnection;
+}
+
 function createSignalRConnection(
     url: string,
     tokenRef: React.MutableRefObject<string | null>,
@@ -38,6 +42,7 @@ export enum WSActions {
     rollDice = 'RollDice',
     lockCharacter = 'LockCharacter',
     unlockCharacter = 'UnlockCharacter',
+    startGame = 'StartGame',
 }
 
 export enum WSEvents {
@@ -47,6 +52,8 @@ export enum WSEvents {
     characterUnlocked = 'characterUnlocked',
     playerLeft = 'playerLeft',
     playerInfoReceived = 'playerInfoReceived',
+    gameSessionInfoReceived = "gameSessionInfoReceived",
+    gameStarted = "gameStarted",
 }
 
 

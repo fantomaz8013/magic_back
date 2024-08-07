@@ -27,10 +27,15 @@ public class LockedCharacters
             });
     }
 
-    public void Unlock(Guid gameSessionId, Guid userId)
+    public void UnlockByUser(Guid gameSessionId, Guid userId)
     {
         if (_connections.TryGetValue(gameSessionId, out var lockedCharacterTemplateIds))
             lockedCharacterTemplateIds.TryRemove(userId, out _);
+    }
+    
+    public void UnlockByGameSession(Guid gameSessionId)
+    {
+        _connections.TryRemove(gameSessionId, out var _);
     }
 
     public Dictionary<Guid, Guid>? GetGameSessionLocks(Guid gameSessionId)

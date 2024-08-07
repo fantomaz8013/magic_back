@@ -42,4 +42,8 @@ public enum ExceptionApplicationCodeEnum
     /// Шаблон персонажа не существует
     /// </summary>
     CharacterTemplateNotExist = 10,
+    /// <summary>
+    /// Игровая сессия имеет неверный статус
+    /// </summary>
+    GameSessionIncorrectStatus = 11,
 }

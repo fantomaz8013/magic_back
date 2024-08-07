@@ -40,10 +40,11 @@ public class GameSessionCharacterConfiguration : IEntityTypeConfiguration<GameSe
 
         builder.PropertyWithUnderscore(x => x.OwnerId);
         builder.HasForeignKey(x => x.Owner, x => x.OwnerId);
-        builder.HasOne(x => x.Owner);
+        builder.HasOne(x => x.Owner)
+            .WithMany(x => x.GameSessionsCharacters);
 
         builder.PropertyWithUnderscore(x => x.GameSessionId);
-        builder.HasForeignKey(x => x.GameSession, x => x.OwnerId);
+        builder.HasForeignKey(x => x.GameSession, x => x.GameSessionId);
         builder.HasOne(x => x.GameSession);
 
 

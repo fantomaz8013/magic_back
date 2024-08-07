@@ -1,4 +1,4 @@
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
@@ -8,9 +8,20 @@ import {Card, CardActions, CardContent} from "@mui/material";
 import Button from "@mui/material/Button";
 import paths from "../../consts/paths";
 import * as React from "react";
+import {useEffect, useState} from "react";
+import TextField from "@mui/material/TextField";
 
 export default function HomePage() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const [gameSessionId, setGameSessionId] = useState('945da2d0-a0ac-4257-9f9e-10b31e3955d3');
+
+    useEffect(() => {
+        if (location.pathname !== paths.home) {
+            navigate(paths.home, {replace: true});
+        }
+    }, [location, navigate]);
+
     return (
         <Grid container spacing={4}>
             <Grid item xs={12}>
@@ -48,14 +59,21 @@ export default function HomePage() {
                         </Typography>
                     </CardContent>
                     <CardActions>
-                        <Button onClick={onStartClick} size="small">Save Halsin!</Button>
+                        <Button disabled={gameSessionId.length !== 36} onClick={onStartClick} size="small">
+                            Save Halsin!
+                        </Button>
+                        <TextField value={gameSessionId} onChange={onGameSessionIdChange} type={'text'}/>
                     </CardActions>
                 </Card>
             </Grid>
         </Grid>
     );
 
+    function onGameSessionIdChange(e: React.ChangeEvent<HTMLInputElement>) {
+        setGameSessionId(e.target.value);
+    }
+
     function onStartClick() {
-        navigate(paths.game)
+        navigate(`${paths.game}/${gameSessionId}`);
     }
 }

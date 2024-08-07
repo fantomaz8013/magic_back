@@ -1,6 +1,7 @@
 ﻿using Magic.Common.Models.Response;
 using Magic.DAL;
 using Magic.Domain.Entities;
+using Magic.Domain.Enums;
 using Magic.Domain.Exceptions;
 using Magic.Service.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,8 @@ public class CharacterService : ICharacterService
         _dbContext = dbContext;
     }
 
-    public async Task<List<GameSessionCharacter>> ChooseCharacters(Dictionary<Guid, Guid> userIdsToCharacterTemplatesIds, Guid gameSessionId)
+    public async Task<List<GameSessionCharacter>> ChooseCharacters(
+        Dictionary<Guid, Guid> userIdsToCharacterTemplatesIds, Guid gameSessionId)
     {
         var gameSession = await _dbContext.GameSessions
             .FindAsync(gameSessionId);
@@ -24,7 +26,13 @@ public class CharacterService : ICharacterService
         if (gameSession == null)
         {
             throw new ExceptionWithApplicationCode("Игровая сессия не найдена",
-               Domain.Enums.ExceptionApplicationCodeEnum.GameSessionNotFound);
+                Domain.Enums.ExceptionApplicationCodeEnum.GameSessionNotFound);
+        }
+
+        if (gameSession.GameSessionStatus != GameSessionStatusTypeEnum.WaitingForStart)
+        {
+            throw new ExceptionWithApplicationCode("Игровая сессия должна иметь статус \"ожидает\"",
+                Domain.Enums.ExceptionApplicationCodeEnum.GameSessionIncorrectStatus);
         }
 
         foreach (var item in userIdsToCharacterTemplatesIds)
@@ -66,8 +74,9 @@ public class CharacterService : ICharacterService
                 OwnerId = userId,
                 GameSessionId = gameSessionId,
             });
-
         }
+
+        await _dbContext.SaveChangesAsync();
 
         var gameSessionCharacters = await GetGameSessionCharacters(gameSessionId);
 
@@ -130,14 +139,13 @@ public class CharacterService : ICharacterService
 
     public async Task<List<GameSessionCharacter>> GetGameSessionCharacters(Guid gameSessionId)
     {
-        var result = await _dbContext.GameSessionCharacters
-             .Include(x => x.CharacterClass)
-             .Include(x => x.CharacterRace)
-             .Where(x => x.GameSessionId == gameSessionId)
-             .ToListAsync();
+        var result = await _dbContext
+            .GameSessionCharacters
+            .Include(x => x.CharacterClass)
+            .Include(x => x.CharacterRace)
+            .Where(x => x.GameSessionId == gameSessionId)
+            .ToListAsync();
 
         return result;
     }
-
-
 }

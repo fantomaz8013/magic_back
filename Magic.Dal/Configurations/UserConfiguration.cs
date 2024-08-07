@@ -36,7 +36,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasForeignKey(x => x.RefUser, x => x.RefUserId);
 
         builder.HasMany(e => e.CreatedGameSessions)
-        .WithOne(e => e.CreatorUser)
-        .HasForeignKey(e => e.CreatorUserId);
+            .WithOne(e => e.CreatorUser)
+            .HasForeignKey(e => e.CreatorUserId);
     }
 }

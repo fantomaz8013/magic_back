@@ -1,20 +1,14 @@
 import React, {useState} from "react";
 import {SignalRProps, useSignalR, WSActions, WSEvents} from "../../utils/webSocket";
-import Grid from '@mui/material/Unstable_Grid2';
 import Box from "@mui/material/Box";
-import {
-    CubeTypeEnum,
-} from "../../models/websocket/ChatMessage";
 import Dice from "../dice/Dice";
 import Chat from "./chat";
-import CharacterCards from "./charactersList";
-import {useGetCharacteristicsQuery, useGetCharacterTemplatesQuery} from "../../redux/toolkit/api/characterApi";
-import Button from "@mui/material/Button";
-import {useGetCurrentUserQuery} from "../../redux/toolkit/api/userApi";
-
-export interface GameSessionProps {
-    gameSessionId: string;
-}
+import CharactersList from "./charactersList/CharactersList";
+import {useParams} from "react-router-dom";
+import {GameSessionInfo} from "../../models/websocket/gameStartedInfo";
+import {LinearProgress} from "@mui/material";
+import {GameSessionStatusTypeEnum} from "../../models/websocket/gameSessionStatus";
+import CharacterCard from "./charactersList/CharacterCard";
 
 export interface PlayerInfo {
     id: string;
@@ -23,121 +17,79 @@ export interface PlayerInfo {
     lockedCharacterId: string | null;
 }
 
-export default function GameSession(props: GameSessionProps) {
+export default function GameSession() {
     const ws = useSignalR(createSignalRConfig());
-    const {data: characterTemplates} = useGetCharacterTemplatesQuery();
-    const {data: currentUser} = useGetCurrentUserQuery();
-    const {data: characteristics} = useGetCharacteristicsQuery();
-    const [playerInfos, setPlayerInfos] = useState<Record<string, PlayerInfo>>();
+    const {gameSessionId} = useParams();
+    const [gameSessionInfo, setGameSessionInfo] = useState<GameSessionInfo | null>(null);
 
-    return (
-        <Box sx={{
-            marginTop: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-        }}>
-            <Grid container spacing={10} sx={{maxWidth: '100%'}}>
-                {
-                    currentUser && currentUser.data && playerInfos && characteristics?.data && characterTemplates?.data?.map(t => {
-                        const lockInfo = Object
-                            .values(playerInfos)
-                            .filter(p => p.lockedCharacterId === t.id)
-                            ?.[0];
-                        const isLocked = lockInfo && lockInfo.id !== currentUser.data!.id;
-                        const text = lockInfo
-                            ? isLocked
-                                ? `LOCKED BY ${lockInfo.login}`
-                                : `UNLOCK`
-                            : `LOCK`
-                        const lockFunc = lockInfo
-                            ? isLocked
-                                ? lockCharacter
-                                : unlockCharacter
-                            : lockCharacter
-                        return (
-                            <Grid key={t.name} xs={3}>
-                                <CharacterCards template={t} characteristics={characteristics.data!}/>
-                                <Button
-                                    disabled={isLocked} id={t.id} sx={{marginTop: 4,}}
-                                    onClick={lockFunc}>
-                                    {text}
-                                </Button>
-                            </Grid>
-                        );
-                    })
-                }
-            </Grid>
-            <Chat ws={ws}/>
-            <Dice onDiceRoll={rollDice}/>
-        </Box>
-    );
+    return renderGameSessionPage();
 
-    async function lockCharacter(e: React.MouseEvent<HTMLButtonElement>) {
-        await ws.invoke(WSActions.lockCharacter, e.currentTarget.id)
-    }
+    function renderGameSessionPage() {
+        if (!gameSessionInfo)
+            return (
+                <LinearProgress color="inherit"/>
+            )
 
-    async function unlockCharacter(e: React.MouseEvent<HTMLButtonElement>) {
-        await ws.invoke(WSActions.unlockCharacter)
-    }
-
-    async function rollDice() {
-        await ws.invoke(WSActions.rollDice, CubeTypeEnum.D6);
+        switch (gameSessionInfo.gameSessionStatus) {
+            case GameSessionStatusTypeEnum.WaitingForStart:
+                return (
+                    <Box sx={{
+                        marginTop: 8,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                    }}>
+                        <CharactersList ws={ws}/>
+                        <Chat ws={ws}/>
+                    </Box>
+                );
+            case GameSessionStatusTypeEnum.InGame:
+                return (
+                    <Box sx={{
+                        marginTop: 8,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                    }}>
+                        НИХУЯ СЕ ИГРА НАЧАЛАСЬ
+                        {gameSessionInfo.characters && gameSessionInfo.characters.map(c => {
+                            return (
+                                <CharacterCard key={c.id} template={{...c, name: `${c.name} (${c.ownerId})`}}/>
+                            );
+                        })}
+                        <Chat ws={ws}/>
+                        <Dice ws={ws}/>
+                    </Box>
+                );
+            case GameSessionStatusTypeEnum.Finished:
+                break;
+        }
     }
 
     function createSignalRConfig(): SignalRProps {
         return {
             beforeStart: (ws) => {
-                ws.on(WSEvents.playerInfoReceived, playerInfoReceived);
-                ws.on(WSEvents.characterLocked, characterLocked);
-                ws.on(WSEvents.characterUnlocked, characterUnlocked);
-                ws.on(WSEvents.playerLeft, playerLeft);
+                ws.on(WSEvents.gameSessionInfoReceived, gameSessionInfoReceived);
+                ws.on(WSEvents.gameStarted, (data) => console.log(WSEvents.gameStarted, data));
             },
             afterStart: async (ws) => {
-                await ws.invoke(WSActions.joinGameSession, props.gameSessionId);
+                await ws.invoke(WSActions.joinGameSession, gameSessionId);
             },
             beforeStop: async (ws) => {
-                ws.off(WSEvents.playerInfoReceived);
-                ws.off(WSEvents.characterLocked);
-                ws.off(WSEvents.characterUnlocked);
-                ws.off(WSEvents.playerLeft);
+                ws.off(WSEvents.gameSessionInfoReceived);
+                ws.off(WSEvents.gameStarted);
                 await ws.invoke(WSActions.leaveGameSession);
             }
         }
     }
 
-    function playerInfoReceived(playerInfos: PlayerInfo[]) {
-        console.log(WSEvents.playerInfoReceived, playerInfos);
-        setPlayerInfos(playerInfos.reduce((pv, cv) => {
-            pv[cv.id] = cv;
-            return pv;
-        }, {} as Record<string, PlayerInfo>));
+    function gameSessionInfoReceived(data: GameSessionInfo) {
+        console.log(WSEvents.gameSessionInfoReceived, data)
+        setGameSessionInfo(data);
     }
 
-    function characterLocked(userId: string, lockedCharacterTemplateId: string) {
-        setPlayerInfos(prevState => {
-            const newState = {...prevState} || {};
-            newState[userId] = {...newState[userId], lockedCharacterId: lockedCharacterTemplateId};
-            console.log(WSEvents.characterLocked, newState);
-            return newState;
-        });
-    }
-
-    function characterUnlocked(userId: string) {
-        setPlayerInfos(prevState => {
-            const newState = {...prevState} || {};
-            newState[userId] = {...newState[userId], lockedCharacterId: null};
-            console.log(WSEvents.characterUnlocked, newState);
-            return newState;
-        });
-    }
-
-    function playerLeft(userId: string) {
-        setPlayerInfos(prevState => {
-            const newState = {...prevState} || {};
-            delete newState[userId];
-            console.log(WSEvents.playerLeft, newState);
-            return newState;
-        });
+    function gameStarted(data: GameSessionInfo) {
+        console.log(WSEvents.gameStarted, data)
+        setGameSessionInfo(data);
     }
 }
