@@ -1,4 +1,5 @@
 ﻿using Magic.Common;
+using Magic.Service.Implementations;
 using Magic.Service.Interfaces;
 using Magic.Service.Provider;
 using Microsoft.AspNetCore.Http;
@@ -21,5 +22,6 @@ public static class ServiceDIExtensions
         services.AddScoped<ICharacterService, CharacterService>();
         services.AddScoped<IGameSessionService, GameSessionService>();
         services.AddScoped<IGameSessionMessageService, GameSessionMessageService>();
+        services.AddScoped<IGameSessionCharacterService, GameSessionCharacterService>();
     }
 }

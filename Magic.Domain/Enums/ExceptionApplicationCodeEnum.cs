@@ -46,4 +46,8 @@ public enum ExceptionApplicationCodeEnum
     /// Игровая сессия имеет неверный статус
     /// </summary>
     GameSessionIncorrectStatus = 11,
+    /// <summary>
+    /// Игровой персонаж не найден
+    /// </summary>
+    GameSessionCharacterNotFound = 12,
 }
