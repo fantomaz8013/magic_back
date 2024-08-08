@@ -50,4 +50,20 @@ public enum ExceptionApplicationCodeEnum
     /// Игровой персонаж не найден
     /// </summary>
     GameSessionCharacterNotFound = 12,
+    /// <summary>
+    /// Карта не найдена
+    /// </summary>
+    MapNotExist = 13 ,
+    /// <summary>
+    /// Параметры тайла не найдены
+    /// </summary>
+    TilePropertyNotExist = 14,
+    /// <summary>
+    /// Игровой персонаж не размещен на карте
+    /// </summary>
+    CharacterNotInMap = 15,
+    /// <summary>
+    /// Путь пустой
+    /// </summary>
+    PathIsEmpty = 16,
 }

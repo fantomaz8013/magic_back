@@ -24,5 +24,6 @@ public static class ServiceDIExtensions
         services.AddScoped<IGameSessionMessageService, GameSessionMessageService>();
         services.AddScoped<IGameSessionCharacterService, GameSessionCharacterService>();
         services.AddScoped<IMapService, MapService>();
+        services.AddScoped<ITilePropertyService, TilePropertyService>();
     }
 }

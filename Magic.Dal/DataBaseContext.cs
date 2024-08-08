@@ -25,6 +25,7 @@ public class DataBaseContext : DbContext
     public DbSet<DiceGameSessionMessage> DiceSessionMessages { get; set; }
     public DbSet<GameSessionCharacter> GameSessionCharacters { get; set; }
     public DbSet<Map> Maps { get; set; }
+    public DbSet<TileProperty> TileProperties { get; set; }
 
     public DataBaseContext(DbContextOptions<DataBaseContext> options) : base(options) { }
 
@@ -48,5 +49,6 @@ public class DataBaseContext : DbContext
         modelBuilder.ApplyConfiguration(new CharacterTemplateConfiguration());
         modelBuilder.ApplyConfiguration(new GameSessionCharacterConfiguration());
         modelBuilder.ApplyConfiguration(new MapConfiguration());
+        modelBuilder.ApplyConfiguration(new TilePropertyConfiguration());
     }
 }

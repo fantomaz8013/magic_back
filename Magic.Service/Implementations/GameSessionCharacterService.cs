@@ -112,7 +112,7 @@ public class GameSessionCharacterService : IGameSessionCharacterService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<GameSessionCharacter> Armor(Guid gameSessionCharacterId, int value)
+    public async Task<GameSessionCharacter> Shield(Guid gameSessionCharacterId, int value)
     {
         var gameSessionCharacter = await GetGameSessionCharacter(gameSessionCharacterId);
 
@@ -203,7 +203,7 @@ public class GameSessionCharacterService : IGameSessionCharacterService
         return gameSessionCharacter;
     }
 
-    private async Task<GameSessionCharacter> GetGameSessionCharacter(Guid gameSessionCharacterId)
+    public async Task<GameSessionCharacter> GetGameSessionCharacter(Guid gameSessionCharacterId)
     {
         var gameSessionCharacter = await _dbContext.GameSessionCharacters
             .AsTracking()

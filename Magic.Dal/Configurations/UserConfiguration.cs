@@ -28,10 +28,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.PropertyWithUnderscore(x => x.CityId);
         builder.HasForeignKey(x => x.City, x => x.CityId);
         builder.HasOne(x => x.City);
-        /*builder.PropertyWithUnderscore(x => x.Code);
-        builder.PropertyWithUnderscore(x => x.CodeDate)
-            .HasDateTimeConversion()
-            .HasColumnType(SqlColumnTypes.TimeStampWithTimeZone); */
 
         builder.HasForeignKey(x => x.RefUser, x => x.RefUserId);
 

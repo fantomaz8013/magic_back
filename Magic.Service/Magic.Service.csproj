@@ -15,6 +15,7 @@
     <ItemGroup>
         <ProjectReference Include="..\Magic.Common\Magic.Common.csproj" />
         <ProjectReference Include="..\Magic.Dal\Magic.Dal.csproj" />
+        <ProjectReference Include="..\Magic.Utils\Magic.Utils.csproj" />
     </ItemGroup>
 
 </Project>
