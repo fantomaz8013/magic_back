@@ -1,6 +1,5 @@
 ﻿using Magic.Api.Controller.Base;
 using Magic.Common.Models.Response;
-using Magic.Domain.Entities;
 using Magic.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using static Magic.Api.Configure.ModelStateFilter;

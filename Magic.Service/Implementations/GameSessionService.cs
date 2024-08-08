@@ -172,7 +172,7 @@ public class GameSessionService : IGameSessionService
         return true;
     }
 
-    public async Task<GameSession> GetGameSessionById(Guid gameSessionId)
+    private async Task<GameSession> GetGameSessionById(Guid gameSessionId)
     {
         var gameSession = await _dbContext.GameSessions
             .Include(x => x.CreatorUser)
@@ -210,6 +210,7 @@ public class GameSessionService : IGameSessionService
         return await _dbContext.GameSessions
             .Include(g => g.Users)
             .Include(g => g.CreatorUser)
+            .Include(g => g.Map)
             .FirstOrDefaultAsync(g => g.Id == gameSessionId);
     }
 

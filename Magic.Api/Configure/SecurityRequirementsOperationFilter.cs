@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.OpenApi.Models;
-
-namespace Magic.Api.Configure;
+﻿namespace Magic.Api.Configure;
 
 // public class SecurityRequirementsOperationFilter : IOperationFilter
 // {

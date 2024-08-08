@@ -29,6 +29,8 @@ import MenuItem from "@mui/material/MenuItem";
 import {useGetCharacteristicsQuery} from "../../redux/toolkit/api/characterApi";
 import {useGetCurrentUserQuery} from "../../redux/toolkit/api/userApi";
 import {RequestedSaveThrowPassed, setRequestSaveThrow} from "../../redux/toolkit/slices/gameSessionSlice";
+import {Map} from "./map/Map";
+import CssBaseline from "@mui/material/CssBaseline";
 
 export interface PlayerInfo {
     id: string;
@@ -165,7 +167,7 @@ export default function GameSession() {
     const {data: characteristics} = useGetCharacteristicsQuery();
     const {data: currentUser} = useGetCurrentUserQuery();
     const dispatch = useDispatch<AppDispatch>();
-    const gameSessionFullState = useSelector((state: RootState) => state.gameSession)
+    const gameSessionFullState = useSelector((state: RootState) => state.gameSession);
 
     const isGameMaster = (currentUser && currentUser.data && gameSessionFullState?.playerInfos[currentUser.data.id]?.isMaster) || false;
 
@@ -185,21 +187,31 @@ export default function GameSession() {
     }, [gameSessionFullState.requestedSaveThrowPassed]);
 
     return (
-        <Box sx={{
-            marginTop: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-        }}>
-            {renderGameSessionPage()}
-            {isGameMaster &&
-                <MasterToPlayerCommand anchorEl={ref} onStartCommandClick={startCommand} onClose={closeMenu}/>}
-            {renderModal()}
-            <Snackbar
-                open={!!snackBarMessage}
-                autoHideDuration={6000} onClick={closeSnackBar}
-                message={snackBarMessage}
-            />
+        <Box
+            sx={{
+                backgroundSize: 'cover',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+                backgroundImage: `url(https://www.wargamer.com/wp-content/sites/wargamer/2021/09/dnd-backgrounds-5e-hermit.jpg)`,
+            }}>
+            <CssBaseline/>
+            <Box sx={{
+                marginTop: 8,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+            }}>
+                {renderGameSessionPage()}
+                {isGameMaster &&
+                    <MasterToPlayerCommand anchorEl={ref} onStartCommandClick={startCommand} onClose={closeMenu}/>}
+                {renderModal()}
+                <Snackbar
+                    open={!!snackBarMessage}
+                    autoHideDuration={6000}
+                    onClick={closeSnackBar}
+                    message={snackBarMessage}
+                />
+            </Box>
         </Box>
     )
 
@@ -234,50 +246,47 @@ export default function GameSession() {
                 );
             case GameSessionStatusTypeEnum.InGame:
                 return (
-                    <>
-                        <Grid container spacing={2}>
-                            <Grid item xs={1}>
-                                <Box sx={{display: 'flex', flexDirection: 'column'}}>
-                                    {gameSessionFullState.gameSessionInfo.characters?.map((c: GameSessionCharacter) => {
-                                        return (
-                                            <CharacterLeftMenu
-                                                onClick={onClick}
-                                                key={c.id}
-                                                character={{...c, name: `${c.name} (${c.ownerId})`}}
-                                            />
-                                        );
-                                    })}
-                                </Box>
-                            </Grid>
-                            <Grid item xs={11}>
-                                <Box sx={{
-                                    height: '85vh',
-                                    display: 'flex',
-                                    alignItems: 'end'
-                                }}>
-                                    <Grid container>
-                                        <Grid item xs={1} sx={{
-                                            display: 'flex',
-                                            alignItems: 'end'
-                                        }}>
-                                            <Box>
-                                                <Dice/>
-                                            </Box>
-                                        </Grid>
-                                        <Grid item xs={11}>
-                                            <Box sx={{
-                                                width: '95%',
-                                                display: 'flex',
-                                                flexDirection: ' row-reverse',
-                                            }}>
-                                                <Chat/>
-                                            </Box>
-                                        </Grid>
-                                    </Grid>
-                                </Box>
-                            </Grid>
+                    <Grid container spacing={2}>
+                        <Grid item sx={{zIndex: 1}} xs={1}>
+                            <Box sx={{display: 'flex', flexDirection: 'column'}}>
+                                {gameSessionFullState.gameSessionInfo.characters?.map((c: GameSessionCharacter) => {
+                                    return (
+                                        <CharacterLeftMenu
+                                            onClick={onClick}
+                                            key={c.id}
+                                            character={{...c, name: `${c.name} (${c.ownerId})`}}
+                                        />
+                                    );
+                                })}
+                            </Box>
                         </Grid>
-                    </>
+                        <Grid item sx={{zIndex: 1}} xs={11}>
+                            <Box sx={{
+                                height: '85vh',
+                                display: 'flex',
+                                alignItems: 'end'
+                            }}>
+                                <Grid container>
+                                    <Grid item xs={1} sx={{
+                                        display: 'flex',
+                                        alignItems: 'end'
+                                    }}>
+                                        <Dice/>
+                                    </Grid>
+                                    <Grid item xs={11}>
+                                        <Box sx={{
+                                            width: '95%',
+                                            display: 'flex',
+                                            flexDirection: ' row-reverse',
+                                        }}>
+                                            <Chat/>
+                                        </Box>
+                                    </Grid>
+                                </Grid>
+                            </Box>
+                        </Grid>
+                        <Map/>
+                    </Grid>
                 );
             case GameSessionStatusTypeEnum.Finished:
                 break;
@@ -394,8 +403,8 @@ export default function GameSession() {
                         <FormControl sx={{mt: 2}} fullWidth>
                             <InputLabel>Параметр</InputLabel>
                             <Select
-                                value={changingParameter?.value}
-                                label="Параметр"
+                                value={changingParameter?.name || ''}
+                                label={"Параметр"}
                                 onChange={_setChangingParameter}
                             >
                                 {Object.entries(fillableFields).map(([key, value]) => {
@@ -412,9 +421,11 @@ export default function GameSession() {
                         {changingParameter?.value !== null && changingParameter?.value !== undefined &&
                             <FormControl sx={{mt: 2}} fullWidth>
                                 <Typography>
-                                    Начальное значение
-                                    <br/>
-                                    {changingParameter.initialValue}
+                                    {changingParameter.initialValue &&
+                                        <>Начальное значение
+                                            <br/>
+                                            {changingParameter.initialValue}
+                                        </>}
                                 </Typography>
                                 <TextField
                                     value={changingParameter.value.toString()}
@@ -433,9 +444,9 @@ export default function GameSession() {
         }
     }
 
-    async function saveChangedParameter(){
+    async function saveChangedParameter() {
         const character = gameSessionFullState.gameSessionInfo?.characters?.find(c => c.ownerId === command?.userId)!;
-        const newChar :Record<string, string> = {};
+        const newChar: Record<string, string> = {};
         newChar[changingParameter!.name] = changingParameter!.value;
         await api.changeCharacter(character.id, newChar)
         setChangingParameter(null);
@@ -449,7 +460,7 @@ export default function GameSession() {
         setChangingParameter({
             name: parameterName,
             initialValue: character[parameterName]?.toString()!,
-            value: character[parameterName]?.toString()!
+            value: character[parameterName]?.toString()! || '',
         });
     }
 

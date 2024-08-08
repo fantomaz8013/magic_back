@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using System.Text.Json.Serialization;
 using Magic.DAL.Extensions;
 using Magic.Domain.Entities;
 using Microsoft.EntityFrameworkCore;

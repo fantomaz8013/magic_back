@@ -10,7 +10,7 @@ public class GameSessionResponse
     public int MaxUserCount { get; set; }
     public Guid CreatorUserId { get; set; }
     public DateTime CreatedDate { get; set; }
-    public MapResponse Map { get; set; }
+    public MapResponse? Map { get; set; }
 
     public GameSessionResponse(GameSession gameSession)
     {
@@ -20,7 +20,7 @@ public class GameSessionResponse
         MaxUserCount = gameSession.MaxUserCount;
         CreatorUserId = gameSession.CreatorUserId;
         CreatedDate = gameSession.CreatedDate;
-        if (gameSession.Map != null) 
+        if (gameSession.Map != null)
             Map = new MapResponse(gameSession.Map);
     }
 }

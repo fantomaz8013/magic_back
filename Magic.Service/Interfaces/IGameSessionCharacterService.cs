@@ -1,5 +1,4 @@
 ﻿using Magic.Domain.Entities;
-using Microsoft.AspNetCore.Http;
 
 namespace Magic.Service.Interfaces;
 

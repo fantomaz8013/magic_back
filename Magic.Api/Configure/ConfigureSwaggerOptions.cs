@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
-
-namespace Magic.Api.Configure;
+﻿namespace Magic.Api.Configure;
 
 // public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
 // {

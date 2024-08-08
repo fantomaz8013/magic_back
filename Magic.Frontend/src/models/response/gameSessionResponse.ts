@@ -1,4 +1,5 @@
 import {BaseEntity} from "./characterTemplateResponse";
+import {MapResponse} from "./mapResponse";
 
 export interface GameSessionResponse extends BaseEntity<string> {
     title: string;
@@ -6,4 +7,5 @@ export interface GameSessionResponse extends BaseEntity<string> {
     maxUserCount: number;
     creatorUserId: string;
     createdDate: string;
+    map: MapResponse | null;
 }

@@ -8,12 +8,13 @@ import {ChatBox, ReceiverMessage, SenderMessage} from "mui-chat-box";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import {Avatar} from "@mui/material";
+import {Accordion, AccordionDetails, AccordionSummary, Avatar} from "@mui/material";
 import {useGetCurrentUserQuery} from "../../../redux/toolkit/api/userApi";
 import Typography from "@mui/material/Typography";
 import {useSelector} from "react-redux";
 import {RootState} from "../../../redux";
 import {socket} from "../../../utils/webSocket";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 
 export default function Chat() {
@@ -29,32 +30,40 @@ export default function Chat() {
     }, [messages]);
 
     return (
-        <Box>
-            <Typography mb={4} component="h1" variant="h5">
-                Player's chat
-            </Typography>
-            <Box sx={{height: 300, overflowY: 'scroll'}}>
-                <ChatBox>
-                    {messages.map(renderMessage)}
-                </ChatBox>
-                <div ref={scrollRef}></div>
-            </Box>
-            <Box>
-                <TextField
-                    type={'text'}
-                    margin="normal"
-                    required
-                    fullWidth
-                    value={currentMessage}
-                    onKeyDown={onKeyDown}
-                    onChange={onMessageChange}
-                />
-                <Button onClick={sendMessage}>SEND</Button>
-            </Box>
-        </Box>
+        <Accordion sx={{
+            width: '400px',
+        }}>
+            <AccordionSummary
+                expandIcon={<ExpandMoreIcon/>}
+            >
+                <Typography mb={4} component="h1" variant="h5">
+                    Player's chat
+                </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+                <Box sx={{height: 300, overflowY: 'scroll'}}>
+                    <ChatBox>
+                        {messages.map(renderMessage)}
+                    </ChatBox>
+                    <div ref={scrollRef}></div>
+                </Box>
+                <Box>
+                    <TextField
+                        type={'text'}
+                        margin="normal"
+                        required
+                        fullWidth
+                        value={currentMessage}
+                        onKeyDown={onKeyDown}
+                        onChange={onMessageChange}
+                    />
+                    <Button onClick={sendMessage}>SEND</Button>
+                </Box>
+            </AccordionDetails>
+        </Accordion>
     );
 
-    function renderMessage(baseMessage: BaseGameSessionMessage, i:number) {
+    function renderMessage(baseMessage: BaseGameSessionMessage, i: number) {
         let mes, login, isSender;
         switch (baseMessage.gameSessionMessageTypeEnum) {
             case GameSessionMessageTypeEnum.Server:
@@ -81,7 +90,9 @@ export default function Chat() {
             : ReceiverMessage;
         return (
             <Message key={baseMessage.id} avatar={<Avatar>{login?.slice(0, 1)}</Avatar>}>
-                {mes}
+                <Typography sx={{whiteSpace: 'wrap', wordBreak: 'break-word'}}>
+                    {mes}
+                </Typography>
             </Message>
         )
     }

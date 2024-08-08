@@ -167,59 +167,56 @@ export function useGameSessionWS(logsEnabled?: boolean) {
 
     return toReturn;
 
+    async function _invoke(action: WSActions, ...args: any) {
+        logsEnabled && console.log(action, ...args);
+        if (ws.state === "Connected")
+            await ws.invoke(action, ...args);
+        else
+            logsEnabled && console.warn('Called invoke on not connected')
+    }
+
     async function startGame() {
-        logsEnabled && console.log(WSActions.startGame);
-        await ws.invoke(WSActions.startGame);
+        await _invoke(WSActions.startGame);
     }
 
     async function joinGameSession(gameSessionId: string) {
-        logsEnabled && console.log(WSActions.joinGameSession, gameSessionId);
-        await ws.invoke(WSActions.joinGameSession, gameSessionId);
+        await _invoke(WSActions.joinGameSession, gameSessionId);
     }
 
     async function leaveGameSession() {
-        logsEnabled && console.log(WSActions.leaveGameSession);
-        await ws.invoke(WSActions.leaveGameSession);
+        await _invoke(WSActions.leaveGameSession);
     }
 
     async function newMessage(message: string) {
-        logsEnabled && console.log(WSActions.newMessage, message);
-        await ws.invoke(WSActions.newMessage, message);
+        await _invoke(WSActions.newMessage, message);
     }
 
     async function lockCharacter(characterId: string) {
-        logsEnabled && console.log(WSActions.lockCharacter, characterId);
-        await ws.invoke(WSActions.lockCharacter, characterId)
+        await _invoke(WSActions.lockCharacter, characterId)
     }
 
     async function unlockCharacter() {
-        logsEnabled && console.log(WSActions.unlockCharacter);
-        await ws.invoke(WSActions.unlockCharacter)
+        await _invoke(WSActions.unlockCharacter)
     }
 
     async function rollDice(cubeType: CubeTypeEnum) {
-        logsEnabled && console.log(WSActions.rollDice, CubeTypeEnum[cubeType]);
-        await ws.invoke(WSActions.rollDice, cubeType);
+        await _invoke(WSActions.rollDice, cubeType);
     }
 
     async function rollSaveDice() {
-        logsEnabled && console.log(WSActions.rollSaveDice);
-        await ws.invoke(WSActions.rollSaveDice);
+        await _invoke(WSActions.rollSaveDice);
     }
 
     async function kick(userId: string) {
-        logsEnabled && console.log(WSActions.kick, userId);
-        await ws.invoke(WSActions.kick, userId);
+        await _invoke(WSActions.kick, userId);
     }
 
     async function requestSaveThrow(userId: string, characteristicId: CharacterCharacteristicIds, value: number) {
-        logsEnabled && console.log(WSActions.requestSaveThrow, userId, characteristicId, value);
-        await ws.invoke(WSActions.requestSaveThrow, userId, characteristicId, value);
+        await _invoke(WSActions.requestSaveThrow, userId, characteristicId, value);
     }
 
     async function changeCharacter(characterId: string, changedFields: Partial<GameSessionCharacter>) {
-        logsEnabled && console.log(WSActions.changeCharacter);
-        await ws.invoke(WSActions.changeCharacter, characterId, changedFields);
+        await _invoke(WSActions.changeCharacter, characterId, changedFields);
     }
 
     function onPlayerInfoReceived(playerInfos: PlayerInfo[]) {

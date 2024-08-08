@@ -3,7 +3,6 @@ using Magic.Api.Extensions;
 using Magic.Common;
 using Magic.DAL.Extensions;
 using Magic.Service.Extensions;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.Extensions.FileProviders;

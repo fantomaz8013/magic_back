@@ -1,5 +1,4 @@
-﻿using System.Linq.Dynamic.Core;
-using Magic.Common.Models.Response;
+﻿using Magic.Common.Models.Response;
 using Magic.DAL;
 using Magic.Domain.Entities;
 using Magic.Domain.Enums;

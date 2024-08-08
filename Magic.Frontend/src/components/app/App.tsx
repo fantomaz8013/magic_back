@@ -14,6 +14,7 @@ import HomePage from "./HomePage";
 import GameSession from "../gameSession/GameSession";
 import Page from "../common/Page";
 import CssBaseline from "@mui/material/CssBaseline";
+import Box from "@mui/material/Box";
 
 export default function App() {
     return (
@@ -30,12 +31,9 @@ export default function App() {
                     <Route path={paths.default} element={<HomePage/>}/>
                 </Route>
                 <Route element={<RequireAuth/>}>
-                    <Route path={paths.game + "/:gameSessionId"}
-                           element={
-                               <>
-                                   <CssBaseline/>
-                                   <GameSession/>
-                               </>}
+                    <Route
+                        path={paths.game + "/:gameSessionId"}
+                        element={<GameSession/>}
                     />
                 </Route>
             </Route>

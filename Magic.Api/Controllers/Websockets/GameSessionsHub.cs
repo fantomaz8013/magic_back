@@ -106,6 +106,7 @@ public class GameSessionsHub : Hub
 
         await ConnectPlayer_Internal(gameSessionId, callerUser);
         await SendHistory(gameSession.Id, Clients.Caller);
+        //TODO isOnline
         await SendPlayerInfos(gameSession, Clients.Group(gameSession.Id.ToString()));
         await SendGameSessionInfo(gameSession.Id, gameSession.GameSessionStatus, Clients.Caller);
     }
@@ -151,9 +152,11 @@ public class GameSessionsHub : Hub
         var gameSessionInfo = new GameSessionInfo(gameSessionStatus);
         if (gameSessionStatus == GameSessionStatusTypeEnum.InGame)
         {
+            var gameSession = await _gameSessionService.GetById(gameSessionId);
             gameSessionInfo = gameSessionInfo with
             {
-                Characters = await _characterService.GetGameSessionCharacters(gameSessionId)
+                Characters = await _characterService.GetGameSessionCharacters(gameSessionId),
+                Map = gameSession!.Map != null ? new MapResponse(gameSession.Map) : null,
             };
         }
 
@@ -282,7 +285,6 @@ public class GameSessionsHub : Hub
         RequestedSaveThrow requestedSaveThrow
     )
     {
-        //TODO add info on connect
         RequestedSaveThrows.RequestSaveThrow(connectionId, requestedSaveThrow);
         await Clients
             .Client(connectionId)
