@@ -39,6 +39,7 @@ public class MapService : IMapService
     /// <returns></returns>
     public async Task<PathCalculationResponse> PathCalculation(Dictionary<int, LocationRequest> path, Guid mapId, Guid gameSessionCharacterId)
     {
+        //Результат просчета пути
         var pathCalculationResponse = new PathCalculationResponse();
         if (path.Count == 0)
         {
@@ -48,8 +49,6 @@ public class MapService : IMapService
         var map = await GetMapById(mapId);
         var gameSessionCharacter = await _gameSessionCharacterService.GetGameSessionCharacter(gameSessionCharacterId);
         LocationRequest? prevLocation = null;
-        //Результат просчета пути
-        
 
         if (!gameSessionCharacter.PositionX.HasValue || !gameSessionCharacter.PositionY.HasValue)
         {
