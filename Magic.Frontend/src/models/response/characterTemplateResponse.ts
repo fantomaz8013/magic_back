@@ -8,14 +8,19 @@ export interface CharacterTemplate extends BaseEntity<string> {
     description: string;
     avatarUrL: string;
     characterClass: CharacterClass;
-    abilities: string;
-    armor: string;
-    characterRaceId: string;
+    characterClassId: number;
+    abilities: Ability[];
+    abilitieIds: number[];
+    armor: number;
+    characterRaceId: number;
     characterRace: CharacterRace;
-    maxHP: string;
-    speed: string;
-    initiative: string;
+    maxHP: number;
+    speed: number;
+    initiative: number;
     characteristics: CharacteristicsMapper;
+}
+
+export interface Ability {
 }
 
 export type CharacteristicsMapper = { [key: number]: number };

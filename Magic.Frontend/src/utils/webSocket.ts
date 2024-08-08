@@ -3,7 +3,7 @@ import {baseProxy} from "../env";
 import React, {useEffect, useMemo, useRef, useState} from "react";
 import {AppDispatch, RootState,} from "../redux";
 import {useDispatch, useSelector} from "react-redux";
-import {GameSessionInfo} from "../models/websocket/gameStartedInfo";
+import {GameSessionCharacter, GameSessionInfo} from "../models/websocket/gameStartedInfo";
 import {BaseGameSessionMessage, CubeTypeEnum} from "../models/websocket/ChatMessage";
 import {PlayerInfo} from "../components/gameSession/GameSession";
 import {
@@ -52,6 +52,7 @@ export enum WSActions {
     startGame = 'StartGame',
     kick = 'Kick',
     requestSaveThrow = 'RequestSaveThrow',
+    changeCharacter = 'ChangeCharacter',
 }
 
 export enum WSEvents {
@@ -157,6 +158,7 @@ export function useGameSessionWS(logsEnabled?: boolean) {
         requestSaveThrow,
         unlockCharacter,
         rollSaveDice,
+        changeCharacter,
         state,
     };
 
@@ -213,6 +215,11 @@ export function useGameSessionWS(logsEnabled?: boolean) {
     async function requestSaveThrow(userId: string, characteristicId: CharacterCharacteristicIds, value: number) {
         logsEnabled && console.log(WSActions.requestSaveThrow, userId, characteristicId, value);
         await ws.invoke(WSActions.requestSaveThrow, userId, characteristicId, value);
+    }
+
+    async function changeCharacter(characterId: string, changedFields: Partial<GameSessionCharacter>) {
+        logsEnabled && console.log(WSActions.changeCharacter);
+        await ws.invoke(WSActions.changeCharacter, characterId, changedFields);
     }
 
     function onPlayerInfoReceived(playerInfos: PlayerInfo[]) {

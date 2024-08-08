@@ -7,7 +7,16 @@ import Chat from "./chat/Chat";
 import CharactersList from "./charactersList/CharactersList";
 import CharacterLeftMenu from "./charactersList/CharacterLeftMenu";
 import {useParams} from "react-router-dom";
-import {FormControl, InputLabel, LinearProgress, Modal, Select, SelectChangeEvent, Snackbar} from "@mui/material";
+import {
+    FormControl,
+    InputLabel,
+    LinearProgress,
+    Modal,
+    Select,
+    SelectChangeEvent,
+    Snackbar,
+    TextField
+} from "@mui/material";
 import {GameSessionStatusTypeEnum} from "../../models/websocket/gameSessionStatus";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "../../redux";
@@ -19,7 +28,6 @@ import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import {useGetCharacteristicsQuery} from "../../redux/toolkit/api/characterApi";
 import {useGetCurrentUserQuery} from "../../redux/toolkit/api/userApi";
-import {CubeTypeEnum} from "../../models/websocket/ChatMessage";
 import {RequestedSaveThrowPassed, setRequestSaveThrow} from "../../redux/toolkit/slices/gameSessionSlice";
 
 export interface PlayerInfo {
@@ -61,6 +69,86 @@ const style = {
     p: 4,
 };
 
+interface FillableField {
+    name: string;
+    type: React.InputHTMLAttributes<unknown>['type'];
+}
+
+interface ChangingField {
+    name: string;
+    value: string;
+    initialValue: string;
+}
+
+
+const fillableFields: Partial<Record<(keyof GameSessionCharacter), FillableField>> = {
+    //id: {},
+    // ownerId: {},
+    name: {
+        name: 'Имя',
+        type: 'text',
+    },
+    characteristics: {
+        name: 'Характеристики',
+        type: 'text',
+    },
+    //characterClass: {},
+    characterClassId: {
+        name: 'ID класса',
+        type: 'number',
+    },
+    // characterRace: {},
+    characterRaceId: {
+        name: 'ID рассы',
+        type: 'number',
+    },
+    description: {
+        name: 'Описание',
+        type: 'text',
+    },
+    //gameSessionId: {},
+    armor: {
+        name: 'Класс брони',
+        type: 'number',
+    },
+    avatarUrL: {
+        name: 'Аватар',
+        type: 'text',
+    },
+    abilitieIds: {
+        name: 'Способности',
+        type: 'text',
+    },
+    currentHP: {
+        name: 'Текущий уровень здоровья',
+        type: 'number',
+    },
+    currentShield: {
+        name: 'Щит',
+        type: 'number',
+    },
+    initiative: {
+        name: 'Инициатива',
+        type: 'number',
+    },
+    maxHP: {
+        name: 'Максимальный уровень здоровья',
+        type: 'number',
+    },
+    positionX: {
+        name: 'Позиция X',
+        type: 'number',
+    },
+    positionY: {
+        name: 'Позиция Y',
+        type: 'number',
+    },
+    speed: {
+        name: 'Скорость',
+        type: 'number',
+    },
+}
+
 export default function GameSession() {
     const {state, ...api} = useGameSessionWS();
     const {gameSessionId} = useParams();
@@ -68,6 +156,7 @@ export default function GameSession() {
     const [command, setCommand] = React.useState<{ type: MasterCommands, userId: string } | null>(null);
     const [ref, setRef] = useState<HTMLElement | null>(null);
     const [snackBarMessage, setSnackBarMessage] = useState<string | null>(null);
+    const [changingParameter, setChangingParameter] = useState<ChangingField | null>(null);
     const [characteristic, setCharacteristic] = React.useState<{ type: CharacterCharacteristicIds, value: number }>({
         type: CharacterCharacteristicIds.Strength,
         value: 5
@@ -197,11 +286,7 @@ export default function GameSession() {
 
     function renderModal() {
         const open = !!gameSessionFullState.requestedSaveThrow || !!command;
-        // console.log(`Player test request.
-        //  TO: ${command!.userId} (${getUserLoginById(command!.userId)})
-        //  TYPE: ${characteristic.type} (${characteristics!.data!.find(c => c.id === characteristic.type)!.title})
-        //  VALUE: ${characteristic.value} (${SavingThrowEnumMapper[characteristic.value]})
-        //  `);
+
         const getCharacteristicTitle = (characterCharacteristicId: number) => {
             return characteristics!.data!.find(c => c.id === characterCharacteristicId)!.title;
         }
@@ -241,7 +326,7 @@ export default function GameSession() {
 
     function renderCommandInModal() {
         switch (command?.type) {
-            case MasterCommands.Test: {
+            case MasterCommands.RequestSaveThrow: {
                 // const charId = gameSessionFullState.playerInfos[command.userId]
                 // const info = gameSessionFullState.gameSessionInfo?.characters
                 return (
@@ -252,7 +337,6 @@ export default function GameSession() {
                         <FormControl sx={{mt: 2}} fullWidth>
                             <InputLabel>Характеристика</InputLabel>
                             <Select
-                                id={"c"}
                                 value={characteristic.type.toString()}
                                 label="Характеристика"
                                 onChange={setCharacteristicType}
@@ -301,10 +385,77 @@ export default function GameSession() {
                     </>
                 );
             }
+            case MasterCommands.ChangeCharacteristics: {
+                return (
+                    <>
+                        <Typography id="modal-modal-title" variant="h6" component="h2">
+                            Изменить параметры у игрока {getUserLoginById(command.userId)}
+                        </Typography>
+                        <FormControl sx={{mt: 2}} fullWidth>
+                            <InputLabel>Параметр</InputLabel>
+                            <Select
+                                value={changingParameter?.value}
+                                label="Параметр"
+                                onChange={_setChangingParameter}
+                            >
+                                {Object.entries(fillableFields).map(([key, value]) => {
+                                    return (
+                                        <MenuItem
+                                            key={key}
+                                            value={key}>
+                                            {value.name}
+                                        </MenuItem>
+                                    );
+                                })}
+                            </Select>
+                        </FormControl>
+                        {changingParameter?.value !== null && changingParameter?.value !== undefined &&
+                            <FormControl sx={{mt: 2}} fullWidth>
+                                <Typography>
+                                    Начальное значение
+                                    <br/>
+                                    {changingParameter.initialValue}
+                                </Typography>
+                                <TextField
+                                    value={changingParameter.value.toString()}
+                                    onChange={_setChangingParameterValue}
+                                />
+                                <Box>
+                                    <Button sx={{mt: 2}} onClick={saveChangedParameter}>Изменить</Button>
+                                </Box>
+                            </FormControl>}
+                    </>
+                );
+            }
             case null: {
                 return (<React.Fragment/>);
             }
         }
+    }
+
+    async function saveChangedParameter(){
+        const character = gameSessionFullState.gameSessionInfo?.characters?.find(c => c.ownerId === command?.userId)!;
+        const newChar :Record<string, string> = {};
+        newChar[changingParameter!.name] = changingParameter!.value;
+        await api.changeCharacter(character.id, newChar)
+        setChangingParameter(null);
+        closeModal();
+    }
+
+    function _setChangingParameter(event: SelectChangeEvent) {
+        const parameterName = event.target.value as keyof GameSessionCharacter;
+        const userId = command!.userId;
+        const character = gameSessionFullState.gameSessionInfo?.characters?.find(c => c.ownerId === userId)!;
+        setChangingParameter({
+            name: parameterName,
+            initialValue: character[parameterName]?.toString()!,
+            value: character[parameterName]?.toString()!
+        });
+    }
+
+    function _setChangingParameterValue(event: React.ChangeEvent<HTMLTextAreaElement>) {
+        const parameterValue = event.currentTarget.value;
+        setChangingParameter({...changingParameter!, value: parameterValue});
     }
 
     function setCharacteristicType(event: SelectChangeEvent) {
@@ -328,11 +479,6 @@ export default function GameSession() {
     }
 
     async function onTestPlayerClick() {
-        // console.log(`Player test request.
-        //  TO: ${command!.userId} (${getUserLoginById(command!.userId)})
-        //  TYPE: ${characteristic.type} (${characteristics!.data!.find(c => c.id === characteristic.type)!.title})
-        //  VALUE: ${characteristic.value} (${SavingThrowEnumMapper[characteristic.value]})
-        //  `);
         await api.requestSaveThrow(command!.userId, characteristic.type, characteristic.value);
         closeModal();
     }
@@ -342,6 +488,7 @@ export default function GameSession() {
     }
 
     function closeModal() {
+        setChangingParameter(null);
         setCommand(null);
     }
 

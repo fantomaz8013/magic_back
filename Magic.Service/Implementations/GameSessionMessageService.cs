@@ -20,7 +20,8 @@ public class GameSessionMessageService : IGameSessionMessageService
         _userProvider = userProvider;
     }
 
-    public async Task<ChatGameGameSessionMessageResponse> AddChatMessage(Guid gameSessionId, string message, Guid userId)
+    public async Task<ChatGameGameSessionMessageResponse> AddChatMessage(Guid gameSessionId, string message,
+        Guid userId)
     {
         var rEntry = await _dbContext.ChatGameSessionMessages.AddAsync(new ChatGameGameSessionMessage
         {
@@ -76,16 +77,17 @@ public class GameSessionMessageService : IGameSessionMessageService
         return new DiceGameSessionMessageResponse(res);
     }
 
-    public async Task<List<BaseGameSessionMessageResponse>> GetMessages(Guid gameSessionId)
+    public async Task<List<BaseGameSessionMessageResponse>> GetMessages(Guid gameSessionId, int takeLast = 10)
     {
         var messages = await _dbContext.GameSessionMessages
             .Include(m => (m as ChatGameGameSessionMessage).Author)
             .Include(m => (m as DiceGameSessionMessage).Author)
             .Where(g => g.GameSessionId == gameSessionId)
-            .OrderBy(g => g.CreatedDate)
+            .OrderByDescending(g => g.CreatedDate)
+            .Take(takeLast)
             .ToListAsync();
 
-
+        messages.Reverse();
         var responses = new List<BaseGameSessionMessageResponse>();
         foreach (var message in messages)
         {

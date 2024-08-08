@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Magic.Service.Implementations
@@ -18,6 +19,102 @@ namespace Magic.Service.Implementations
         public GameSessionCharacterService(DataBaseContext dbContext)
         {
             _dbContext = dbContext;
+        }
+
+        public async Task Change(
+            GameSessionCharacter gameSessionCharacter,
+            Dictionary<string, string> changedCharacterFields
+        )
+        {
+            #region Fields
+
+            var fillableFields =
+                new Dictionary<string, Action<string, GameSessionCharacter>>(StringComparer.InvariantCultureIgnoreCase)
+                {
+                    {
+                        nameof(GameSessionCharacter.Armor),
+                        (value, gameSessionCharacter) => { gameSessionCharacter.Armor = int.Parse(value); }
+                    },
+                    {
+                        nameof(GameSessionCharacter.Characteristics),
+                        (value, gameSessionCharacter) =>
+                        {
+                            var newCharacteristics = JsonSerializer.Deserialize<Dictionary<int, int>>(value);
+                            if (newCharacteristics.Count < 6)
+                                throw new ArgumentException("Incorrect number of characteristics");
+
+                            gameSessionCharacter.Characteristics = newCharacteristics;
+                        }
+                    },
+                    {
+                        nameof(GameSessionCharacter.CharacterClassId),
+                        (value, gameSessionCharacter) => { gameSessionCharacter.CharacterClassId = int.Parse(value); }
+                    },
+                    {
+                        nameof(GameSessionCharacter.Description),
+                        (value, gameSessionCharacter) => { gameSessionCharacter.Description = value; }
+                    },
+                    {
+                        nameof(GameSessionCharacter.Name),
+                        (value, gameSessionCharacter) => { gameSessionCharacter.Name = value; }
+                    },
+                    {
+                        nameof(GameSessionCharacter.Speed),
+                        (value, gameSessionCharacter) => { gameSessionCharacter.Speed = int.Parse(value); }
+                    },
+                    {
+                        nameof(GameSessionCharacter.AbilitieIds),
+                        (value, gameSessionCharacter) =>
+                        {
+                            gameSessionCharacter.AbilitieIds = JsonSerializer.Deserialize<int[]>(value);
+                        }
+                    },
+                    {
+                        nameof(GameSessionCharacter.CharacterRaceId),
+                        (value, gameSessionCharacter) => { gameSessionCharacter.CharacterRaceId = int.Parse(value); }
+                    },
+                    {
+                        nameof(GameSessionCharacter.Initiative),
+                        (value, gameSessionCharacter) => { gameSessionCharacter.Initiative = int.Parse(value); }
+                    },
+                    {
+                        nameof(GameSessionCharacter.CurrentShield),
+                        (value, gameSessionCharacter) => { gameSessionCharacter.CurrentShield = int.Parse(value); }
+                    },
+                    {
+                        nameof(GameSessionCharacter.PositionX),
+                        (value, gameSessionCharacter) => { gameSessionCharacter.PositionX = int.Parse(value); }
+                    },
+                    {
+                        nameof(GameSessionCharacter.PositionY),
+                        (value, gameSessionCharacter) => { gameSessionCharacter.PositionY = int.Parse(value); }
+                    },
+                    {
+                        nameof(GameSessionCharacter.AvatarUrL),
+                        (value, gameSessionCharacter) => { gameSessionCharacter.AvatarUrL = value; }
+                    },
+                    {
+                        nameof(GameSessionCharacter.CurrentHP),
+                        (value, gameSessionCharacter) =>
+                        {
+                            gameSessionCharacter.CurrentHP = Math.Min(gameSessionCharacter.MaxHP, int.Parse(value));
+                        }
+                    },
+                    {
+                        nameof(GameSessionCharacter.MaxHP),
+                        (value, gameSessionCharacter) => { gameSessionCharacter.MaxHP = int.Parse(value); }
+                    },
+                };
+
+            #endregion
+
+            foreach (var pair in changedCharacterFields.Where(p => fillableFields.ContainsKey(p.Key)))
+            {
+                fillableFields[pair.Key].Invoke(pair.Value, gameSessionCharacter);
+            }
+
+            _dbContext.Update(gameSessionCharacter);
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task<GameSessionCharacter> Armor(Guid gameSessionCharacterId, int value)

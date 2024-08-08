@@ -1,7 +1,6 @@
 import React from "react";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import {CharacterCharacteristicIds} from "../../../models/response/characterTemplateResponse";
 
 export interface MasterToPlayerCommandProps {
     anchorEl: HTMLElement | null;
@@ -11,8 +10,8 @@ export interface MasterToPlayerCommandProps {
 
 export enum MasterCommands {
     Kick = 'Kick',
-    Test = 'Test',
-    ChangeHp = 'ChangeHp',
+    RequestSaveThrow = 'RequestSaveThrow',
+    ChangeCharacteristics = 'ChangeCharacteristics',
 }
 
 export function MasterToPlayerCommand({anchorEl, onStartCommandClick, onClose}: MasterToPlayerCommandProps) {
@@ -27,8 +26,8 @@ export function MasterToPlayerCommand({anchorEl, onStartCommandClick, onClose}: 
             }}
         >
             <MenuItem id={MasterCommands.Kick} onClick={_onStartCommandClick}>Выгнать</MenuItem>
-            <MenuItem id={MasterCommands.Test} onClick={_onStartCommandClick}>Запросить спас-бросок</MenuItem>
-            <MenuItem id={MasterCommands.Test} onClick={_onStartCommandClick}>Изменить здоровье</MenuItem>
+            <MenuItem id={MasterCommands.RequestSaveThrow} onClick={_onStartCommandClick}>Запросить спас-бросок</MenuItem>
+            <MenuItem id={MasterCommands.ChangeCharacteristics} onClick={_onStartCommandClick}>Изменить характеристики</MenuItem>
         </Menu>
     );
 

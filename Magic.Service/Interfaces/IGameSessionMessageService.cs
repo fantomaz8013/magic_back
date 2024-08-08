@@ -11,5 +11,5 @@ public interface IGameSessionMessageService
     Task<DiceGameSessionMessageResponse> AddDiceMessage(Guid gameSessionId, int diceRoll, CubeTypeEnum cubeTypeEnum,
         Guid userId);
 
-    Task<List<BaseGameSessionMessageResponse>> GetMessages(Guid gameSessionId);
+    Task<List<BaseGameSessionMessageResponse>> GetMessages(Guid gameSessionId, int takeLast = 10);
 }

@@ -2,6 +2,7 @@ import * as React from 'react';
 import Card from '@mui/material/Card';
 import CardMedia from '@mui/material/CardMedia';
 import {GameSessionCharacter} from "../../../models/websocket/gameStartedInfo";
+import Typography from "@mui/material/Typography";
 
 
 export interface CharacterTemplateProps {
@@ -12,6 +13,9 @@ export interface CharacterTemplateProps {
 export default function CharacterLeftMenu({character, onClick}: CharacterTemplateProps) {
     return (
         <Card onClick={onClick} id={character.ownerId}>
+            <Typography>
+                {character.currentHP}/{character.maxHP}
+            </Typography>
             <CardMedia
                 sx={{height: 150}}
                 image={character.avatarUrL}

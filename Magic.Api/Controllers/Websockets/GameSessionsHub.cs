@@ -43,12 +43,10 @@ public class GameSessionsHub : Hub
 
         if (gameSessionId is null)
             throw new HubException("GameSession not found");
+
         var caller = await _userService.CurrentUser();
 
-        if (caller is null)
-            throw new HubException("401, Unauthorized");
-
-        return (gameSessionId.Value, caller);
+        return (gameSessionId.Value, caller!);
     }
 
     public async Task NewMessage(string message)
@@ -247,10 +245,8 @@ public class GameSessionsHub : Hub
         var (gameSessionId, callerUser) = await GetConnectionInfoOrThrow();
         var gameSession = await _gameSessionService.GetById(gameSessionId);
 
-        if (gameSession == null || gameSession.CreatorUserId != callerUser.Id)
-        {
+        if (!IsCallerAdmin(gameSession, callerUser.Id))
             throw new HubException("You have no rights to run this action");
-        }
 
         var userToKick = gameSession.Users.FirstOrDefault(u => u.Id == userId);
         var connectionId = ConnectedUsers.GetConnectionId(gameSessionId, userToKick.Id);
@@ -347,6 +343,34 @@ public class GameSessionsHub : Hub
         var passedMessage = hasPassed ? "прошёл" : "провалил";
         return
             @$"Игрок {callerLogin} {passedMessage} проверку на {characteristicTitle} сложностью в {requestSaveThrow.Value}, выбросив {rollDice} с модификатором {modificator} (={rollDice + modificator}).";
+    }
+
+    public async Task ChangeCharacter(Guid characterId, Dictionary<string, string> changedCharacterFields)
+    {
+        var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
+        if (!await IsCallerAdmin(gameSessionId, caller))
+            throw new HubException("You have no rights to run this action");
+
+        var gameSessionCharacters = await _characterService.GetGameSessionCharacters(gameSessionId);
+        var gameSessionCharacter = gameSessionCharacters.FirstOrDefault(c => c.Id == characterId);
+        await _gameSessionCharacterService.Change(gameSessionCharacter, changedCharacterFields);
+        await SendGameSessionInfo(
+            gameSessionId,
+            GameSessionStatusTypeEnum.InGame,
+            Clients.Group(gameSessionId.ToString())
+        );
+    }
+
+    private async Task<bool> IsCallerAdmin(Guid gameSessionId, UserResponse caller)
+    {
+        var gameSession = await _gameSessionService.GetById(gameSessionId);
+
+        return IsCallerAdmin(gameSession, caller.Id);
+    }
+
+    private bool IsCallerAdmin(GameSession? gameSession, Guid callerId)
+    {
+        return gameSession != null && gameSession.CreatorUserId == callerId;
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
