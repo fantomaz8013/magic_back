@@ -1,18 +1,34 @@
 import {GameSessionInfo} from "../../../models/websocket/gameStartedInfo";
 import {BaseGameSessionMessage} from "../../../models/websocket/ChatMessage";
-import {PlayerInfo} from "../../../components/gameSession";
+import {PlayerInfo} from "../../../components/gameSession/GameSession";
 import {createSlice} from "@reduxjs/toolkit";
+import {CharacterCharacteristicIds} from "../../../models/response/characterTemplateResponse";
 
 export interface GameSessionFullState {
     gameSessionInfo: GameSessionInfo | null;
     messages: BaseGameSessionMessage[];
     playerInfos: Record<string, PlayerInfo>;
+    requestedSaveThrow: RequestedSaveThrow | null;
+    requestedSaveThrowPassed: RequestedSaveThrowPassed | null;
+}
+
+export interface RequestedSaveThrow {
+    characterCharacteristicId: CharacterCharacteristicIds;
+    value: number;
+    callerId: string;
+    userId: string;
+}
+
+export interface RequestedSaveThrowPassed extends RequestedSaveThrow {
+    resultRollValue: number;
 }
 
 const initialState: GameSessionFullState = {
     gameSessionInfo: null,
     messages: [],
     playerInfos: {},
+    requestedSaveThrow: null,
+    requestedSaveThrowPassed: null,
 };
 
 const slicePrefix = 'gameSession';
@@ -34,9 +50,15 @@ export const gameSessionSlice = createSlice({
                 [userId]: {
                     ...state.playerInfos[userId],
                     lockedCharacterId: null,
-                    isOnline: null,
+                    isOnline: false,
                 }
             };
+        },
+        setRequestSaveThrow: (state, action) => {
+            state.requestedSaveThrow = action.payload;
+        },
+        setRequestSaveThrowPassed: (state, action) => {
+            state.requestedSaveThrowPassed = action.payload;
         },
         characterLocked: (state, action) => {
             const {userId, lockedCharacterTemplateId} = action.payload;
@@ -75,4 +97,6 @@ export const {
     playerLeft,
     characterLocked,
     characterUnlocked,
+    setRequestSaveThrow,
+    setRequestSaveThrowPassed,
 } = gameSessionSlice.actions;

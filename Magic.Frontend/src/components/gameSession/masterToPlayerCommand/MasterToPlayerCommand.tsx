@@ -1,33 +1,38 @@
 import React from "react";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
+import {CharacterCharacteristicIds} from "../../../models/response/characterTemplateResponse";
 
 export interface MasterToPlayerCommandProps {
     anchorEl: HTMLElement | null;
-    setAnchorEl: (target: HTMLElement | null) => void;
+    onClose: () => void;
+    onStartCommandClick: (type: MasterCommands) => void;
 }
 
-export function MasterToPlayerCommand(props: MasterToPlayerCommandProps) {
+export enum MasterCommands {
+    Kick = 'Kick',
+    Test = 'Test',
+    ChangeHp = 'ChangeHp',
+}
+
+export function MasterToPlayerCommand({anchorEl, onStartCommandClick, onClose}: MasterToPlayerCommandProps) {
     return (
         <Menu
             id="basic-menu"
-            anchorEl={props.anchorEl}
-            open={!!props.anchorEl}
-            onClose={handleClose}
+            anchorEl={anchorEl}
+            open={!!anchorEl}
+            onClose={onClose}
             MenuListProps={{
                 'aria-labelledby': 'basic-button',
             }}
         >
-            <MenuItem onClick={handleClose}>Выгнать</MenuItem>
-            <MenuItem onClick={handleClose}>Запросить спас-бросок</MenuItem>
+            <MenuItem id={MasterCommands.Kick} onClick={_onStartCommandClick}>Выгнать</MenuItem>
+            <MenuItem id={MasterCommands.Test} onClick={_onStartCommandClick}>Запросить спас-бросок</MenuItem>
+            <MenuItem id={MasterCommands.Test} onClick={_onStartCommandClick}>Изменить здоровье</MenuItem>
         </Menu>
     );
 
-    function handleClick(event: React.MouseEvent<HTMLButtonElement>) {
-        props.setAnchorEl(event.currentTarget);
-    }
-
-    function handleClose() {
-        props.setAnchorEl(null);
+    function _onStartCommandClick(e: React.MouseEvent<HTMLLIElement>) {
+        onStartCommandClick(e.currentTarget.id as MasterCommands);
     }
 }

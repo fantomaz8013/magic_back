@@ -1,10 +1,6 @@
-import {useGetCurrentUserQuery} from "../../../redux/toolkit/api/userApi";
 import React from "react";
-import {resetToken} from "../../../redux/toolkit/slices/tokenSlice";
 import {useDispatch} from "react-redux";
-import {AppDispatch} from "../../../redux";
 import {useNavigate} from "react-router-dom";
-import paths from "../../../consts/paths";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Tooltip from "@mui/material/Tooltip";
@@ -13,6 +9,10 @@ import Avatar from "@mui/material/Avatar";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
+import {useGetCurrentUserQuery} from "../../../../redux/toolkit/api/userApi";
+import {AppDispatch} from "../../../../redux";
+import paths from "../../../../consts/paths";
+import {resetToken} from "../../../../redux/toolkit/slices/tokenSlice";
 
 export default function Account() {
     const {isLoading, data: currentUser} = useGetCurrentUserQuery();

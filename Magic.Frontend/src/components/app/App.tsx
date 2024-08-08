@@ -4,14 +4,14 @@ import {
     Route,
 } from "react-router-dom";
 import paths from "../../consts/paths";
-import Login from "../login";
-import Register from "../register";
+import Login from "../login/Login";
+import Register from "../register/Register";
 import RequireAuth from "../common/RequireAuth";
 import RequireAnonym from "../common/RequireAnonym";
-import Profile from "../profile/profile";
+import Profile from "../profile/Profile";
 import Layout from "./Layout";
 import HomePage from "./HomePage";
-import GameSession from "../gameSession";
+import GameSession from "../gameSession/GameSession";
 import Page from "../common/Page";
 import CssBaseline from "@mui/material/CssBaseline";
 

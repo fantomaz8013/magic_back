@@ -5,16 +5,20 @@ import {AppDispatch, RootState,} from "../redux";
 import {useDispatch, useSelector} from "react-redux";
 import {GameSessionInfo} from "../models/websocket/gameStartedInfo";
 import {BaseGameSessionMessage, CubeTypeEnum} from "../models/websocket/ChatMessage";
-import {PlayerInfo} from "../components/gameSession";
+import {PlayerInfo} from "../components/gameSession/GameSession";
 import {
     addMessage,
     characterLocked,
     characterUnlocked,
-    playerLeft,
+    playerLeft, RequestedSaveThrow, setRequestSaveThrow,
     setGameSessionInfo,
     setMessages,
-    setPlayerInfos
+    setPlayerInfos, RequestedSaveThrowPassed, setRequestSaveThrowPassed
 } from "../redux/toolkit/slices/gameSessionSlice";
+import {useNavigate} from "react-router-dom";
+import {useGetCurrentUserQuery} from "../redux/toolkit/api/userApi";
+import paths from "../consts/paths";
+import {CharacterCharacteristicIds} from "../models/response/characterTemplateResponse";
 
 function createSignalRConnection(
     url: string,
@@ -42,20 +46,34 @@ export enum WSActions {
     joinGameSession = 'JoinGameSession',
     leaveGameSession = 'LeaveGameSession',
     rollDice = 'RollDice',
+    rollSaveDice = 'RollSaveDice',
     lockCharacter = 'LockCharacter',
     unlockCharacter = 'UnlockCharacter',
     startGame = 'StartGame',
+    kick = 'Kick',
+    requestSaveThrow = 'RequestSaveThrow',
 }
 
 export enum WSEvents {
+    //messages
     historyReceived = 'historyReceived',
     messageReceived = 'messageReceived',
-    characterLocked = 'characterLocked',
-    characterUnlocked = 'characterUnlocked',
-    playerLeft = 'playerLeft',
+
+
+    //global info
     playerInfoReceived = 'playerInfoReceived',
     gameSessionInfoReceived = "gameSessionInfoReceived",
-    gameStarted = "gameStarted",
+
+
+    //characters
+    characterLocked = 'characterLocked',
+    characterUnlocked = 'characterUnlocked',
+
+
+    //player
+    playerSaveThrow = "playerSaveThrow",
+    playerLeft = 'playerLeft',
+    playerSaveThrowPassed = 'playerSaveThrowPassed',
 }
 
 
@@ -100,27 +118,31 @@ export let socket: apiType | null = null;
 export function useGameSessionWS(logsEnabled?: boolean) {
     logsEnabled ??= true;
     const {ws, state} = useSignalR(wsPath);
+    const navigate = useNavigate();
+    const {data: currentUser} = useGetCurrentUserQuery();
     const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
         ws.on(WSEvents.gameSessionInfoReceived, onGameSessionInfoReceived);
-        ws.on(WSEvents.gameStarted, onGameStarted);
         ws.on(WSEvents.messageReceived, onMessageReceived);
         ws.on(WSEvents.historyReceived, onHistoryReceived);
         ws.on(WSEvents.playerInfoReceived, onPlayerInfoReceived);
         ws.on(WSEvents.characterLocked, onCharacterLocked);
         ws.on(WSEvents.characterUnlocked, onCharacterUnlocked);
         ws.on(WSEvents.playerLeft, onPlayerLeft);
+        ws.on(WSEvents.playerSaveThrow, onPlayerSaveThrow);
+        ws.on(WSEvents.playerSaveThrowPassed, onPlayerSaveThrowPassed);
 
         return () => {
             ws.off(WSEvents.gameSessionInfoReceived);
-            ws.off(WSEvents.gameStarted);
             ws.off(WSEvents.messageReceived);
             ws.off(WSEvents.historyReceived);
             ws.off(WSEvents.playerInfoReceived);
             ws.off(WSEvents.characterLocked);
             ws.off(WSEvents.characterUnlocked);
             ws.off(WSEvents.playerLeft);
+            ws.off(WSEvents.playerSaveThrow);
+            ws.off(WSEvents.playerSaveThrowPassed);
         }
     }, [ws])
 
@@ -131,8 +153,11 @@ export function useGameSessionWS(logsEnabled?: boolean) {
         newMessage,
         rollDice,
         startGame,
+        kick,
+        requestSaveThrow,
+        unlockCharacter,
+        rollSaveDice,
         state,
-        unlockCharacter
     };
 
     socket = toReturn;
@@ -175,6 +200,21 @@ export function useGameSessionWS(logsEnabled?: boolean) {
         await ws.invoke(WSActions.rollDice, cubeType);
     }
 
+    async function rollSaveDice() {
+        logsEnabled && console.log(WSActions.rollSaveDice);
+        await ws.invoke(WSActions.rollSaveDice);
+    }
+
+    async function kick(userId: string) {
+        logsEnabled && console.log(WSActions.kick, userId);
+        await ws.invoke(WSActions.kick, userId);
+    }
+
+    async function requestSaveThrow(userId: string, characteristicId: CharacterCharacteristicIds, value: number) {
+        logsEnabled && console.log(WSActions.requestSaveThrow, userId, characteristicId, value);
+        await ws.invoke(WSActions.requestSaveThrow, userId, characteristicId, value);
+    }
+
     function onPlayerInfoReceived(playerInfos: PlayerInfo[]) {
         logsEnabled && console.log(WSEvents.playerInfoReceived, playerInfos);
         dispatch(setPlayerInfos(playerInfos.reduce((pv, cv) => {
@@ -197,15 +237,23 @@ export function useGameSessionWS(logsEnabled?: boolean) {
     function onPlayerLeft(userId: string) {
         logsEnabled && console.log(WSEvents.playerLeft, userId);
         dispatch(playerLeft(userId));
+        if (userId === currentUser?.data?.id) {
+            navigate(paths.home);
+        }
+    }
+
+    function onPlayerSaveThrow(data: RequestedSaveThrow) {
+        logsEnabled && console.log(WSEvents.playerSaveThrow, data);
+        dispatch(setRequestSaveThrow(data));
+    }
+
+    function onPlayerSaveThrowPassed(data: RequestedSaveThrowPassed) {
+        logsEnabled && console.log(WSEvents.playerSaveThrowPassed, data);
+        dispatch(setRequestSaveThrowPassed(data));
     }
 
     function onGameSessionInfoReceived(data: GameSessionInfo) {
         logsEnabled && console.log(WSEvents.gameSessionInfoReceived, data)
-        dispatch(setGameSessionInfo(data));
-    }
-
-    function onGameStarted(data: GameSessionInfo) {
-        logsEnabled && console.log(WSEvents.gameStarted, data)
         dispatch(setGameSessionInfo(data));
     }
 

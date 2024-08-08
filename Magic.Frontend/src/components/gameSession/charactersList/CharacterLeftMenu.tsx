@@ -1,24 +1,21 @@
 import * as React from 'react';
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
-import {
-    CharacterTemplate
-} from "../../../models/response/characterTemplateResponse";
+import {GameSessionCharacter} from "../../../models/websocket/gameStartedInfo";
 
 
 export interface CharacterTemplateProps {
-    template: CharacterTemplate;
+    character: GameSessionCharacter;
     onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
-export default function CharacterCard({template, onClick}: CharacterTemplateProps) {
+export default function CharacterLeftMenu({character, onClick}: CharacterTemplateProps) {
     return (
-        <Card onClick={onClick}>
+        <Card onClick={onClick} id={character.ownerId}>
             <CardMedia
                 sx={{height: 150}}
-                image={template.avatarUrL}
-                title={template.name}
+                image={character.avatarUrL}
+                title={character.name}
             />
         </Card>
     );

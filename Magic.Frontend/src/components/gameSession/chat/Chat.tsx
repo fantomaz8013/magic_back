@@ -54,7 +54,7 @@ export default function Chat() {
         </Box>
     );
 
-    function renderMessage(baseMessage: BaseGameSessionMessage) {
+    function renderMessage(baseMessage: BaseGameSessionMessage, i:number) {
         let mes, login, isSender;
         switch (baseMessage.gameSessionMessageTypeEnum) {
             case GameSessionMessageTypeEnum.Server:
@@ -80,7 +80,7 @@ export default function Chat() {
             ? SenderMessage
             : ReceiverMessage;
         return (
-            <Message key={baseMessage.id} avatar={<Avatar>{login?.slice(0, 1) || 'Й'}</Avatar>}>
+            <Message key={baseMessage.id} avatar={<Avatar>{login?.slice(0, 1)}</Avatar>}>
                 {mes}
             </Message>
         )

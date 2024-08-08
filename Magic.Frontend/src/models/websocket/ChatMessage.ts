@@ -1,5 +1,6 @@
-export interface BaseGameSessionMessage {
-    id: string;
+import {BaseEntity} from "../response/characterTemplateResponse";
+
+export interface BaseGameSessionMessage extends BaseEntity<string> {
     gameSessionId: string;
     createdDate: string;
     gameSessionMessageTypeEnum: GameSessionMessageTypeEnum;
@@ -20,7 +21,7 @@ export interface WithAuthor {
     author: User;
 }
 
-export type DiceGameSessionMessage = BaseGameSessionMessage & WithAuthor &  {
+export type DiceGameSessionMessage = BaseGameSessionMessage & WithAuthor & {
     roll: number;
     cubeTypeEnum: CubeTypeEnum;
     gameSessionMessageTypeEnum: GameSessionMessageTypeEnum.Dice;

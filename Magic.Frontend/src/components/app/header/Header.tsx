@@ -5,12 +5,12 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import {useNavigate} from "react-router-dom";
-import paths from "../../consts/paths";
+import paths from "../../../consts/paths";
 import {useSelector} from "react-redux";
-import {RootState} from "../../redux";
-import Account from "./account";
+import {RootState} from "../../../redux";
+import Account from "./account/Account";
 import {PaletteMode} from "@mui/material";
-import ToggleColorMode from "../app/ToggleColorMode";
+import ToggleColorMode from "./ToggleColorMode";
 
 const logoStyle = {
     width: '140px',

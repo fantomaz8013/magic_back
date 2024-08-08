@@ -148,7 +148,7 @@ export interface CharacterCharacteristic extends BaseEntity<number> {
     description: string;
 }
 
-export enum CharacterCharacteristics {
+export enum CharacterCharacteristicIds {
     Strength = 1,
     Agility = 2,
     Physique = 3,

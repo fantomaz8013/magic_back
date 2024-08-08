@@ -24,10 +24,20 @@ public class ConnectedUsers
             });
     }
 
-    public void Disconnect(Guid gameSessionId, Guid userId)
+    public string? Disconnect(Guid gameSessionId, Guid userId)
     {
         if (_connections.TryGetValue(gameSessionId, out var connectedUsers))
-            connectedUsers.TryRemove(userId, out _);
+            if (connectedUsers.TryRemove(userId, out var connectionId))
+                return connectionId;
+        return null;
+    }
+    
+    public string? GetConnectionId(Guid gameSessionId, Guid userId)
+    {
+        if (_connections.TryGetValue(gameSessionId, out var connectedUsers))
+            if (connectedUsers.TryGetValue(userId, out var connectionId))
+                return connectionId;
+        return null;
     }
 
     public bool IsConnected(Guid gameSessionId, Guid userId)

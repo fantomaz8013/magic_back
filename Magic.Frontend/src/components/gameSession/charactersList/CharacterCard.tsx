@@ -60,7 +60,6 @@ export default function CharacterCard({template}: CharacterTemplateProps) {
                     {c.title}:
                 </Box>
                 <Box>{template.characteristics[c.id]}</Box>
-
             </Box>
         );
     }

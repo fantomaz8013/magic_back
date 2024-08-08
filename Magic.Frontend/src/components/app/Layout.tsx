@@ -1,7 +1,7 @@
 import * as React from "react";
 import {createTheme, PaletteMode, ThemeProvider} from "@mui/material";
 import {getPaletteMode, setPaletteMode} from "../../utils/localStorage";
-import Header from "../header";
+import Header from "./header/Header";
 import {Outlet} from "react-router-dom";
 
 export default function Layout() {

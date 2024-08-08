@@ -10,11 +10,13 @@ namespace Magic.Common.Models.Response;
 public abstract class BaseGameSessionMessageResponse
 {
     public virtual GameSessionMessageTypeEnum GameSessionMessageTypeEnum { get; set; }
+    public Guid Id { get; set; }
     public Guid GameSessionId { get; set; }
     public DateTime CreatedDate { get; set; }
 
     public BaseGameSessionMessageResponse(BaseGameSessionMessage message)
     {
+        Id = message.Id;
         CreatedDate = message.CreatedDate;
         GameSessionId = message.GameSessionId;
     }
@@ -37,7 +39,7 @@ public class ChatGameGameSessionMessageResponse : ServerGameSessionMessageRespon
 public class ServerGameSessionMessageResponse : BaseGameSessionMessageResponse
 {
     public override GameSessionMessageTypeEnum GameSessionMessageTypeEnum => GameSessionMessageTypeEnum.Server;
-    
+
     public string Message { get; set; }
 
     public ServerGameSessionMessageResponse(ServerGameSessionMessage serverGameSessionMessage)

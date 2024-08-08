@@ -14,10 +14,12 @@ namespace Magic.Service.Implementations
     public class GameSessionCharacterService : IGameSessionCharacterService
     {
         protected readonly DataBaseContext _dbContext;
-        public GameSessionCharacterService(DataBaseContext dbContext) 
+
+        public GameSessionCharacterService(DataBaseContext dbContext)
         {
             _dbContext = dbContext;
         }
+
         public async Task<GameSessionCharacter> Armor(Guid gameSessionCharacterId, int value)
         {
             var gameSessionCharacter = await GetGameSessionCharacter(gameSessionCharacterId);
@@ -63,72 +65,26 @@ namespace Magic.Service.Implementations
         {
             var gameSessionCharacter = await GetGameSessionCharacter(gameSessionCharacterId);
             var characterCharacteristicValue = gameSessionCharacter.Characteristics[characterCharacteristicId];
-            int result = 0;
 
-            if (characterCharacteristicValue < 2)
+            var result = characterCharacteristicValue switch
             {
-                result = -5;
-            }
-            if (characterCharacteristicValue < 4 && characterCharacteristicValue > 1)
-            {
-                result = -4;
-            }
-            if (characterCharacteristicValue < 6 && characterCharacteristicValue > 3)
-            {
-                result = -3;
-            }
-            if (characterCharacteristicValue < 8 && characterCharacteristicValue > 5)
-            {
-                result = -2;
-            }
-            if (characterCharacteristicValue < 10 && characterCharacteristicValue > 7)
-            {
-                result = -1;
-            }
-            if (characterCharacteristicValue < 12 && characterCharacteristicValue > 9)
-            {
-                result = 0;
-            }
-            if (characterCharacteristicValue < 14 && characterCharacteristicValue > 11)
-            {
-                result = 1;
-            }
-            if (characterCharacteristicValue < 16 && characterCharacteristicValue > 13)
-            {
-                result = 2;
-            }
-            if (characterCharacteristicValue < 18 && characterCharacteristicValue > 15)
-            {
-                result = 3;
-            }
-            if (characterCharacteristicValue < 20 && characterCharacteristicValue > 17)
-            {
-                result = 4;
-            }
-            if (characterCharacteristicValue < 22 && characterCharacteristicValue > 19)
-            {
-                result = 5;
-            }
-            if (characterCharacteristicValue < 24 && characterCharacteristicValue > 21)
-            {
-                result = 6;
-            }
-            if (characterCharacteristicValue < 26 && characterCharacteristicValue > 23)
-            {
-                result = 7;
-            }
-            if (characterCharacteristicValue < 28 && characterCharacteristicValue > 25)
-            {
-                result = 8;
-            }
-            if (characterCharacteristicValue < 30 && characterCharacteristicValue > 27)
-            {
-                result = 9;
-            }
-            if (characterCharacteristicValue >= 30 )
-            {
-                result = 10;
-            }
+                < 2 => -5,
+                < 4 and > 1 => -4,
+                < 6 and > 3 => -3,
+                < 8 and > 5 => -2,
+                < 10 and > 7 => -1,
+                < 12 and > 9 => 0,
+                < 14 and > 11 => 1,
+                < 16 and > 13 => 2,
+                < 18 and > 15 => 3,
+                < 20 and > 17 => 4,
+                < 22 and > 19 => 5,
+                < 24 and > 21 => 6,
+                < 26 and > 23 => 7,
+                < 28 and > 25 => 8,
+                < 30 and > 27 => 9,
+                >= 30 => 10
+            };
             return result;
         }
 
@@ -143,7 +99,7 @@ namespace Magic.Service.Implementations
             return gameSessionCharacter;
         }
 
-        public async Task<GameSessionCharacter> SetPosition(Guid gameSessionCharacterId, int? x , int? y )
+        public async Task<GameSessionCharacter> SetPosition(Guid gameSessionCharacterId, int? x, int? y)
         {
             var gameSessionCharacter = await GetGameSessionCharacter(gameSessionCharacterId);
             gameSessionCharacter.PositionX = x;
@@ -153,7 +109,6 @@ namespace Magic.Service.Implementations
             await _dbContext.SaveChangesAsync();
 
             return gameSessionCharacter;
-
         }
 
         private async Task<GameSessionCharacter> GetGameSessionCharacter(Guid gameSessionCharacterId)
@@ -164,7 +119,7 @@ namespace Magic.Service.Implementations
 
             if (gameSessionCharacter == null)
             {
-                throw new ExceptionWithApplicationCode("Игровой персонаж не найден", 
+                throw new ExceptionWithApplicationCode("Игровой персонаж не найден",
                     Domain.Enums.ExceptionApplicationCodeEnum.GameSessionCharacterNotFound);
             }
 
