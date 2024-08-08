@@ -1,8 +1,4 @@
-import {BaseResponse} from "./baseResponse";
-
-export type UserResponse = BaseResponse<UserResult>;
-
-export interface UserResult {
+export interface UserResponse {
     name: string;
     id: string;
     login: string;

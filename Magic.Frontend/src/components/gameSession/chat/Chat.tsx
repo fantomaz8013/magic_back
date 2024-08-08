@@ -3,7 +3,7 @@ import {
     BaseGameSessionMessage, ChatGameSessionMessage, CubeTypeEnum, DiceGameSessionMessage,
     GameSessionMessageTypeEnum,
     ServerGameSessionMessage
-} from "../../../models/websocket/ChatMessage";
+} from "../../../models/websocket/chatMessage";
 import {ChatBox, ReceiverMessage, SenderMessage} from "mui-chat-box";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
@@ -12,8 +12,8 @@ import {Accordion, AccordionDetails, AccordionSummary, Avatar} from "@mui/materi
 import {useGetCurrentUserQuery} from "../../../redux/toolkit/api/userApi";
 import Typography from "@mui/material/Typography";
 import {useSelector} from "react-redux";
-import {RootState} from "../../../redux";
-import {socket} from "../../../utils/webSocket";
+import {RootState} from "../../../redux/redux";
+import {socket} from "../../../webSocket/webSocket";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 

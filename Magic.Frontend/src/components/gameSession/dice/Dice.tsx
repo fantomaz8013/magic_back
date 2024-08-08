@@ -1,7 +1,7 @@
 import * as React from "react";
 import Button from "@mui/material/Button";
-import {CubeTypeEnum} from "../../../models/websocket/ChatMessage";
-import {socket} from "../../../utils/webSocket";
+import {CubeTypeEnum} from "../../../models/websocket/chatMessage";
+import {socket} from "../../../webSocket/webSocket";
 import {Accordion, AccordionDetails, AccordionSummary} from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Typography from "@mui/material/Typography";

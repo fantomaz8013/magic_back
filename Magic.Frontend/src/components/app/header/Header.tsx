@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 import {useNavigate} from "react-router-dom";
 import paths from "../../../consts/paths";
 import {useSelector} from "react-redux";
-import {RootState} from "../../../redux";
+import {RootState} from "../../../redux/redux";
 import Account from "./account/Account";
 import {PaletteMode} from "@mui/material";
 import ToggleColorMode from "./ToggleColorMode";

@@ -1,5 +1,5 @@
 import {useSelector} from "react-redux";
-import {RootState} from "../../redux";
+import {RootState} from "../../redux/redux";
 import {Navigate, Outlet, useLocation} from "react-router-dom";
 import paths from "../../consts/paths";
 import * as React from "react";

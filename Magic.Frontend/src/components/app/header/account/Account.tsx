@@ -10,7 +10,7 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import {useGetCurrentUserQuery} from "../../../../redux/toolkit/api/userApi";
-import {AppDispatch} from "../../../../redux";
+import {AppDispatch} from "../../../../redux/redux";
 import paths from "../../../../consts/paths";
 import {resetToken} from "../../../../redux/toolkit/slices/tokenSlice";
 

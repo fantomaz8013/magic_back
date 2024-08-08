@@ -4,7 +4,8 @@ import {setToken, getToken as getTokenLocalStorage} from "../../../utils/localSt
 import {apiProxy} from "../../../env";
 import {TokenResponse} from "../../../models/response/tokenResponse";
 import {HttpMethods} from "../../../consts/httpMethods";
-import {AuthResponse} from "../../../models/response/AuthResponse";
+import {BaseResponse} from "../../../models/response/baseResponse";
+import {AuthResponse} from "../../../models/response/authResponse";
 
 export interface AuthState {
     token: string | null;
@@ -23,21 +24,21 @@ const slicePrefix = 'token';
 export const refreshToken = createAsyncThunk(
     `${slicePrefix}/refresh`,
     async (refreshToken: string, {rejectWithValue}) => {
-        return await parseFetch(fetch(apiProxy + `token/refresh`, createRequestParams(refreshToken)), rejectWithValue) as Promise<TokenResponse>
+        return await parseFetch(fetch(apiProxy + `token/refresh`, createRequestParams(refreshToken)), rejectWithValue) as Promise<BaseResponse<TokenResponse>>
     }
 );
 
 export const getToken = createAsyncThunk(
     `${slicePrefix}/getToken`,
     async (r: TokenRequest, {rejectWithValue}) => {
-        return await parseFetch(fetch(apiProxy + `token/byLogin`, createRequestParams({...r})), rejectWithValue) as Promise<AuthResponse>
+        return await parseFetch(fetch(apiProxy + `token/byLogin`, createRequestParams({...r})), rejectWithValue) as Promise<BaseResponse<AuthResponse>>
     }
 );
 
 export const register = createAsyncThunk(
     `${slicePrefix}/register`,
     async (r: TokenRequest, {rejectWithValue}) => {
-        return await parseFetch(fetch(apiProxy + `user/register`, createRequestParams({...r})), rejectWithValue) as Promise<TokenResponse>
+        return await parseFetch(fetch(apiProxy + `user/register`, createRequestParams({...r})), rejectWithValue) as Promise<BaseResponse<TokenResponse>>
     }
 );
 
@@ -121,7 +122,7 @@ function parseFetch(promise: Promise<Response>, rejectWithValue: any) {
             return response
                 .json()
                 .then(r => {
-                    const tr = r as TokenResponse;
+                    const tr = r as BaseResponse<TokenResponse>;
                     if (!tr.isSuccess)
                         return rejectWithValue(tr.errorText);
                     return tr;

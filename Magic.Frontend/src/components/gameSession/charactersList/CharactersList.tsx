@@ -4,11 +4,11 @@ import CharacterCard from "./CharacterCard";
 import Button from "@mui/material/Button";
 import {useGetCharacterTemplatesQuery} from "../../../redux/toolkit/api/characterApi";
 import {useGetCurrentUserQuery} from "../../../redux/toolkit/api/userApi";
-import {CharacterTemplate} from "../../../models/response/characterTemplateResponse";
+import {CharacterTemplateResponse} from "../../../models/response/characterTemplateResponse";
 import Box from "@mui/material/Box";
 import {useSelector} from "react-redux";
-import {RootState} from "../../../redux";
-import {socket} from "../../../utils/webSocket";
+import {RootState} from "../../../redux/redux";
+import {socket} from "../../../webSocket/webSocket";
 
 export default function CharacterList() {
     const {data: characterTemplates} = useGetCharacterTemplatesQuery();
@@ -37,7 +37,7 @@ export default function CharacterList() {
         </Box>
     );
 
-    function renderCharacterTemplate(t: CharacterTemplate) {
+    function renderCharacterTemplate(t: CharacterTemplateResponse) {
         const lockInfo = Object
             .values(playerInfos!)
             .filter(p => p.lockedCharacterId === t.id)

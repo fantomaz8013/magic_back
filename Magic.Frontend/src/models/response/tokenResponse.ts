@@ -1,8 +1,4 @@
-import {BaseResponse} from "./baseResponse";
-
-export type TokenResponse = BaseResponse<TokenData>
-
-export interface TokenData {
+export interface TokenResponse {
     expires: string;
     expiresRefresh: string;
     refreshToken: string;

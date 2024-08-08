@@ -7,14 +7,14 @@ import InfoIcon from '@mui/icons-material/Info';
 import Box from "@mui/material/Box";
 import {
     CharacterCharacteristic,
-    CharacterTemplate
+    CharacterTemplateResponse
 } from "../../../models/response/characterTemplateResponse";
 import Tooltip from "@mui/material/Tooltip";
 import {useGetCharacteristicsQuery} from "../../../redux/toolkit/api/characterApi";
 
 
 export interface CharacterTemplateProps {
-    template: CharacterTemplate;
+    template: CharacterTemplateResponse;
 }
 
 export default function CharacterCard({template}: CharacterTemplateProps) {

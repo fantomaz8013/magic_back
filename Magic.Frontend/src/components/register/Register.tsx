@@ -14,7 +14,7 @@ import {ValidationResult} from "../../validation";
 import {validateLogin, validatePassword} from "../../validation/userValidation";
 import {register, resetError} from "../../redux/toolkit/slices/tokenSlice";
 import {useDispatch, useSelector} from "react-redux";
-import {AppDispatch, RootState} from "../../redux";
+import {AppDispatch, RootState} from "../../redux/redux";
 import {Alert} from "@mui/material";
 
 

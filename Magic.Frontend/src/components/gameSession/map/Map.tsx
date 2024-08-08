@@ -2,12 +2,12 @@ import React from "react";
 import {Stack} from "@mui/material";
 import Paper from "@mui/material/Paper";
 import {useSelector} from "react-redux";
-import {RootState} from "../../../redux";
+import {RootState} from "../../../redux/redux";
 
 export function Map() {
     const gameSessionInfo = useSelector((state: RootState) => state.gameSession.gameSessionInfo);
 
-    if (!gameSessionInfo?.map || !gameSessionInfo || !gameSessionInfo.characters) {
+    if (!gameSessionInfo?.map || !gameSessionInfo.characters) {
         return (
             <React.Fragment/>
         );

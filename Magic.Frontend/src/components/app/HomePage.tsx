@@ -17,6 +17,9 @@ import {
 } from "../../redux/toolkit/api/gameSessionApi";
 import {GameSessionResponse} from "../../models/response/gameSessionResponse";
 import {useGetCurrentUserQuery} from "../../redux/toolkit/api/userApi";
+import {useDispatch} from "react-redux";
+import {AppDispatch} from "../../redux/redux";
+import {clearGameSessionData} from "../../redux/toolkit/slices/gameSessionSlice";
 
 export default function HomePage() {
     const navigate = useNavigate();
@@ -26,12 +29,17 @@ export default function HomePage() {
     const [createSession] = useCreateMutation();
     const [deleteRequest] = useDeleteRequestMutation();
     const {data: currentUser} = useGetCurrentUserQuery();
+    const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
         if (location.pathname !== paths.home) {
             navigate(paths.home, {replace: true});
         }
     }, [location, navigate]);
+
+    useEffect(() => {
+        dispatch(clearGameSessionData());
+    }, [])
 
     return (
         <Grid container spacing={4}>
@@ -77,40 +85,41 @@ export default function HomePage() {
                 </Card>
             </Grid>
 
-            {list?.data?.map((r: GameSessionResponse) => (
-                <Grid item xs={12}>
-                    <Card>
-                        <CardContent>
-                            <Typography variant="h5" component="div">
-                                {r.title}
-                            </Typography>
-                            <Typography sx={{mb: 1.5}} color="text.secondary">
-                                For {r.maxUserCount} player(s)
-                            </Typography>
-                            <Typography variant="body2">
-                                {r.description}
-                            </Typography>
-                        </CardContent>
-                        <CardActions>
-
-                            {
-                                currentUser?.data?.id === r.creatorUserId
-                                    ? <>
-                                        <Button id={r.id} onClick={onJoinClick} size="small">
-                                            JOIN
+            {list?.data?.map((r: GameSessionResponse) => {
+                return (
+                    <Grid key={r.id} item xs={12}>
+                        <Card>
+                            <CardContent>
+                                <Typography variant="h5" component="div">
+                                    {r.title}
+                                </Typography>
+                                <Typography sx={{mb: 1.5}} color="text.secondary">
+                                    For {r.maxUserCount} player(s)
+                                </Typography>
+                                <Typography variant="body2">
+                                    {r.description}
+                                </Typography>
+                            </CardContent>
+                            <CardActions>
+                                {
+                                    currentUser?.data?.id === r.creatorUserId
+                                        ? <>
+                                            <Button id={r.id} onClick={onJoinClick} size="small">
+                                                JOIN
+                                            </Button>
+                                            <Button id={r.id} onClick={onDeleteClick} size="small">
+                                                DELETE
+                                            </Button>
+                                        </>
+                                        : <Button id={r.id} onClick={onAskToJoinClick} size="small">
+                                            ASK TO JOIN
                                         </Button>
-                                        <Button id={r.id} onClick={onDeleteClick} size="small">
-                                            DELETE
-                                        </Button>
-                                    </>
-                                    : <Button id={r.id} onClick={onAskToJoinClick} size="small">
-                                        ASK TO JOIN
-                                    </Button>
-                            }
-                        </CardActions>
-                    </Card>
-                </Grid>
-            ))}
+                                }
+                            </CardActions>
+                        </Card>
+                    </Grid>
+                )
+            })}
         </Grid>
     );
 

@@ -1,5 +1,5 @@
 import {GameSessionInfo} from "../../../models/websocket/gameStartedInfo";
-import {BaseGameSessionMessage} from "../../../models/websocket/ChatMessage";
+import {BaseGameSessionMessage} from "../../../models/websocket/chatMessage";
 import {PlayerInfo} from "../../../components/gameSession/GameSession";
 import {createSlice} from "@reduxjs/toolkit";
 import {CharacterCharacteristicIds} from "../../../models/response/characterTemplateResponse";
@@ -85,7 +85,14 @@ export const gameSessionSlice = createSlice({
         },
         addMessage: (state, action) => {
             state.messages.push(action.payload);
-        }
+        },
+        clearGameSessionData: (state) => {
+            state.gameSessionInfo = null;
+            state.messages = [];
+            state.playerInfos = {};
+            state.requestedSaveThrow = null;
+            state.requestedSaveThrowPassed = null;
+        },
     },
 });
 
@@ -99,4 +106,5 @@ export const {
     characterUnlocked,
     setRequestSaveThrow,
     setRequestSaveThrowPassed,
+    clearGameSessionData,
 } = gameSessionSlice.actions;

@@ -1,126 +1,34 @@
 import * as signalR from "@microsoft/signalr";
 import {baseProxy} from "../env";
 import React, {useEffect, useMemo, useRef, useState} from "react";
-import {AppDispatch, RootState,} from "../redux";
+import {AppDispatch, RootState,} from "../redux/redux";
 import {useDispatch, useSelector} from "react-redux";
 import {GameSessionCharacter, GameSessionInfo} from "../models/websocket/gameStartedInfo";
-import {BaseGameSessionMessage, CubeTypeEnum} from "../models/websocket/ChatMessage";
+import {BaseGameSessionMessage, CubeTypeEnum} from "../models/websocket/chatMessage";
 import {PlayerInfo} from "../components/gameSession/GameSession";
 import {
     addMessage,
     characterLocked,
     characterUnlocked,
-    playerLeft, RequestedSaveThrow, setRequestSaveThrow,
+    playerLeft,
+    RequestedSaveThrow,
+    setRequestSaveThrow,
     setGameSessionInfo,
     setMessages,
-    setPlayerInfos, RequestedSaveThrowPassed, setRequestSaveThrowPassed
+    setPlayerInfos,
+    RequestedSaveThrowPassed,
+    setRequestSaveThrowPassed
 } from "../redux/toolkit/slices/gameSessionSlice";
-import {useNavigate} from "react-router-dom";
-import {useGetCurrentUserQuery} from "../redux/toolkit/api/userApi";
-import paths from "../consts/paths";
 import {CharacterCharacteristicIds} from "../models/response/characterTemplateResponse";
-
-function createSignalRConnection(
-    url: string,
-    tokenRef: React.MutableRefObject<string | null>,
-    loggingLevel = signalR.LogLevel.None): signalR.HubConnection {
-    return new signalR.HubConnectionBuilder()
-        .withUrl(
-            baseProxy + url,
-            {
-                accessTokenFactory: async () => {
-                    return tokenRef.current || '';
-                },
-                transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling
-            }
-        )
-        .withAutomaticReconnect()
-        .configureLogging(loggingLevel)
-        .build();
-}
+import {WSApi, WSEvents, WSActions} from "./webSocket.types";
+import {UnknownAction} from "redux";
 
 const wsPath = 'ws';
-
-export enum WSActions {
-    newMessage = 'NewMessage',
-    joinGameSession = 'JoinGameSession',
-    leaveGameSession = 'LeaveGameSession',
-    rollDice = 'RollDice',
-    rollSaveDice = 'RollSaveDice',
-    lockCharacter = 'LockCharacter',
-    unlockCharacter = 'UnlockCharacter',
-    startGame = 'StartGame',
-    kick = 'Kick',
-    requestSaveThrow = 'RequestSaveThrow',
-    changeCharacter = 'ChangeCharacter',
-}
-
-export enum WSEvents {
-    //messages
-    historyReceived = 'historyReceived',
-    messageReceived = 'messageReceived',
-
-
-    //global info
-    playerInfoReceived = 'playerInfoReceived',
-    gameSessionInfoReceived = "gameSessionInfoReceived",
-
-
-    //characters
-    characterLocked = 'characterLocked',
-    characterUnlocked = 'characterUnlocked',
-
-
-    //player
-    playerSaveThrow = "playerSaveThrow",
-    playerLeft = 'playerLeft',
-    playerSaveThrowPassed = 'playerSaveThrowPassed',
-}
-
-
-function useSignalR(wsPath: string) {
-    const token = useSelector((state: RootState) => state.auth.token)
-    const tokenRef = useRef(token);
-    const ws = useMemo(() => createSignalRConnection(wsPath, tokenRef), [wsPath]);
-    const [state, setState] = useState(ws.state);
-
-    useEffect(() => {
-        tokenRef.current = token;
-    }, [token])
-
-    useEffect(() => {
-        ws.start()
-            .catch(() => {
-            })
-            .then(() => {
-                setState(ws.state);
-            });
-
-        return () => {
-            if (isConnected()) {
-                ws.stop()
-                    .then(() => {
-                        setState(ws.state);
-                    });
-            }
-        }
-    }, [wsPath])
-
-    return {ws, state};
-
-    function isConnected() {
-        return state === 'Connected';
-    }
-}
-
-type apiType = ReturnType<typeof useGameSessionWS>;
-export let socket: apiType | null = null;
+export let socket: WSApi | null = null;
 
 export function useGameSessionWS(logsEnabled?: boolean) {
     logsEnabled ??= true;
     const {ws, state} = useSignalR(wsPath);
-    const navigate = useNavigate();
-    const {data: currentUser} = useGetCurrentUserQuery();
     const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
@@ -219,57 +127,144 @@ export function useGameSessionWS(logsEnabled?: boolean) {
         await _invoke(WSActions.changeCharacter, characterId, changedFields);
     }
 
+    function _onEvent(event: WSEvents, func: () => UnknownAction, ...args: any) {
+        logsEnabled && console.log(event, ...args);
+        dispatch(func());
+    }
+
     function onPlayerInfoReceived(playerInfos: PlayerInfo[]) {
-        logsEnabled && console.log(WSEvents.playerInfoReceived, playerInfos);
-        dispatch(setPlayerInfos(playerInfos.reduce((pv, cv) => {
-            pv[cv.id] = cv;
-            return pv;
-        }, {} as Record<string, PlayerInfo>)));
+        _onEvent(
+            WSEvents.playerInfoReceived,
+            () => setPlayerInfos(playerInfos.reduce((pv, cv) => {
+                pv[cv.id] = cv;
+                return pv;
+            }, {} as Record<string, PlayerInfo>)),
+            playerInfos
+        );
     }
 
     function onCharacterLocked(userId: string, lockedCharacterTemplateId: string) {
         const data = {userId, lockedCharacterTemplateId};
-        logsEnabled && console.log(WSEvents.characterLocked, data);
-        dispatch(characterLocked(data));
+
+        _onEvent(
+            WSEvents.characterLocked,
+            () => characterLocked(data),
+            data
+        );
     }
 
     function onCharacterUnlocked(userId: string) {
-        logsEnabled && console.log(WSEvents.characterUnlocked, userId);
-        dispatch(characterUnlocked(userId));
+        _onEvent(
+            WSEvents.characterUnlocked,
+            () => characterUnlocked(userId),
+            userId
+        );
     }
 
     function onPlayerLeft(userId: string) {
-        logsEnabled && console.log(WSEvents.playerLeft, userId);
-        dispatch(playerLeft(userId));
-        if (userId === currentUser?.data?.id) {
-            navigate(paths.home);
-        }
+        _onEvent(
+            WSEvents.playerLeft,
+            () => playerLeft(userId),
+            userId
+        );
     }
 
     function onPlayerSaveThrow(data: RequestedSaveThrow) {
-        logsEnabled && console.log(WSEvents.playerSaveThrow, data);
-        dispatch(setRequestSaveThrow(data));
+        _onEvent(
+            WSEvents.playerSaveThrow,
+            () => setRequestSaveThrow(data),
+            data
+        );
     }
 
     function onPlayerSaveThrowPassed(data: RequestedSaveThrowPassed) {
-        logsEnabled && console.log(WSEvents.playerSaveThrowPassed, data);
-        dispatch(setRequestSaveThrowPassed(data));
+        _onEvent(
+            WSEvents.playerSaveThrowPassed,
+            () => setRequestSaveThrowPassed(data),
+            data
+        );
     }
 
     function onGameSessionInfoReceived(data: GameSessionInfo) {
-        logsEnabled && console.log(WSEvents.gameSessionInfoReceived, data)
-        dispatch(setGameSessionInfo(data));
+        _onEvent(
+            WSEvents.gameSessionInfoReceived,
+            () => setGameSessionInfo(data),
+            data
+        );
     }
 
     function onMessageReceived(message: BaseGameSessionMessage) {
-        logsEnabled && console.log(WSEvents.messageReceived, message)
-        dispatch(addMessage(message));
+        _onEvent(
+            WSEvents.messageReceived,
+            () => addMessage(message),
+            message
+        );
     }
 
     function onHistoryReceived(newMessages: BaseGameSessionMessage[]) {
-        logsEnabled && console.log(WSEvents.historyReceived, newMessages)
-        dispatch(setMessages(newMessages));
+        _onEvent(
+            WSEvents.historyReceived,
+            () => setMessages(newMessages),
+            newMessages
+        );
     }
 }
+
+function createSignalRConnection(
+    url: string,
+    tokenRef: React.MutableRefObject<string | null>,
+    loggingLevel = signalR.LogLevel.None): signalR.HubConnection {
+    return new signalR.HubConnectionBuilder()
+        .withUrl(
+            baseProxy + url,
+            {
+                accessTokenFactory: async () => {
+                    return tokenRef.current || '';
+                },
+                transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling
+            }
+        )
+        .withAutomaticReconnect()
+        .configureLogging(loggingLevel)
+        .build();
+}
+
+
+function useSignalR(wsPath: string) {
+    const token = useSelector((state: RootState) => state.auth.token)
+    const tokenRef = useRef(token);
+    const ws = useMemo(() => createSignalRConnection(wsPath, tokenRef), [wsPath]);
+    const [state, setState] = useState(ws.state);
+
+    useEffect(() => {
+        tokenRef.current = token;
+    }, [token])
+
+    useEffect(() => {
+        ws.start()
+            .catch(() => {
+            })
+            .then(() => {
+                setState(ws.state);
+            });
+
+        return () => {
+            if (isConnected()) {
+                ws.stop()
+                    .then(() => {
+                        setState(ws.state);
+                    });
+            }
+        }
+    }, [wsPath])
+
+    return {ws, state};
+
+    function isConnected() {
+        return state === 'Connected';
+    }
+}
+
+
 
 

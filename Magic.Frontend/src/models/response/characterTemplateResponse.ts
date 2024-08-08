@@ -1,7 +1,7 @@
-import {CubeTypeEnum} from "../websocket/ChatMessage";
+import {CubeTypeEnum} from "../websocket/chatMessage";
 import {BaseResponse} from "./baseResponse";
 
-export type CharacterTemplateResponse = BaseResponse<CharacterTemplate[]>;
+export type CharacterTemplateResponse = Omit<CharacterTemplate, 'characterClassId' | 'abilitieIds'>;
 
 export interface CharacterTemplate extends BaseEntity<string> {
     name: string;

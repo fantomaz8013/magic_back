@@ -13,8 +13,6 @@ import Layout from "./Layout";
 import HomePage from "./HomePage";
 import GameSession from "../gameSession/GameSession";
 import Page from "../common/Page";
-import CssBaseline from "@mui/material/CssBaseline";
-import Box from "@mui/material/Box";
 
 export default function App() {
     return (
