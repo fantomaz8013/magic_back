@@ -177,6 +177,7 @@ public class GameSessionService : IGameSessionService
         var gameSession = await _dbContext.GameSessions
             .Include(x => x.CreatorUser)
             .Include(x => x.Users)
+            .Include(x => x.Map)
             .Where(x => x.Id == gameSessionId)
             .AsTracking()
             .FirstOrDefaultAsync();
@@ -197,6 +198,7 @@ public class GameSessionService : IGameSessionService
     public async Task<List<GameSessionResponse>> GetAllGameSession()
     {
         var gameSession = await _dbContext.GameSessions
+            .Include(x => x.Map)
             .Select(x => new GameSessionResponse(x))
             .ToListAsync();
 
@@ -226,5 +228,24 @@ public class GameSessionService : IGameSessionService
         await _dbContext.SaveChangesAsync();
 
         return true;
+    }
+
+    public async Task<GameSessionResponse> SetMap(Guid gameSessionId, Guid? MapId)
+    {
+        var gameSession = await GetGameSessionById(gameSessionId);
+        var userId = _userProvider.GetUserId();
+
+        if (userId != gameSession.CreatorUserId) {
+            throw new ExceptionWithApplicationCode("Нет доступа",
+                ExceptionApplicationCodeEnum.AccessError);
+        }
+
+        gameSession.MapId = MapId;
+        _dbContext.Update(gameSession);
+        await _dbContext.SaveChangesAsync();
+
+        gameSession = await GetGameSessionById(gameSessionId);
+
+        return new GameSessionResponse(gameSession);
     }
 }

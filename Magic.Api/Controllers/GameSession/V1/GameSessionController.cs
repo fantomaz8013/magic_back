@@ -34,6 +34,14 @@ public class GameSessionController : V1GameSessionControllerBase
 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<bool>))]
+    public async Task<IActionResult> SetMap([FromBody] SetMapRequest request)
+    {
+        var result = await _gameSessionService.SetMap(request.GameSessionId, request.MapId);
+        return Ok(result);
+    }
+
+    [HttpPost]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<bool>))]
     public async Task<IActionResult> Enter([FromBody] EnterToGameSessionRequest request)
     {
         var result = await _gameSessionService.Enter(request);

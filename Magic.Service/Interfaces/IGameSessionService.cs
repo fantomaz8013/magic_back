@@ -12,6 +12,7 @@ public interface IGameSessionService
     Task<bool> Kick(KickUserForGameSessionRequest request);
     Task<bool> Delete (DeleteGameSessionRequest request);
     Task<bool> Leave(LeaveGameSessionRequest request);
+    Task<GameSessionResponse> SetMap(Guid gameSessionId, Guid? MapId);
     Task<List<GameSessionResponse>> GetAllGameSession();
     Task<GameSession?> GetById(Guid gameSessionId);
     /// <summary>

@@ -48,4 +48,13 @@ public class GameSession : BaseEntity<Guid>, IHasCreatedDate
     public DateTime CreatedDate { get; set; }
 
     public GameSessionStatusTypeEnum GameSessionStatus { get; set; } = GameSessionStatusTypeEnum.WaitingForStart;
+
+    /// <summary>
+    /// Идентификатор текущей карты
+    /// </summary>
+    public Guid? MapId { get; set; }
+    /// <summary>
+    /// Текущая карта
+    /// </summary>
+    public Map? Map { get; set; }
 }

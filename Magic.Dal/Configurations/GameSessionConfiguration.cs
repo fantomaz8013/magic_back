@@ -28,5 +28,9 @@ public class GameSessionConfiguration : IEntityTypeConfiguration<GameSession>
             .UsingEntity<GameSessionUser>(
                 l => l.HasOne<User>().WithMany().HasForeignKey(e => e.UserId),
                 r => r.HasOne<GameSession>().WithMany().HasForeignKey(e => e.GameSessionId));
+
+        builder.PropertyWithUnderscore(x => x.MapId);
+        builder.HasForeignKey(x => x.Map, x => x.MapId);
+        builder.HasOne(x => x.Map);
     }
 }

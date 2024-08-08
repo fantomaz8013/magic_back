@@ -10,6 +10,7 @@ public class V1ControllerBase : ControllerBase { }
 
 public class V1UserControllerBase : V1ControllerBase { }
 public class V1CharacterControllerBase : V1ControllerBase { }
+public class V1MapControllerBase : V1ControllerBase { }
 public class V1GameSessionControllerBase : V1ControllerBase { }
 
 [ApiController]
