@@ -1,12 +1,12 @@
 import {combineReducers,} from "redux";
-import {tokenSlice} from "./toolkit/slices/tokenSlice";
+import {tokenSlice} from "./slices/tokenSlice";
 import {configureStore} from "@reduxjs/toolkit";
 import {devMode} from "../env";
-import {userApi} from "./toolkit/api/userApi";
-import {characterApi} from "./toolkit/api/characterApi";
-import {gameSessionSlice} from "./toolkit/slices/gameSessionSlice";
-import {gameSessionApi} from "./toolkit/api/gameSessionApi";
-import {mapApi} from "./toolkit/api/mapApi";
+import {userApi} from "./api/userApi";
+import {characterApi} from "./api/characterApi";
+import {gameSessionSlice} from "./slices/gameSessionSlice";
+import {gameSessionApi} from "./api/gameSessionApi";
+import {mapApi} from "./api/mapApi";
 
 export const rootReducer = combineReducers({
     auth: tokenSlice.reducer,

@@ -10,7 +10,7 @@ import Typography from '@mui/material/Typography';
 import {useLocation, useNavigate} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {useEffect, useState} from "react";
-import {getToken as loginRequest, resetError} from "../../redux/toolkit/slices/tokenSlice";
+import {getToken as loginRequest, resetError} from "../../redux/slices/tokenSlice";
 import paths from "../../consts/paths";
 import {AppDispatch, RootState} from "../../redux/redux";
 import {Alert} from "@mui/material";

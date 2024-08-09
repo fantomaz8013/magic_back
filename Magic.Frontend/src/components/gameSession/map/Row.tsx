@@ -1,4 +1,4 @@
-import {useGetTilePropertiesQuery} from "../../../redux/toolkit/api/mapApi";
+import {useGetTilePropertiesQuery} from "../../../redux/api/mapApi";
 import {Avatar, Stack} from "@mui/material";
 import Paper from "@mui/material/Paper";
 import {baseProxy} from "../../../env";

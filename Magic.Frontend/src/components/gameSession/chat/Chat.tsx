@@ -9,7 +9,7 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import {Accordion, AccordionDetails, AccordionSummary, Avatar} from "@mui/material";
-import {useGetCurrentUserQuery} from "../../../redux/toolkit/api/userApi";
+import {useGetCurrentUserQuery} from "../../../redux/api/userApi";
 import Typography from "@mui/material/Typography";
 import {useSelector} from "react-redux";
 import {RootState} from "../../../redux/redux";

@@ -18,7 +18,7 @@ import {
     setPlayerInfos,
     RequestedSaveThrowPassed,
     setRequestSaveThrowPassed
-} from "../redux/toolkit/slices/gameSessionSlice";
+} from "../redux/slices/gameSessionSlice";
 import {CharacterCharacteristicIds} from "../models/response/characterTemplateResponse";
 import {WSApi, WSEvents, WSActions} from "./webSocket.types";
 import {UnknownAction} from "redux";

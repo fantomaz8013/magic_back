@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {useSelector} from "react-redux";
 import {RootState} from "../../../redux/redux";
 import {Snackbar} from "@mui/material";
-import {RequestedSaveThrowPassed} from "../../../redux/toolkit/slices/gameSessionSlice";
+import {RequestedSaveThrowPassed} from "../../../redux/slices/gameSessionSlice";
 
 export function EventSnackbar() {
     const [snackBarMessage, setSnackBarMessage] = useState<string | null>(null);

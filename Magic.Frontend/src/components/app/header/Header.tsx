@@ -28,26 +28,24 @@ export default function Header({mode, toggleColorMode}: HeaderProps) {
     const isLoggedIn = useSelector((state: RootState) => state.auth.token !== null);
 
     return (
-        <Box sx={{flexGrow: 1}}>
-            <AppBar position="static" color="inherit">
-                <Toolbar>
-                    <Box component="div" sx={{flexGrow: 1}}>
-                        <Typography variant="h6" component="div" style={logoStyle} onClick={onHomeClick}>
-                            Magic
-                        </Typography>
-                    </Box>
-                    <ToggleColorMode mode={mode} toggleColorMode={toggleColorMode}/>
-                    {isLoggedIn
-                        ? <Account/>
-                        : <>
-                            <Button onClick={onRegisterClick} color="inherit">Register</Button>
-                            <Button onClick={onLoginClick} color="inherit">Login</Button>
-                        </>
-                    }
+        <AppBar position="sticky" color="inherit">
+            <Toolbar>
+                <Box component="div" sx={{flexGrow: 1}}>
+                    <Typography variant="h6" component="div" style={logoStyle} onClick={onHomeClick}>
+                        Magic
+                    </Typography>
+                </Box>
+                <ToggleColorMode mode={mode} toggleColorMode={toggleColorMode}/>
+                {isLoggedIn
+                    ? <Account/>
+                    : <>
+                        <Button onClick={onRegisterClick} color="inherit">Register</Button>
+                        <Button onClick={onLoginClick} color="inherit">Login</Button>
+                    </>
+                }
 
-                </Toolbar>
-            </AppBar>
-        </Box>
+            </Toolbar>
+        </AppBar>
     );
 
     function onHomeClick() {

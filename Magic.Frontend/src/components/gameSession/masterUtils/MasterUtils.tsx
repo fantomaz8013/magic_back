@@ -9,7 +9,7 @@ import {
 } from "./MasterUtils.types";
 import {useSelector} from "react-redux";
 import {RootState} from "../../../redux/redux";
-import {useGetCurrentUserQuery} from "../../../redux/toolkit/api/userApi";
+import {useGetCurrentUserQuery} from "../../../redux/api/userApi";
 import {ModalStyle} from "./MasterUtils.utils";
 import {RequestSaveThrowModal} from "./commandModals/RequestSaveThrowModal";
 import {KickModal} from "./commandModals/KickModal";

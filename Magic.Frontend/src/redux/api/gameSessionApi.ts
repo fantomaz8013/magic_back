@@ -1,11 +1,11 @@
 import {createApi} from '@reduxjs/toolkit/query/react'
 import {fetchBaseQueryWithAuth} from "../utils/baseQueryWithReauth";
-import {apiProxy} from "../../../env";
-import {EnterToGameSessionRequest} from "../../../models/request/enterToGameSessionRequest";
-import {BaseResponse} from "../../../models/response/baseResponse";
-import {GameSessionResponse} from "../../../models/response/gameSessionResponse";
-import {CreateGameSessionRequest} from "../../../models/request/createGameSessionRequest";
-import {HttpMethods} from "../../../consts/httpMethods";
+import {apiProxy} from "../../env";
+import {EnterToGameSessionRequest} from "../../models/request/enterToGameSessionRequest";
+import {BaseResponse} from "../../models/response/baseResponse";
+import {GameSessionResponse} from "../../models/response/gameSessionResponse";
+import {CreateGameSessionRequest} from "../../models/request/createGameSessionRequest";
+import {HttpMethods} from "../../consts/httpMethods";
 
 const prefix = 'gameSession';
 

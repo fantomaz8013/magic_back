@@ -21,6 +21,7 @@ import {UserUtils} from "./playerUtils/userUtils";
 import {EventSnackbar} from "./eventSnackbar/EventSnackbar";
 import {KickHandler} from "./KickHandler";
 import paths from "../../consts/paths";
+import Paper from "@mui/material/Paper";
 
 export interface PlayerInfo {
     id: string;

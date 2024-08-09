@@ -1,7 +1,7 @@
 import {fetchBaseQuery, FetchBaseQueryArgs} from '@reduxjs/toolkit/query';
 import type {BaseQueryFn, FetchArgs, FetchBaseQueryError} from '@reduxjs/toolkit/query';
 import {Mutex} from 'async-mutex';
-import {RootState} from "../../redux";
+import {RootState} from "../redux";
 import {refreshToken} from "../slices/tokenSlice";
 
 const mutex = new Mutex();

@@ -1,5 +1,5 @@
 import React from "react";
-import {useGetCurrentUserQuery} from "../../redux/toolkit/api/userApi";
+import {useGetCurrentUserQuery} from "../../redux/api/userApi";
 import {useSelector} from "react-redux";
 import {RootState} from "../../redux/redux";
 import {Navigate} from "react-router-dom";

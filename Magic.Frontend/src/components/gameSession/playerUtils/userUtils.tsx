@@ -5,8 +5,8 @@ import {ModalStyle, SavingThrowEnumMapper} from "../GameSession.utils";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import {socket} from "../../../webSocket/webSocket";
-import {setRequestSaveThrow} from "../../../redux/toolkit/slices/gameSessionSlice";
-import {useGetCharacteristicsQuery} from "../../../redux/toolkit/api/characterApi";
+import {setRequestSaveThrow} from "../../../redux/slices/gameSessionSlice";
+import {useGetCharacteristicsQuery} from "../../../redux/api/characterApi";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "../../../redux/redux";
 

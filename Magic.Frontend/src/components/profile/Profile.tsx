@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import * as React from "react";
-import {useGetCurrentUserQuery} from "../../redux/toolkit/api/userApi";
+import {useGetCurrentUserQuery} from "../../redux/api/userApi";
 import {baseProxy} from "../../env";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";

@@ -10,7 +10,7 @@ import {
     CharacterTemplateResponse
 } from "../../../models/response/characterTemplateResponse";
 import Tooltip from "@mui/material/Tooltip";
-import {useGetCharacteristicsQuery} from "../../../redux/toolkit/api/characterApi";
+import {useGetCharacteristicsQuery} from "../../../redux/api/characterApi";
 
 
 export interface CharacterTemplateProps {

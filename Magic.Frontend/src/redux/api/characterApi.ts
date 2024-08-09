@@ -1,11 +1,11 @@
 import {createApi} from '@reduxjs/toolkit/query/react'
 import {fetchBaseQueryWithAuth} from "../utils/baseQueryWithReauth";
-import {apiProxy} from "../../../env";
+import {apiProxy} from "../../env";
 import {
     CharacterCharacteristicResponse, CharacterClass, CharacterRace,
     CharacterTemplateResponse
-} from "../../../models/response/characterTemplateResponse";
-import {BaseResponse} from "../../../models/response/baseResponse";
+} from "../../models/response/characterTemplateResponse";
+import {BaseResponse} from "../../models/response/baseResponse";
 
 const prefix = 'character';
 

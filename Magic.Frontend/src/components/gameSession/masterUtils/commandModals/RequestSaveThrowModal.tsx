@@ -7,7 +7,7 @@ import React from "react";
 import {CharacterCharacteristicIds} from "../../../../models/response/characterTemplateResponse";
 import {CharacteristicChangeDetails} from "../MasterUtils.types";
 import {defaultCharacteristic} from "../MasterUtils.utils";
-import {useGetCharacteristicsQuery} from "../../../../redux/toolkit/api/characterApi";
+import {useGetCharacteristicsQuery} from "../../../../redux/api/characterApi";
 import {socket} from "../../../../webSocket/webSocket";
 import {ModalProps} from "./commandModals.types";
 

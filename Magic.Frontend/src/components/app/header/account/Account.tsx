@@ -9,10 +9,10 @@ import Avatar from "@mui/material/Avatar";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
-import {useGetCurrentUserQuery} from "../../../../redux/toolkit/api/userApi";
+import {useGetCurrentUserQuery} from "../../../../redux/api/userApi";
 import {AppDispatch} from "../../../../redux/redux";
 import paths from "../../../../consts/paths";
-import {resetToken} from "../../../../redux/toolkit/slices/tokenSlice";
+import {resetToken} from "../../../../redux/slices/tokenSlice";
 
 export default function Account() {
     const {isLoading, data: currentUser} = useGetCurrentUserQuery();

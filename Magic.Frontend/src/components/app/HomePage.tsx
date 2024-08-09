@@ -14,12 +14,12 @@ import {
     useDeleteRequestMutation,
     useEnterMutation,
     useListQuery
-} from "../../redux/toolkit/api/gameSessionApi";
+} from "../../redux/api/gameSessionApi";
 import {GameSessionResponse} from "../../models/response/gameSessionResponse";
-import {useGetCurrentUserQuery} from "../../redux/toolkit/api/userApi";
+import {useGetCurrentUserQuery} from "../../redux/api/userApi";
 import {useDispatch} from "react-redux";
 import {AppDispatch} from "../../redux/redux";
-import {clearGameSessionData} from "../../redux/toolkit/slices/gameSessionSlice";
+import {clearGameSessionData} from "../../redux/slices/gameSessionSlice";
 
 export default function HomePage() {
     const navigate = useNavigate();

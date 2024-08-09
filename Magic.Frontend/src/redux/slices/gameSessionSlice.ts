@@ -1,8 +1,8 @@
-import {GameSessionInfo} from "../../../models/websocket/gameStartedInfo";
-import {BaseGameSessionMessage} from "../../../models/websocket/chatMessage";
-import {PlayerInfo} from "../../../components/gameSession/GameSession";
+import {GameSessionInfo} from "../../models/websocket/gameStartedInfo";
+import {BaseGameSessionMessage} from "../../models/websocket/chatMessage";
+import {PlayerInfo} from "../../components/gameSession/GameSession";
 import {createSlice} from "@reduxjs/toolkit";
-import {CharacterCharacteristicIds} from "../../../models/response/characterTemplateResponse";
+import {CharacterCharacteristicIds} from "../../models/response/characterTemplateResponse";
 
 export interface GameSessionFullState {
     gameSessionInfo: GameSessionInfo | null;

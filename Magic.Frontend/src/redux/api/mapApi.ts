@@ -1,9 +1,9 @@
 import {createApi} from '@reduxjs/toolkit/query/react'
 import {fetchBaseQueryWithAuth} from "../utils/baseQueryWithReauth";
-import {apiProxy} from "../../../env";
-import {BaseResponse} from "../../../models/response/baseResponse";
-import {MapResponse} from "../../../models/response/mapResponse";
-import {TileProperty} from "../../../models/response/tileProperty";
+import {apiProxy} from "../../env";
+import {BaseResponse} from "../../models/response/baseResponse";
+import {MapResponse} from "../../models/response/mapResponse";
+import {TileProperty} from "../../models/response/tileProperty";
 
 const prefix = 'map';
 
