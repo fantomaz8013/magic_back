@@ -41,8 +41,6 @@ interface RowProps {
 
 const Row = ({row, rowIdx, charPositions,}: RowProps) => {
     const {data: tileProperties} = useGetTilePropertiesQuery();
-    const darkCellBackgroundColor = "rgba(82, 103, 8, 0.9)";
-    const lightCellBackgroundColor = "rgba(230, 233, 220, 0.9)";
     const cellSize = "min(7vw, 7vh)";
     return (
         <Stack
@@ -73,7 +71,7 @@ const Row = ({row, rowIdx, charPositions,}: RowProps) => {
                             borderRadius: 0,
                             fontSize: cellSize,
                         }} elevation={0}>
-                            {character && <Avatar>{character.name}</Avatar>}
+                            {character && <Avatar src={character.avatarUrL}/>}
                         </Paper>
                     );
                 })
