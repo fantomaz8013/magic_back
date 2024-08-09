@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
+using Magic.Api.Controllers.Websockets.Requests;
 
-namespace Magic.Api.Controllers.Websockets;
+namespace Magic.Api.Controllers.Websockets.InMemory;
 
 public class RequestedSaveThrows
 {

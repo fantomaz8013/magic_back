@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace Magic.Api.Controllers.Websockets;
+namespace Magic.Api.Controllers.Websockets.InMemory;
 
 public class LockedCharacters
 {

@@ -9,7 +9,7 @@ import {CharacteristicChangeDetails} from "../MasterUtils.types";
 import {defaultCharacteristic} from "../MasterUtils.utils";
 import {useGetCharacteristicsQuery} from "../../../../redux/toolkit/api/characterApi";
 import {socket} from "../../../../webSocket/webSocket";
-import {ModalProps} from "./commandModals.utils";
+import {ModalProps} from "./commandModals.types";
 
 
 export function RequestSaveThrowModal({onCloseModal, userId}: ModalProps) {

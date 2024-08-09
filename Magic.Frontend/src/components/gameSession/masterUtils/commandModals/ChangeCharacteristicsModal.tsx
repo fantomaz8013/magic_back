@@ -10,7 +10,7 @@ import {socket} from "../../../../webSocket/webSocket";
 import {ChangingField} from "../MasterUtils.types";
 import {useSelector} from "react-redux";
 import {RootState} from "../../../../redux/redux";
-import {ModalProps} from "./commandModals.utils";
+import {ModalProps} from "./commandModals.types";
 
 export function ChangeCharacteristicsModal({userId, onCloseModal}: ModalProps) {
     const [changingParameter, setChangingParameter] = useState<ChangingField | null>(null);
@@ -56,13 +56,12 @@ export function ChangeCharacteristicsModal({userId, onCloseModal}: ModalProps) {
 
         return (
             <FormControl sx={{mt: 2}} fullWidth>
-                <Typography>
-                    {changingParameter.initialValue &&
-                        <>Начальное значение
-                            <br/>
-                            {changingParameter.initialValue}
-                        </>}
-                </Typography>
+                {changingParameter.initialValue &&
+                    <Typography>
+                        Начальное значение
+                        <br/>
+                        {changingParameter.initialValue}
+                    </Typography>}
                 <TextField
                     value={changingParameter.value.toString()}
                     onChange={onParameterValueChange}

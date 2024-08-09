@@ -1,5 +1,7 @@
-﻿using Magic.Common.Models.Response;
-using Magic.Domain.Entities;
+﻿using Magic.Api.Controllers.Websockets.InMemory;
+using Magic.Api.Controllers.Websockets.Requests;
+using Magic.Api.Controllers.Websockets.Responses;
+using Magic.Common.Models.Response;
 using Magic.Domain.Enums;
 using Magic.Service;
 using Magic.Service.Interfaces;
@@ -126,7 +128,7 @@ public class GameSessionsHub : Hub
             await clientProxy.SendAsync(Events.HistoryReceived, messages);
     }
 
-    private async Task SendPlayerInfos(GameSession gameSession, IClientProxy clientProxy)
+    private async Task SendPlayerInfos(Domain.Entities.GameSession gameSession, IClientProxy clientProxy)
     {
         var locks = LockedCharacters.GetGameSessionLocks(gameSession.Id);
         var playerInfos = gameSession
@@ -370,7 +372,7 @@ public class GameSessionsHub : Hub
         return IsCallerAdmin(gameSession, caller.Id);
     }
 
-    private bool IsCallerAdmin(GameSession? gameSession, Guid callerId)
+    private bool IsCallerAdmin(Domain.Entities.GameSession? gameSession, Guid callerId)
     {
         return gameSession != null && gameSession.CreatorUserId == callerId;
     }

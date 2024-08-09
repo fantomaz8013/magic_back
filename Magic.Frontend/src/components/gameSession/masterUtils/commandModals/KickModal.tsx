@@ -5,7 +5,7 @@ import {socket} from "../../../../webSocket/webSocket";
 import {getUserLoginById} from "../MasterUtils.utils";
 import {useSelector} from "react-redux";
 import {RootState} from "../../../../redux/redux";
-import {ModalProps} from "./commandModals.utils";
+import {ModalProps} from "./commandModals.types";
 
 
 export function KickModal({userId, onCloseModal}: ModalProps) {

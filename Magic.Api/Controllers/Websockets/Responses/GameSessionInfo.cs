@@ -2,7 +2,7 @@
 using Magic.Domain.Entities;
 using Magic.Domain.Enums;
 
-namespace Magic.Api.Controllers.Websockets;
+namespace Magic.Api.Controllers.Websockets.Responses;
 
 public record GameSessionInfo(
     GameSessionStatusTypeEnum GameSessionStatus,

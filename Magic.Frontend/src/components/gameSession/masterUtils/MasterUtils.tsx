@@ -15,7 +15,7 @@ import {ModalStyle} from "./MasterUtils.utils";
 import {RequestSaveThrowModal} from "./commandModals/RequestSaveThrowModal";
 import {KickModal} from "./commandModals/KickModal";
 import {ChangeCharacteristicsModal} from "./commandModals/ChangeCharacteristicsModal";
-import {ModalProps} from "./commandModals/commandModals.utils";
+import {ModalProps} from "./commandModals/commandModals.types";
 
 
 export function MasterUtils({anchorEl, onClose}: MasterToPlayerCommandProps) {

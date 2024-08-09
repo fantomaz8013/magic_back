@@ -1,4 +1,4 @@
-﻿namespace Magic.Api.Controllers.Websockets;
+﻿namespace Magic.Api.Controllers.Websockets.Requests;
 
 public record RequestedSaveThrow(
     int CharacterCharacteristicId,
