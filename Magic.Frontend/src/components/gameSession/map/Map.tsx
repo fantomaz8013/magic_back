@@ -3,6 +3,9 @@ import {Stack} from "@mui/material";
 import Paper from "@mui/material/Paper";
 import {useSelector} from "react-redux";
 import {RootState} from "../../../redux/redux";
+import {GameSessionCharacter} from "../../../models/websocket/gameStartedInfo";
+import {useGetTilePropertiesQuery} from "../../../redux/toolkit/api/mapApi";
+import {baseProxy} from "../../../env";
 
 export function Map() {
     const gameSessionInfo = useSelector((state: RootState) => state.gameSession.gameSessionInfo);
@@ -13,15 +16,16 @@ export function Map() {
         );
     }
 
-    const map = JSON.parse(JSON.stringify(gameSessionInfo.map.tiles)) as number[][];
-
-    for (const character of gameSessionInfo.characters) {
-        if (Number.isFinite(character.positionY) && Number.isFinite(character.positionX))
-            map[character.positionY!][character.positionX!] = 1;
-    }
+    const charPositions = gameSessionInfo.characters
+        .reduce((pv, cv) => {
+            if (Number.isFinite(cv.positionY) && Number.isFinite(cv.positionX)) {
+                pv[cellKey(cv.positionY!, cv.positionX!)] = cv;
+            }
+            return pv;
+        }, {} as CharPositions)
 
     return (
-        <Board board={map}/>
+        <Board board={gameSessionInfo.map.tiles} charPositions={charPositions}/>
     );
 }
 
@@ -29,19 +33,30 @@ const rowKey = (rowIdx: number) => `${rowIdx + 1}`;
 
 const cellKey = (rowIdx: number, colIdx: number) => `${rowKey(rowIdx)}:${colIdx}`;
 
-const Row = ({row, rowIdx}: { row: number[], rowIdx: number }) => {
+interface RowProps {
+    row: number[];
+    rowIdx: number;
+    charPositions: CharPositions;
+}
+
+const Row = ({row, rowIdx, charPositions,}: RowProps) => {
+    const {data: tileProperties} = useGetTilePropertiesQuery();
     const darkCellBackgroundColor = "rgba(82, 103, 8, 0.9)";
     const lightCellBackgroundColor = "rgba(230, 233, 220, 0.9)";
     const cellSize = "min(7vw, 7vh)";
     return (
-        <Stack direction="row" sx={{
-            display: "flex",
-            maxHeight: '50px',
-            flex: `1 1 ${cellSize}`,
-            mb: '1px',
-        }}>
+        <Stack
+            direction="row"
+            sx={{
+                display: "flex",
+                maxHeight: '50px',
+                flex: `1 1 ${cellSize}`,
+                mb: '1px',
+            }}>
             {
                 row.map((piece, colIdx) => {
+                    const character = charPositions[cellKey(rowIdx, colIdx)];
+                    const property = tileProperties && tileProperties.data && tileProperties.data[piece];
                     return (
                         <Paper key={cellKey(rowIdx, colIdx)} sx={{
                             flex: "1 1 min(9vw, 9vh)",
@@ -50,12 +65,13 @@ const Row = ({row, rowIdx}: { row: number[], rowIdx: number }) => {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
+                            backgroundImage: property && `url(${baseProxy}${property.image})`,
                             mr: '1px',
-                            bgcolor: piece === 1 ? lightCellBackgroundColor : darkCellBackgroundColor,
+                            bgcolor: character ? lightCellBackgroundColor : darkCellBackgroundColor,
                             borderRadius: 0,
                             fontSize: cellSize,
-                        }} elevation={0}>
-                        </Paper>
+                        }} elevation={0}
+                        />
                     );
                 })
             }
@@ -63,7 +79,14 @@ const Row = ({row, rowIdx}: { row: number[], rowIdx: number }) => {
     );
 }
 
-export const Board = ({board}: { board: number[][] }) => {
+type CharPositions = Record<string, GameSessionCharacter>
+
+interface BoardProps {
+    board: number[][];
+    charPositions: CharPositions;
+}
+
+export const Board = ({board, charPositions}: BoardProps) => {
     return (
         <Paper sx={{
             maxWidth: '100%',
@@ -78,7 +101,7 @@ export const Board = ({board}: { board: number[][] }) => {
             {
                 board.map((row, rowIdx) => {
                     return (
-                        <Row key={rowIdx} row={row} rowIdx={rowIdx}/>
+                        <Row key={rowIdx} row={row} rowIdx={rowIdx} charPositions={charPositions}/>
                     );
                 })
             }

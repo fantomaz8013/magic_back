@@ -19,18 +19,18 @@ import {ModalProps} from "./commandModals/commandModals.types";
 
 export function MasterUtils({anchorEl, onClose}: MasterToPlayerCommandProps) {
     const [masterCommand, setMasterCommand] = React.useState<MasterCommands | null>(null);
-    const [userId, setUserId] = useState<string|null>(null);
+    const [userId, setUserId] = useState<string | null>(null);
 
     const playerInfos = useSelector((state: RootState) => state.gameSession.playerInfos);
     const {data: currentUser} = useGetCurrentUserQuery();
 
     const isGameMaster = (currentUser && currentUser.data && playerInfos[currentUser.data.id]?.isMaster) || false;
 
-    useEffect(()=>{
-        if(anchorEl){
+    useEffect(() => {
+        if (anchorEl) {
             setUserId(anchorEl.id);
         }
-    },[anchorEl]);
+    }, [anchorEl]);
 
     if (!isGameMaster) {
         return (
@@ -48,14 +48,13 @@ export function MasterUtils({anchorEl, onClose}: MasterToPlayerCommandProps) {
                 open={!!anchorEl}
                 onClose={closeModal}
             >
-                {!isUserOnline && <>
+                {!isUserOnline &&
                     <MenuItem
                         disabled={!isUserOnline}
                         id={"Offline"}>
                         Игрок вне сети
-                    </MenuItem>
-                    <Divider/>
-                </>}
+                    </MenuItem>}
+                {!isUserOnline && <Divider/>}
                 <MenuItem
                     disabled={!isUserOnline}
                     id={MasterCommands.Kick}

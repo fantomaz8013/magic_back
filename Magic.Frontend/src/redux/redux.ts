@@ -6,11 +6,13 @@ import {userApi} from "./toolkit/api/userApi";
 import {characterApi} from "./toolkit/api/characterApi";
 import {gameSessionSlice} from "./toolkit/slices/gameSessionSlice";
 import {gameSessionApi} from "./toolkit/api/gameSessionApi";
+import {mapApi} from "./toolkit/api/mapApi";
 
 export const rootReducer = combineReducers({
     auth: tokenSlice.reducer,
     gameSession: gameSessionSlice.reducer,
     [userApi.reducerPath]: userApi.reducer,
+    [mapApi.reducerPath]: mapApi.reducer,
     [characterApi.reducerPath]: characterApi.reducer,
     [gameSessionApi.reducerPath]: gameSessionApi.reducer,
 });
@@ -23,6 +25,7 @@ export const store = configureStore({
                 userApi.middleware,
                 characterApi.middleware,
                 gameSessionApi.middleware,
+                mapApi.middleware,
             ]),
     devTools: devMode,
 });

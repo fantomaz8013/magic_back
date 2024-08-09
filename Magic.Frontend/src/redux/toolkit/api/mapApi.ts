@@ -11,7 +11,7 @@ export const mapApi = createApi({
     reducerPath: 'mapApi',
     baseQuery: fetchBaseQueryWithAuth(apiProxy + prefix),
     endpoints: (builder) => ({
-        getTileList: builder.query<BaseResponse<MapResponse>, void>({
+        getMapList: builder.query<BaseResponse<MapResponse>, void>({
             query: () => `list`,
         }),
         getTileProperties: builder.query<BaseResponse<TileProperty[]>, void>({
@@ -20,4 +20,4 @@ export const mapApi = createApi({
     }),
 })
 
-export const {useGetTileListQuery, useGetTilePropertiesQuery} = mapApi
+export const {useGetMapListQuery, useGetTilePropertiesQuery} = mapApi
