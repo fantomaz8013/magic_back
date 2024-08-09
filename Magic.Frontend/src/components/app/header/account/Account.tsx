@@ -54,7 +54,6 @@ export default function Account() {
                                 position: 'absolute',
                                 top: 4,
                                 left: 4,
-                                zIndex: 1,
                             }}
                         />
                     )}

@@ -1,3 +1,1 @@
-export const rowKey = (rowIdx: number) => `${rowIdx + 1}`;
-
-export const cellKey = (rowIdx: number, colIdx: number) => `${rowKey(rowIdx)}:${colIdx}`;
+export const cellKey = (y: number, x: number) => `$(Y:${y}, X:${x})`;

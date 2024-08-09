@@ -1,20 +1,20 @@
-import {useGetTilePropertiesQuery} from "../../../redux/api/mapApi";
 import {Avatar, Stack} from "@mui/material";
 import Paper from "@mui/material/Paper";
 import {baseProxy} from "../../../env";
-import React from "react";
-import {CharPositions} from "./Board";
+import React, {useContext} from "react";
 import {cellKey} from "./map.utils";
+import {MapContext} from "./Map";
+import {LocationOn} from "@mui/icons-material";
 
 interface RowProps {
     row: number[];
     rowIdx: number;
-    charPositions: CharPositions;
 }
 
-export const Row = ({row, rowIdx, charPositions,}: RowProps) => {
-    const {data: tileProperties} = useGetTilePropertiesQuery();
+export const Row = ({row, rowIdx,}: RowProps) => {
     const cellSize = "min(7vw, 7vh)";
+    const context = useContext(MapContext);
+
     return (
         <Stack
             direction="row"
@@ -26,10 +26,13 @@ export const Row = ({row, rowIdx, charPositions,}: RowProps) => {
             }}>
             {
                 row.map((piece, colIdx) => {
-                    const character = charPositions[cellKey(rowIdx, colIdx)];
-                    const property = tileProperties && tileProperties.data && tileProperties.data[piece];
+                    const key = cellKey(rowIdx, colIdx);
+                    // const character = context!.charPositions[key];
+                    const property = context!.tileProperties[piece];
+                    //const move = context!.move?.pathHashSet[piece];
+
                     return (
-                        <Paper key={cellKey(rowIdx, colIdx)} sx={{
+                        <Paper key={key} sx={{
                             flex: "1 1 min(9vw, 9vh)",
                             width: '50px',
                             height: '50px',
@@ -44,7 +47,9 @@ export const Row = ({row, rowIdx, charPositions,}: RowProps) => {
                             borderRadius: 0,
                             fontSize: cellSize,
                         }} elevation={0}>
-                            {character && <Avatar src={character.avatarUrL}/>}
+                            {context!.drawExtra(piece, rowIdx, colIdx)}
+                            {/*{character && <Avatar src={character.avatarUrL}/>}*/}
+                            {/*{!character && move && <LocationOn/>}*/}
                         </Paper>
                     );
                 })

@@ -1,17 +1,12 @@
 import Paper from "@mui/material/Paper";
 import React from "react";
-import {GameSessionCharacter} from "../../../models/websocket/gameStartedInfo";
 import {Row} from "./Row";
 
 interface BoardProps {
     board: number[][];
-    charPositions: CharPositions;
 }
 
-export type CharPositions = Record<string, GameSessionCharacter>
-
-
-export const Board = ({board, charPositions}: BoardProps) => {
+export const Board = ({board}: BoardProps) => {
     return (
         <Paper sx={{
             maxWidth: '100%',
@@ -26,7 +21,7 @@ export const Board = ({board, charPositions}: BoardProps) => {
             {
                 board.map((row, rowIdx) => {
                     return (
-                        <Row key={rowIdx} row={row} rowIdx={rowIdx} charPositions={charPositions}/>
+                        <Row key={rowIdx} row={row} rowIdx={rowIdx}/>
                     );
                 })
             }
