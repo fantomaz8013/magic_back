@@ -1,5 +1,5 @@
 import React from "react";
-import {Stack} from "@mui/material";
+import {Avatar, Stack} from "@mui/material";
 import Paper from "@mui/material/Paper";
 import {useSelector} from "react-redux";
 import {RootState} from "../../../redux/redux";
@@ -65,13 +65,16 @@ const Row = ({row, rowIdx, charPositions,}: RowProps) => {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
+                            backgroundSize: 'cover',
+                            backgroundRepeat: 'no-repeat',
+                            backgroundPosition: "center",
                             backgroundImage: property && `url(${baseProxy}${property.image})`,
                             mr: '1px',
-                            bgcolor: character ? lightCellBackgroundColor : darkCellBackgroundColor,
                             borderRadius: 0,
                             fontSize: cellSize,
-                        }} elevation={0}
-                        />
+                        }} elevation={0}>
+                            {character && <Avatar>{character.name}</Avatar>}
+                        </Paper>
                     );
                 })
             }
@@ -95,7 +98,7 @@ export const Board = ({board, charPositions}: BoardProps) => {
             mt: '2%',
             ml: '20%',
             display: "flex",
-            flexDirection: "column-reverse",
+            flexDirection: "column",
             gridArea: "2 / 2 / span 8 / span 8",
         }} elevation={4}>
             {
