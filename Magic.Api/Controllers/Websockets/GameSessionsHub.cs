@@ -136,10 +136,17 @@ public class GameSessionsHub : Hub
             .Append(gameSession.CreatorUser)
             .Select(u =>
                 {
+                    var connectionId = ConnectedUsers.GetConnectionId(gameSession.Id, u.Id);
                     Guid? lockedCharacterId = null;
                     if (locks != null && locks.TryGetValue(u.Id, out var value))
                         lockedCharacterId = value;
-                    return new PlayerInfo(u.Id, u.Login, gameSession.CreatorUserId == u.Id, lockedCharacterId);
+                    return new PlayerInfo(
+                        u.Id,
+                        u.Login,
+                        gameSession.CreatorUserId == u.Id,
+                        lockedCharacterId,
+                        connectionId != null
+                    );
                 }
             )
             .ToArray();

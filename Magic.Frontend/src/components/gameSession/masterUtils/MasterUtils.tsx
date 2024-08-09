@@ -1,10 +1,9 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import {Divider, Modal} from "@mui/material";
 import Box from "@mui/material/Box";
 import {
-    MasterCommandDetails,
     MasterCommands,
     MasterToPlayerCommandProps,
 } from "./MasterUtils.types";
@@ -19,11 +18,19 @@ import {ModalProps} from "./commandModals/commandModals.types";
 
 
 export function MasterUtils({anchorEl, onClose}: MasterToPlayerCommandProps) {
-    const [masterCommand, setMasterCommand] = React.useState<MasterCommandDetails | null>(null);
+    const [masterCommand, setMasterCommand] = React.useState<MasterCommands | null>(null);
+    const [userId, setUserId] = useState<string|null>(null);
+
     const playerInfos = useSelector((state: RootState) => state.gameSession.playerInfos);
     const {data: currentUser} = useGetCurrentUserQuery();
 
     const isGameMaster = (currentUser && currentUser.data && playerInfos[currentUser.data.id]?.isMaster) || false;
+
+    useEffect(()=>{
+        if(anchorEl){
+            setUserId(anchorEl.id);
+        }
+    },[anchorEl]);
 
     if (!isGameMaster) {
         return (
@@ -31,9 +38,8 @@ export function MasterUtils({anchorEl, onClose}: MasterToPlayerCommandProps) {
         );
     }
 
-    const userIdFromAnchor = anchorEl?.id;
-    const userInfo = userIdFromAnchor && playerInfos[userIdFromAnchor]!;
-    const isUserOnline = !userInfo || (userInfo.isOnline === undefined) || userInfo?.isOnline;
+    const userInfo = userId ? playerInfos[userId]! : null;
+    const isUserOnline = userInfo?.isOnline;
 
     return (
         <>
@@ -44,7 +50,7 @@ export function MasterUtils({anchorEl, onClose}: MasterToPlayerCommandProps) {
             >
                 {!isUserOnline && <>
                     <MenuItem
-                        disabled={!userInfo.isOnline}
+                        disabled={!isUserOnline}
                         id={"Offline"}>
                         Игрок вне сети
                     </MenuItem>
@@ -74,7 +80,7 @@ export function MasterUtils({anchorEl, onClose}: MasterToPlayerCommandProps) {
     );
 
 
-    function renderMasterCommandModal(masterCommand: MasterCommandDetails) {
+    function renderMasterCommandModal(masterCommand: MasterCommands) {
         return (
             <Modal
                 open={true}
@@ -87,9 +93,9 @@ export function MasterUtils({anchorEl, onClose}: MasterToPlayerCommandProps) {
         );
     }
 
-    function renderCommandInModal(masterCommand: MasterCommandDetails) {
-        const props: ModalProps = {onCloseModal: closeModal, userId: masterCommand.userId};
-        switch (masterCommand.type) {
+    function renderCommandInModal(masterCommand: MasterCommands) {
+        const props: ModalProps = {onCloseModal: closeModal, userId: userId!};
+        switch (masterCommand) {
             case MasterCommands.RequestSaveThrow: {
                 return (<RequestSaveThrowModal {...props}/>);
             }
@@ -106,7 +112,7 @@ export function MasterUtils({anchorEl, onClose}: MasterToPlayerCommandProps) {
     }
 
     function onStartCommandClick(e: React.MouseEvent<HTMLLIElement>) {
-        setMasterCommand({type: e.currentTarget.id as MasterCommands, userId: userIdFromAnchor!});
+        setMasterCommand(e.currentTarget.id as MasterCommands);
         onClose();
     }
 

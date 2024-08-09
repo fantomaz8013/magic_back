@@ -27,7 +27,7 @@ export interface PlayerInfo {
     login: string;
     isMaster: boolean | null;
     lockedCharacterId: string | null;
-    isOnline?: boolean;
+    isOnline: boolean;
 }
 
 
@@ -38,7 +38,7 @@ export default function GameSession() {
 
     const [ref, setRef] = useState<HTMLElement | null>(null);
 
-    const gameSessionFullState = useSelector((state: RootState) => state.gameSession);
+    const gameSessionInfo = useSelector((state: RootState) => state.gameSession.gameSessionInfo);
 
     useEffect(() => {
         if (gameSessionId && state === "Connected")
@@ -81,17 +81,17 @@ export default function GameSession() {
     //region Render functions
 
     function renderGameSessionPage() {
-        if (!gameSessionFullState || !gameSessionFullState.gameSessionInfo)
+        if (!gameSessionInfo)
             return (
                 <LinearProgress color="inherit"/>
             )
 
-        switch (gameSessionFullState.gameSessionInfo.gameSessionStatus) {
+        switch (gameSessionInfo.gameSessionStatus) {
             case GameSessionStatusTypeEnum.WaitingForStart:
                 return renderWaitingForStartPage();
             case GameSessionStatusTypeEnum.InGame:
                 //in game characters will be available
-                return renderInGamePage(gameSessionFullState.gameSessionInfo.characters!);
+                return renderInGamePage(gameSessionInfo.characters!);
             case GameSessionStatusTypeEnum.Finished:
                 break;
         }
