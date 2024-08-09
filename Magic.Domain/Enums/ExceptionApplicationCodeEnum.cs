@@ -66,4 +66,8 @@ public enum ExceptionApplicationCodeEnum
     /// Путь пустой
     /// </summary>
     PathIsEmpty = 16,
+    /// <summary>
+    /// Не найдена информация о ходе игрового персонажа
+    /// </summary>
+    TunfInfoNotExist = 17,
 }

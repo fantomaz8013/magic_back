@@ -15,12 +15,14 @@ public class MapService : IMapService
     protected readonly DataBaseContext _dbContext;
     protected readonly ITilePropertyService _tilePropertyService;
     protected readonly IGameSessionCharacterService _gameSessionCharacterService;
+    protected readonly IGameSessionCharacterTurnInfoService _gameSessionCharacterTurnInfoService;
 
-    public MapService(DataBaseContext dbContext, ITilePropertyService tilePropertyService, IGameSessionCharacterService gameSessionCharacterService)
+    public MapService(DataBaseContext dbContext, ITilePropertyService tilePropertyService, IGameSessionCharacterService gameSessionCharacterService, IGameSessionCharacterTurnInfoService gameSessionCharacterTurnInfoService)
     {
         _dbContext = dbContext;
         _tilePropertyService = tilePropertyService;
         _gameSessionCharacterService = gameSessionCharacterService;
+        _gameSessionCharacterTurnInfoService = gameSessionCharacterTurnInfoService;
     }
     public async Task<List<MapResponse>> GetMaps()
     {
@@ -56,8 +58,10 @@ public class MapService : IMapService
                ExceptionApplicationCodeEnum.CharacterNotInMap);
         }
 
+        var characterTurnInfo = await _gameSessionCharacterTurnInfoService
+            .GetCharacterTurnInfo(gameSessionCharacterId);
         //Количество очков передвижения персонажа
-        var characterSpeed = gameSessionCharacter.Speed;
+        var characterSpeed = characterTurnInfo.LeftStep;
         //Количество текущего здоровья с учетом брони
         var characterHealth = gameSessionCharacter.CurrentHP + (gameSessionCharacter.CurrentShield ?? 0);
         //Проверка, хватает ли количества ходов для прохода всего пути

@@ -26,6 +26,7 @@ public class DataBaseContext : DbContext
     public DbSet<GameSessionCharacter> GameSessionCharacters { get; set; }
     public DbSet<Map> Maps { get; set; }
     public DbSet<TileProperty> TileProperties { get; set; }
+    public DbSet<GameSessionCharacterTurnInfo> GameSessionCharacterTurnInfos { get; set; }
 
     public DataBaseContext(DbContextOptions<DataBaseContext> options) : base(options) { }
 
@@ -50,5 +51,6 @@ public class DataBaseContext : DbContext
         modelBuilder.ApplyConfiguration(new GameSessionCharacterConfiguration());
         modelBuilder.ApplyConfiguration(new MapConfiguration());
         modelBuilder.ApplyConfiguration(new TilePropertyConfiguration());
+        modelBuilder.ApplyConfiguration(new GameSessionCharacterTurnInfoConfiguration());
     }
 }
