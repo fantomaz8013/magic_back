@@ -1,11 +1,8 @@
 import React from "react";
-import {Avatar, Stack} from "@mui/material";
-import Paper from "@mui/material/Paper";
 import {useSelector} from "react-redux";
 import {RootState} from "../../../redux/redux";
-import {GameSessionCharacter} from "../../../models/websocket/gameStartedInfo";
-import {useGetTilePropertiesQuery} from "../../../redux/toolkit/api/mapApi";
-import {baseProxy} from "../../../env";
+import {Board, CharPositions} from "./Board";
+import {cellKey} from "./map.utils";
 
 export function Map() {
     const gameSessionInfo = useSelector((state: RootState) => state.gameSession.gameSessionInfo);
@@ -29,83 +26,3 @@ export function Map() {
     );
 }
 
-const rowKey = (rowIdx: number) => `${rowIdx + 1}`;
-
-const cellKey = (rowIdx: number, colIdx: number) => `${rowKey(rowIdx)}:${colIdx}`;
-
-interface RowProps {
-    row: number[];
-    rowIdx: number;
-    charPositions: CharPositions;
-}
-
-const Row = ({row, rowIdx, charPositions,}: RowProps) => {
-    const {data: tileProperties} = useGetTilePropertiesQuery();
-    const cellSize = "min(7vw, 7vh)";
-    return (
-        <Stack
-            direction="row"
-            sx={{
-                display: "flex",
-                maxHeight: '50px',
-                flex: `1 1 ${cellSize}`,
-                mb: '1px',
-            }}>
-            {
-                row.map((piece, colIdx) => {
-                    const character = charPositions[cellKey(rowIdx, colIdx)];
-                    const property = tileProperties && tileProperties.data && tileProperties.data[piece];
-                    return (
-                        <Paper key={cellKey(rowIdx, colIdx)} sx={{
-                            flex: "1 1 min(9vw, 9vh)",
-                            width: '50px',
-                            height: '50px',
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            backgroundSize: 'cover',
-                            backgroundRepeat: 'no-repeat',
-                            backgroundPosition: "center",
-                            backgroundImage: property && `url(${baseProxy}${property.image})`,
-                            mr: '1px',
-                            borderRadius: 0,
-                            fontSize: cellSize,
-                        }} elevation={0}>
-                            {character && <Avatar src={character.avatarUrL}/>}
-                        </Paper>
-                    );
-                })
-            }
-        </Stack>
-    );
-}
-
-type CharPositions = Record<string, GameSessionCharacter>
-
-interface BoardProps {
-    board: number[][];
-    charPositions: CharPositions;
-}
-
-export const Board = ({board, charPositions}: BoardProps) => {
-    return (
-        <Paper sx={{
-            maxWidth: '100%',
-            zIndex: '0',
-            position: 'absolute',
-            mt: '2%',
-            ml: '20%',
-            display: "flex",
-            flexDirection: "column",
-            gridArea: "2 / 2 / span 8 / span 8",
-        }} elevation={4}>
-            {
-                board.map((row, rowIdx) => {
-                    return (
-                        <Row key={rowIdx} row={row} rowIdx={rowIdx} charPositions={charPositions}/>
-                    );
-                })
-            }
-        </Paper>
-    )
-}
