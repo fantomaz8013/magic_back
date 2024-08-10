@@ -15,7 +15,7 @@ public class CalculateConeRequest
 
 public record Point(int X, int Y);
 
-public class CalculateCone
+public static class CalculateCone
 {
     public static List<Point> GetPointsInCone(CalculateConeRequest request, int mapWidth, int mapHeight)
     {
@@ -26,12 +26,17 @@ public class CalculateCone
         var dx = direction.X - root.X;
         var dy = direction.Y - root.Y;
 
-        var (startX, endX, startY, endY, maxValue, minValue) =
-            GetFigure(dx, dy, request.Radius, root, mapWidth, mapHeight);
-        var remover = GetRemover(dx, dy, maxValue, minValue, root);
+        var (startX, endX, startY, endY) = GetFigure(dx, dy, request.Radius);
+        var remover = GetRemover(dx, dy, root, request.Radius);
 
-        for (var y = startY; y <= endY; y++)
-        for (var x = startX; x <= endX; x++)
+
+        var _startY = Math.Max(startY + root.Y, 0);
+        var _endY = Math.Min(endY + root.Y, mapHeight - 1);
+        var _startX = Math.Max(startX + root.X, 0);
+        var _endX = Math.Min(endX + root.X, mapWidth - 1);
+
+        for (var y = _startY; y <= _endY; y++)
+        for (var x = _startX; x <= _endX; x++)
             if (!remover((x, y)))
                 result.Add(new Point(x, y));
 
@@ -39,27 +44,16 @@ public class CalculateCone
     }
 
     /// <para>вычисляет координаты фигуры (прямоугольник или квадрат) </para> 
-    /// <para>maxValue - наибольшая координата (в абсолютном значениии) </para> 
-    /// <para>min - наименьшая </para> 
-    private static (int startX, int endX, int startY, int endY, int maxValue, int minValue) GetFigure(
+    private static (int startX, int endX, int startY, int endY) GetFigure(
         int dx,
         int dy,
-        int radius,
-        Point root,
-        int mapWidth,
-        int mapHeight)
+        int radius)
     {
-        var (maxY, minY) = GetMaxMin(dy, radius);
-        var (maxX, minX) = GetMaxMin(dx, radius);
-        var startY = Math.Max(minY + root.Y, 0);
-        var endY = Math.Min(maxY + root.Y, mapHeight - 1);
-        var startX = Math.Max(minX + root.X, 0);
-        var endX = Math.Min(maxX + root.X, mapWidth - 1);
-        var values = new[] { startX, endX, startY, endY }.Select(Math.Abs).ToArray();
-        var maxValue = values.Max();
-        var minValue = values.Min();
+        if (dx != 0 && dy != 0) radius += radius / 2;
+        var (endY, startY) = GetMaxMin(dy, radius);
+        var (endX, startX) = GetMaxMin(dx, radius);
 
-        return (startX, endX, startY, endY, maxValue, minValue);
+        return (startX, endX, startY, endY);
     }
 
     private static (int max, int min) GetMaxMin(int delta, int radius)
@@ -77,24 +71,42 @@ public class CalculateCone
     /// <para>подбирает фильтрующую функцию </para> 
     /// <para>для квадрата получить половину близжайщую к root </para> 
     /// <para>для прямоугольника получить конус относительно root </para> 
-    private static Func<(int x, int y), bool> GetRemover(int dx, int dy, int max, int min, Point root)
+    private static Func<(int x, int y), bool> GetRemover(int dx, int dy, Point root, int radius)
     {
         if (dx == 0 || dy == 0)
             return data =>
             {
-                var d = Math.Abs(dx * data.x + dy * data.y);
-                return GetDistanceRelativeToRoot(data.x, data.y, root) > GetDistanceRelativeToRoot(d, d - 1, root);
+                var relativePoint = GetPointRelativeToRoot(data.x, data.y, root);
+                var distance = Math.Abs(dx * relativePoint.X + dy * relativePoint.Y);
+                return GetDistanceRelativeToRoot(data.x, data.y, root) > GetDistance(distance, distance - 1);
             };
 
-        var d = GetDistanceRelativeToRoot(max, min, root);
-        return data => GetDistanceRelativeToRoot(data.x, data.y, root) > d;
+        var distanceToDiagonalInCells = 2 + radius + radius / 2;
+        return data =>
+        {
+            var relativePoint = GetPointRelativeToRoot(data.x, data.y, root);
+            return Math.Abs(relativePoint.X) + Math.Abs(relativePoint.Y) > distanceToDiagonalInCells;
+        };
     }
 
     /// Вычисляет растояние от точки до root
     private static double GetDistanceRelativeToRoot(int x, int y, Point root)
     {
-        var dx = root.X - x;
-        var dy = root.Y - y;
-        return Math.Sqrt(dx * dx + dy * dy);
+        return GetDistance(GetPointRelativeToRoot(x, y, root));
+    }
+
+    private static Point GetPointRelativeToRoot(int x, int y, Point root)
+    {
+        return new Point(root.X - x, root.Y - y);
+    }
+
+    private static double GetDistance(Point point)
+    {
+        return GetDistance(point.X, point.Y);
+    }
+
+    private static double GetDistance(int x, int y)
+    {
+        return Math.Sqrt(x * x + y * y);
     }
 }
