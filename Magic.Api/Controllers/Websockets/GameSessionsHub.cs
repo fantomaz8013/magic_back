@@ -108,7 +108,6 @@ public class GameSessionsHub : Hub
 
         await ConnectPlayer_Internal(gameSessionId, callerUser);
         await SendHistory(gameSession.Id, Clients.Caller);
-        //TODO isOnline
         await SendPlayerInfos(gameSession, Clients.Group(gameSession.Id.ToString()));
         await SendGameSessionInfo(gameSession.Id, gameSession.GameSessionStatus, Clients.Caller);
     }

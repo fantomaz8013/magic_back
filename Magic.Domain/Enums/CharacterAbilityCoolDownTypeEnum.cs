@@ -6,7 +6,7 @@
 public enum CharacterAbilityCoolDownTypeEnum
 {
     /// <summary>
-    /// Способность перезаряжается во вермя драки.
+    /// Способность перезаряжается во время драки.
     /// </summary>
     InFight = 1,
     /// <summary>

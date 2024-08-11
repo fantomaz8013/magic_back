@@ -7,9 +7,11 @@ import {characterApi} from "./api/characterApi";
 import {gameSessionSlice} from "./slices/gameSessionSlice";
 import {gameSessionApi} from "./api/gameSessionApi";
 import {mapApi} from "./api/mapApi";
+import {moveSlice} from "./slices/moveSlice";
 
 export const rootReducer = combineReducers({
     auth: tokenSlice.reducer,
+    move: moveSlice.reducer,
     gameSession: gameSessionSlice.reducer,
     [userApi.reducerPath]: userApi.reducer,
     [mapApi.reducerPath]: mapApi.reducer,

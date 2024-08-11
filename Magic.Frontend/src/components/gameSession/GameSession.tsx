@@ -2,7 +2,6 @@ import React, {useEffect, useState} from "react";
 import {useGameSessionWS} from "../../webSocket/webSocket";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import Dice from "./dice/Dice";
 import Chat from "./chat/Chat";
 import CharactersList from "./charactersList/CharactersList";
 import CharacterLeftMenu from "./charactersList/CharacterLeftMenu";
@@ -21,7 +20,7 @@ import {UserUtils} from "./playerUtils/userUtils";
 import {EventSnackbar} from "./eventSnackbar/EventSnackbar";
 import {KickHandler} from "./KickHandler";
 import paths from "../../consts/paths";
-import Paper from "@mui/material/Paper";
+import {PlayerActions} from "./playerActions/PlayerActions";
 
 export interface PlayerInfo {
     id: string;
@@ -116,7 +115,7 @@ export default function GameSession() {
     function renderInGamePage(characters: NonNullable<GameSessionInfo['characters']>) {
         return (
             <Grid container spacing={2}>
-                <Grid item sx={{zIndex: 1}} xs={1}>
+                <Grid item xs={1}>
                     <Box sx={{display: 'flex', flexDirection: 'column'}}>
                         {characters.map((c: GameSessionCharacter) =>
                             <CharacterLeftMenu
@@ -127,19 +126,14 @@ export default function GameSession() {
                         )}
                     </Box>
                 </Grid>
-                <Grid item sx={{zIndex: 1}} xs={11}>
+                <Grid item xs={11}>
                     <Box sx={{
                         height: '85vh',
                         display: 'flex',
                         alignItems: 'end'
                     }}>
                         <Grid container>
-                            <Grid item xs={1} sx={{
-                                display: 'flex',
-                                alignItems: 'end'
-                            }}>
-                                <Dice/>
-                            </Grid>
+                            <PlayerActions/>
                             <Grid item xs={11}>
                                 <Box sx={{
                                     width: '95%',
