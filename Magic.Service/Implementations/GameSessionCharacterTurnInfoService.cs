@@ -18,6 +18,42 @@ public class GameSessionCharacterTurnInfoService : IGameSessionCharacterTurnInfo
         _gameSessionCharacterService = gameSessionCharacterService;
     }
 
+    public async Task<bool> IsCoolDownAbility(Guid gameSessionCharacterId, int abilityId)
+    {
+        var characterTurnInfo = await GetCharacterTurnInfo(gameSessionCharacterId);
+
+        if (characterTurnInfo.AbilityCoolDowns.FirstOrDefault(x => x.AbilityId == abilityId) != null)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public async Task<GameSessionCharacterTurnInfo> UpdateAbilityTurnInfo(Guid gameSessionCharacterId, CharacterAbility ability)
+    {
+        var characterTurnInfo = await _dbContext.GameSessionCharacterTurnInfos
+            .AsTracking()
+            .FirstOrDefaultAsync(x => x.GameSessionCharacterId == gameSessionCharacterId);
+
+        if (ability.CoolDownType == Domain.Enums.CharacterAbilityCoolDownTypeEnum.None)
+        {
+            return characterTurnInfo!;
+        }
+
+        characterTurnInfo!.AbilityCoolDowns.Add(new AbilityCoolDowns
+        {
+            AbilityId = ability.Id,
+            LeftTurns = ability.CoolDownCount,
+            CharacterAbilityCoolDownTypeEnum = ability.CoolDownType,
+        });
+
+        _dbContext.Update(characterTurnInfo);
+        await _dbContext.SaveChangesAsync();
+
+        return await GetCharacterTurnInfo(gameSessionCharacterId);
+    }
+
     public async Task<GameSessionCharacterTurnInfo> GetCharacterTurnInfo(Guid gameSessionCharacterId)
     {
         var CharacterTurnInfo = await _dbContext.GameSessionCharacterTurnInfos
@@ -98,7 +134,7 @@ public class GameSessionCharacterTurnInfoService : IGameSessionCharacterTurnInfo
         }
 
         await ResetCoreInfo(characterTurnInfo, gameSessionCharacterId);
-        List<Guid> abilitiesToReset = new();
+        List<int> abilitiesToReset = new();
 
         foreach (var item in characterTurnInfo.AbilityCoolDowns.Where(x => x.CharacterAbilityCoolDownTypeEnum == Domain.Enums.CharacterAbilityCoolDownTypeEnum.InFight))
         {

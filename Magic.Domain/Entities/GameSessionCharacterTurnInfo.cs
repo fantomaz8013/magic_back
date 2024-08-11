@@ -27,7 +27,7 @@ public class GameSessionCharacterTurnInfo : BaseEntity<int>
 
 public class AbilityCoolDowns
 {
-    public Guid AbilityId { get; set; }
+    public int AbilityId { get; set; }
     public int? LeftTurns { get; set; }
     public CharacterAbilityCoolDownTypeEnum CharacterAbilityCoolDownTypeEnum { get; set; }
 }

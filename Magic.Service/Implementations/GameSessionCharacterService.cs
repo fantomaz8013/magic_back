@@ -206,6 +206,8 @@ public class GameSessionCharacterService : IGameSessionCharacterService
     public async Task<GameSessionCharacter> GetGameSessionCharacter(Guid gameSessionCharacterId)
     {
         var gameSessionCharacter = await _dbContext.GameSessionCharacters
+            .Include(x => x.CharacterClass)
+            .ThenInclude(x => x.CharacterCharacteristic)
             .AsTracking()
             .FirstOrDefaultAsync(x => x.Id == gameSessionCharacterId);
 

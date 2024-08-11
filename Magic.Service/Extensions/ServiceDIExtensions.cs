@@ -26,5 +26,6 @@ public static class ServiceDIExtensions
         services.AddScoped<IMapService, MapService>();
         services.AddScoped<ITilePropertyService, TilePropertyService>();
         services.AddScoped<IGameSessionCharacterTurnInfoService, GameSessionCharacterTurnInfoService>();
+        services.AddScoped<ICharacterAbilityService, CharacterAbilityService>();
     }
 }

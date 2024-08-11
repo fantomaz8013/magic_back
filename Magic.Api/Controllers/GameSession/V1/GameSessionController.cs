@@ -1,8 +1,11 @@
 ﻿using Magic.Api.Controller.Base;
+using Magic.Common.Models.Request;
 using Magic.Common.Models.Request.GameSessionRequest;
 using Magic.Common.Models.Response;
 using Magic.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using static Magic.Api.Configure.ModelStateFilter;
 
 namespace Magic.Api.Controller.User.V1;

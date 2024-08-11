@@ -23,4 +23,12 @@ public interface IGameSessionCharacterTurnInfoService
     /// <param name="gameSessionCharacterId"></param>
     /// <returns></returns>
     Task<GameSessionCharacterTurnInfo> UpdateTurnInfo(Guid gameSessionCharacterId);
+    /// <summary>
+    /// Отправить способность на перезарядку
+    /// </summary>
+    /// <param name="gameSessionCharacterId"></param>
+    /// <param name="ability"></param>
+    /// <returns></returns>
+    Task<GameSessionCharacterTurnInfo> UpdateAbilityTurnInfo(Guid gameSessionCharacterId, CharacterAbility ability);
+    Task<bool> IsCoolDownAbility(Guid gameSessionCharacterId, int abilityId);
 }

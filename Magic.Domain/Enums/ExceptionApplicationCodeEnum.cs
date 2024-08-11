@@ -70,4 +70,12 @@ public enum ExceptionApplicationCodeEnum
     /// Не найдена информация о ходе игрового персонажа
     /// </summary>
     TunfInfoNotExist = 17,
+    /// <summary>
+    /// Способность персонажа не найдена
+    /// </summary>
+    AbilityNotExist = 18,
+    /// <summary>
+    /// Способность не является таргетной
+    /// </summary>
+    AbilityNotTarget = 19,
 }
