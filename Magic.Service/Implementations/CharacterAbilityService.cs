@@ -33,17 +33,24 @@ public class CharacterAbilityService : ICharacterAbilityService
         switch (ability.TargetType)
         {
             case CharacterAbilityTargetTypeEnum.Target:
+            case CharacterAbilityTargetTypeEnum.TargertSelf:
                 var target = await _dbContext.GameSessionCharacters
                     .Where(c => c.GameSessionId == caster.GameSessionId && c.PositionX.HasValue && c.PositionY.HasValue && c.PositionX.Value == x && c.PositionY.Value == y)
                     .FirstOrDefaultAsync();
                 result = await ApplyTargetAbility(ability, caster, target);
+                break;
+            case CharacterAbilityTargetTypeEnum.Cone:
+                result = await ApplyMultiplePointAbility(ability, caster, x, y, CharacterAbilityTargetTypeEnum.Cone);
+                break;
+            case CharacterAbilityTargetTypeEnum.Area:
+                result = await ApplyMultiplePointAbility(ability, caster, x, y, CharacterAbilityTargetTypeEnum.Cone);
                 break;
         }
 
         return result;
     }
 
-    private async Task<ApplyAbilityResponse> ApplyAreaAbility(CharacterAbility ability, GameSessionCharacter caster, int x, int y)
+    private async Task<ApplyAbilityResponse> ApplyMultiplePointAbility(CharacterAbility ability, GameSessionCharacter caster, int x, int y, CharacterAbilityTargetTypeEnum targetType)
     {
         var result = new ApplyAbilityResponse { IsResult = true };
 
@@ -61,7 +68,57 @@ public class CharacterAbilityService : ICharacterAbilityService
             return result;
         }
 
+        var gameSession = await _dbContext.GameSessions
+            .Include(x => x.Map)
+            .FirstOrDefaultAsync(x => x.Id == caster.GameSessionId);
 
+        var targetPoints = new List<Point>();
+
+        if (targetType == CharacterAbilityTargetTypeEnum.Cone)
+        {
+            targetPoints = CalculateCone.GetPointsInCone(new CalculateConeRequest
+            {
+                Radius = ability.Radius!.Value,
+                UserPosition = new Point(caster.PositionX.Value, caster.PositionY.Value),
+                Direction = new Point(x, y)
+            }, gameSession!.Map!.Tiles.First().Count, gameSession.Map!.Tiles.Count);
+        }
+
+        if (targetType == CharacterAbilityTargetTypeEnum.Area)
+        {
+            targetPoints = CalculatePathUtil.CalculatedPointsInArea(x, y, ability.Radius!.Value, gameSession!.Map!.Tiles.First().Count, gameSession.Map!.Tiles.Count);
+        }
+
+
+        var allTargetsGameSessionCharacter = await _dbContext.GameSessionCharacters
+            .Where(x => x.PositionX.HasValue && x.PositionY.HasValue && targetPoints.Where(t => t.X == x.PositionX!.Value).FirstOrDefault() != null && targetPoints.Where(t => t.Y == x.PositionY!.Value).FirstOrDefault() != null)
+            .ToListAsync();
+
+        var rollCount = 0;
+
+        for (int i = 0; i < ability.CubeCount!.Value; i++)
+        {
+            rollCount += DiceUtil.RollDice(ability.CubeType!.Value);
+        }
+
+        foreach (var target in allTargetsGameSessionCharacter)
+        {
+            switch (ability.Type)
+            {
+                case CharacterAbilityTypeEnum.Attack:
+                    await _gameSessionCharacterService.Damage(target.Id, rollCount);
+                    result.Message.Add($"Персонаж {target.Name} получил урон в размере: {rollCount}");
+                    break;
+                case CharacterAbilityTypeEnum.Healing:
+                    await _gameSessionCharacterService.Heal(target.Id, rollCount);
+                    result.Message.Add($"Персонаж {target.Name} получил лечение в размере: {rollCount}");
+                    break;
+                case CharacterAbilityTypeEnum.Protection:
+                    await _gameSessionCharacterService.Shield(target.Id, rollCount);
+                    result.Message.Add($"Персонаж {target.Name} получил защиту в размере: {rollCount}");
+                    break;
+            }
+        }
 
         return result;
     }

@@ -55,29 +55,22 @@ namespace Magic.Utils
         /// <param name="radius"></param>
         /// <returns></returns>
 
-        public static Dictionary<int,int> CalculatedPointsInArea(int x1, int y1, int radius)
+        public static List<Point> CalculatedPointsInArea(int x1, int y1, int radius, int mapWidth, int mapHeight)
         {
-            var leftTopPointX = x1 - radius;
-            var leftTopPointY = y1 - radius;
-            var maxCountPointLine = 3 + ((radius - 1) * 2);
-            var allUpperPoints = new Dictionary<int, int>();
+            var width = mapWidth;
+            var height = mapHeight;
+            var startX = Math.Max(0, x1 - radius);
+            var startY = Math.Max(0, y1 - radius);
+            var endX = Math.Min(width - 1, x1 + radius);
+            var endY = Math.Min(height - 1, y1 + radius);
 
-            for (int i = 0; i < maxCountPointLine; i++)
-            {
-                allUpperPoints.Add(leftTopPointX, leftTopPointY + i);
-            }
+            var radiusPoints = new List<Point>();
 
-            var result = new Dictionary<int, int>();
+            for (var y = startY; y <= endY; y++)
+                for (var x = startX; x <= endX; x++)
+                    radiusPoints.Add(new Point(x, y));
 
-            foreach (var item in allUpperPoints)
-            {
-                for (int i = 0; i < maxCountPointLine; i++)
-                {
-                    result.Add(leftTopPointX + i, item.Value);
-                }
-            }
-
-            return result;
+            return radiusPoints;
         }
     }
 }
