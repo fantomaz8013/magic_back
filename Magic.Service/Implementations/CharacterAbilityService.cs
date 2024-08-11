@@ -47,6 +47,11 @@ public class CharacterAbilityService : ICharacterAbilityService
                 break;
         }
 
+        if(result.IsResult)
+        {
+            await _gameSessionCharacterTurnInfoService.UpdateAbilityTurnInfo(caster.Id, ability);
+        }
+
         return result;
     }
 
@@ -188,8 +193,6 @@ public class CharacterAbilityService : ICharacterAbilityService
                 result.Message.Add($"Персонаж {target.Name} получил защиту в размере: {rollCount}");
                 break;
         }
-
-        await _gameSessionCharacterTurnInfoService.UpdateAbilityTurnInfo(caster.Id, ability);
 
         return result;
     }
