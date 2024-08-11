@@ -40,10 +40,10 @@ public class CharacterAbilityService : ICharacterAbilityService
                 result = await ApplyTargetAbility(ability, caster, target);
                 break;
             case CharacterAbilityTargetTypeEnum.Cone:
-                result = await ApplyMultiplePointAbility(ability, caster, x, y, CharacterAbilityTargetTypeEnum.Cone);
+                result = await ApplyMultiplePointAbility(ability, caster, x, y);
                 break;
             case CharacterAbilityTargetTypeEnum.Area:
-                result = await ApplyMultiplePointAbility(ability, caster, x, y, CharacterAbilityTargetTypeEnum.Cone);
+                result = await ApplyMultiplePointAbility(ability, caster, x, y);
                 break;
         }
 
@@ -55,7 +55,7 @@ public class CharacterAbilityService : ICharacterAbilityService
         return result;
     }
 
-    private async Task<ApplyAbilityResponse> ApplyMultiplePointAbility(CharacterAbility ability, GameSessionCharacter caster, int x, int y, CharacterAbilityTargetTypeEnum targetType)
+    private async Task<ApplyAbilityResponse> ApplyMultiplePointAbility(CharacterAbility ability, GameSessionCharacter caster, int x, int y)
     {
         var result = new ApplyAbilityResponse { IsResult = true };
 
@@ -79,7 +79,7 @@ public class CharacterAbilityService : ICharacterAbilityService
 
         var targetPoints = new List<Point>();
 
-        if (targetType == CharacterAbilityTargetTypeEnum.Cone)
+        if (ability.TargetType == CharacterAbilityTargetTypeEnum.Cone)
         {
             targetPoints = CalculateCone.GetPointsInCone(new CalculateConeRequest
             {
@@ -89,7 +89,7 @@ public class CharacterAbilityService : ICharacterAbilityService
             }, gameSession!.Map!.Tiles.First().Count, gameSession.Map!.Tiles.Count);
         }
 
-        if (targetType == CharacterAbilityTargetTypeEnum.Area)
+        if (ability.TargetType == CharacterAbilityTargetTypeEnum.Area)
         {
             targetPoints = CalculatePathUtil.CalculatedPointsInArea(x, y, ability.Radius!.Value, gameSession!.Map!.Tiles.First().Count, gameSession.Map!.Tiles.Count);
         }
