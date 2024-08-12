@@ -1,11 +1,12 @@
-import { borderBottom, fontSize } from "@mui/system"
-
 const className = {
   header: {
+    padding: '0',
     display: 'flex',
-    height: '80px',
-    borderBottom: 'solid 1px #5C5C5D',
+    height: '5em',
     justifyContent: 'space-between'
+  },
+  headerContainer: {
+    borderBottom: 'solid 1px #5C5C5D',
   },
   logo: {
     display: 'flex',

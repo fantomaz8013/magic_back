@@ -8,7 +8,7 @@ import paths from "../../../consts/paths";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/redux";
 import Account from "./account/Account";
-import { PaletteMode } from "@mui/material";
+import { Container, PaletteMode } from "@mui/material";
 import ToggleColorMode from "./ToggleColorMode";
 import { Logo } from "../../../assets/vector/Logo";
 import className from "./header.styles";
@@ -24,32 +24,33 @@ export default function Header({ mode, toggleColorMode }: HeaderProps) {
     (state: RootState) => state.auth.token !== null
   );
 
-  
   return (
     <AppBar position="sticky" color="inherit">
-      <Toolbar style={className.header}>
-        <Link to={paths.home} style={className.logo}>
-          <Logo />
-          <span>
-            Magic
-          </span>
-        </Link>
-        <Box style={className.rightController}>
-          <ToggleColorMode mode={mode} toggleColorMode={toggleColorMode} />
-          {isLoggedIn ? (
-            <Account />
-          ) : (
-            <>
-              <Button onClick={onRegisterClick} color="inherit">
-                Register
-              </Button>
-              <Button onClick={onLoginClick} color="inherit">
-                Login
-              </Button>
-            </>
-          )}
-        </Box>
-      </Toolbar>
+      <Box style={className.headerContainer}>
+        <Container maxWidth="xl">
+          <Toolbar style={className.header}>
+            <Link to={paths.home} style={className.logo}>
+              <Logo />
+              <span>Magic</span>
+            </Link>
+            <Box style={className.rightController}>
+              <ToggleColorMode mode={mode} toggleColorMode={toggleColorMode} />
+              {isLoggedIn ? (
+                <Account />
+              ) : (
+                <>
+                  <Button onClick={onRegisterClick} color="inherit">
+                    Register
+                  </Button>
+                  <Button onClick={onLoginClick} color="inherit">
+                    Login
+                  </Button>
+                </>
+              )}
+            </Box>
+          </Toolbar>
+        </Container>
+      </Box>
     </AppBar>
   );
 

@@ -13,6 +13,8 @@ import Layout from "./Layout";
 import HomePage from "./HomePage";
 import GameSession from "../gameSession/GameSession";
 import Page from "../common/Page";
+import Main from "../common/Main";
+import SessionPage from "./SessionPage";
 
 export default function App() {
     return (
@@ -26,7 +28,11 @@ export default function App() {
                     <Route element={<RequireAuth/>}>
                         <Route path={paths.profile} element={<Profile/>}/>
                     </Route>
-                    <Route path={paths.default} element={<HomePage/>}/>
+                    
+                    <Route element={<Main/>}>
+                        <Route path={paths.default} element={<HomePage/>}/>
+                        <Route path={paths.session} element={<SessionPage/>}/>
+                    </Route>
                 </Route>
                 <Route element={<RequireAuth/>}>
                     <Route
