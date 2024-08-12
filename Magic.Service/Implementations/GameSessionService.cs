@@ -199,6 +199,7 @@ public class GameSessionService : IGameSessionService
     {
         var gameSession = await _dbContext.GameSessions
             .Include(x => x.Map)
+            .Include(x => x.Users)
             .Select(x => new GameSessionResponse(x))
             .ToListAsync();
 

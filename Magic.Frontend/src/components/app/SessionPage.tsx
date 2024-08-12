@@ -121,7 +121,7 @@ export default function SessionPage() {
                     </TableCell>
                     <TableCell component="td" scope="row" align="center">
                       <div style={className.tableIconWrapper}>
-                        ?/{r.maxUserCount}
+                        {r.currentUserCount}/{r.maxUserCount}
                       </div>
                     </TableCell>
                     <TableCell component="td" scope="row" align="center">
