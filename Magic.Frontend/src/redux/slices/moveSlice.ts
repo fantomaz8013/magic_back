@@ -1,10 +1,8 @@
 import {createSlice} from "@reduxjs/toolkit";
-import {cellKey} from "../../components/gameSession/map/map.utils";
 
 export interface MoveState {
-    movingUserId: string | null;
+    movingCharacterId: string | null;
     path: LocationRequest[];
-    pathHashSet: Record<string, boolean>;
 }
 
 export interface LocationRequest {
@@ -13,9 +11,8 @@ export interface LocationRequest {
 }
 
 const initialState: MoveState = {
-    movingUserId: null,
+    movingCharacterId: null,
     path: [],
-    pathHashSet: {},
 };
 
 const slicePrefix = 'move';
@@ -25,24 +22,17 @@ export const moveSlice = createSlice({
     initialState,
     reducers: {
         setMoving: (state, action) => {
-            state.movingUserId = action.payload;
+            state.movingCharacterId = action.payload;
             state.path = [];
-            state.pathHashSet = {};
         },
         addMove: (state, action) => {
-            if (!state.movingUserId) return;
+            if (!state.movingCharacterId) return;
 
             const move = action.payload as LocationRequest;
             state.path.push(move);
-            state.pathHashSet = {...state.pathHashSet, [cellKey(move.y, move.x)]: true}
         },
         backTrackLastMove: (state) => {
-            const lastMove = state.path.pop();
-            if (!lastMove) return;
-
-            const newPathHashSet = {...state.pathHashSet};
-            delete newPathHashSet[cellKey(lastMove.y, lastMove.x)];
-            state.pathHashSet = newPathHashSet;
+            state.path.pop();
         },
     },
 });

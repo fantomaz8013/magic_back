@@ -1,6 +1,7 @@
 ﻿using Magic.Api.Controllers.Websockets.InMemory;
 using Magic.Api.Controllers.Websockets.Requests;
 using Magic.Api.Controllers.Websockets.Responses;
+using Magic.Common.Models.Request;
 using Magic.Common.Models.Response;
 using Magic.Domain.Enums;
 using Magic.Service;
@@ -19,6 +20,8 @@ public class GameSessionsHub : Hub
     private readonly IGameSessionMessageService _gameSessionMessageService;
     private readonly ICharacterService _characterService;
     private readonly IGameSessionCharacterService _gameSessionCharacterService;
+    private readonly IMapService _mapService;
+    private readonly IGameSessionCharacterTurnInfoService _gameSessionCharacterTurnInfoService;
 
     private static readonly ConnectedUsers ConnectedUsers = new();
     private static readonly LockedCharacters LockedCharacters = new();
@@ -29,14 +32,15 @@ public class GameSessionsHub : Hub
         IGameSessionService gameSessionService,
         IGameSessionMessageService gameSessionMessageService,
         ICharacterService characterService,
-        IGameSessionCharacterService gameSessionCharacterService
-    )
+        IGameSessionCharacterService gameSessionCharacterService, IMapService mapService, IGameSessionCharacterTurnInfoService gameSessionCharacterTurnInfoService)
     {
         _userService = userService;
         _gameSessionService = gameSessionService;
         _gameSessionMessageService = gameSessionMessageService;
         _characterService = characterService;
         _gameSessionCharacterService = gameSessionCharacterService;
+        _mapService = mapService;
+        _gameSessionCharacterTurnInfoService = gameSessionCharacterTurnInfoService;
     }
 
     private async Task<(Guid GameSessionId, UserResponse user)> GetConnectionInfoOrThrow()
@@ -383,10 +387,52 @@ public class GameSessionsHub : Hub
         return gameSession != null && gameSession.CreatorUserId == callerId;
     }
 
+    public async Task MoveCharacter(Guid characterId, List<LocationRequest> path)
+    {
+        var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
+        var character = await _gameSessionCharacterService.GetGameSessionCharacter(characterId);
+        var gameSession = await _gameSessionService.GetById(gameSessionId);
+        if (caller.Id != character.OwnerId)
+        {
+            throw new HubException("You have no rights to run this command");
+        }
+
+        if (!gameSession.MapId.HasValue)
+        {
+            throw new HubException("There is no map");
+        }
+
+        var pathCalc = await _mapService.PathCalculation(path, gameSession.MapId.Value, characterId);
+        if (pathCalc.IsSuccess)
+        {
+            await _gameSessionCharacterService.SetPosition
+            (characterId,
+                pathCalc.NewCharacterPosition.X,
+                pathCalc.NewCharacterPosition.Y
+            );
+        }
+        else
+        {
+            throw new HubException("Incorrect path");
+        }
+
+        if (pathCalc.Penalties.Count > 0)
+        {
+            await _gameSessionCharacterService.Damage(characterId, pathCalc.Penalties
+                .Where(p => p.PenaltyType == TilePropertyPenaltyTypeEnum.PenaltyHealth)
+                .Sum(p => p.Value));
+        }
+
+        await SendGameSessionInfo(
+            gameSessionId,
+            GameSessionStatusTypeEnum.InGame,
+            Clients.Group(gameSessionId.ToString())
+        );
+    }
+
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         await LeaveGameSession();
-
         await base.OnDisconnectedAsync(exception);
     }
 }

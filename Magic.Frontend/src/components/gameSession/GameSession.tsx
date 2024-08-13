@@ -110,7 +110,7 @@ export default function GameSession() {
     function renderUI(characters: NonNullable<GameSessionInfo['characters']>) {
         return (
             <>
-                <Box sx={{display: 'flex', flexDirection: 'column', position: 'absolute', left: 0}}>
+                <Box id={"UI"} sx={{display: 'flex', flexDirection: 'column', position: 'absolute', left: 0}}>
                     {characters.map((c: GameSessionCharacter) =>
                         <CharacterLeftMenu
                             key={c.id}

@@ -1,10 +1,9 @@
-import {Avatar, Stack} from "@mui/material";
+import {Stack} from "@mui/material";
 import Paper from "@mui/material/Paper";
 import {baseProxy} from "../../../env";
 import React, {useContext} from "react";
 import {cellKey} from "./map.utils";
-import {MapContext} from "./Map";
-import {LocationOn} from "@mui/icons-material";
+import {MapContext, ShadowTypeEnum} from "./Map";
 
 interface RowProps {
     row: number[];
@@ -27,30 +26,51 @@ export const Row = ({row, rowIdx,}: RowProps) => {
             {
                 row.map((piece, colIdx) => {
                     const key = cellKey(rowIdx, colIdx);
-                    // const character = context!.charPositions[key];
                     const property = context!.tileProperties[piece];
+                    const shadow = context!.shadows[key];
+                    let color = '#FFFFFF';
+                    switch (shadow) {
+                        case ShadowTypeEnum.Green:
+                            color = '#13E14AE5';
+                            break;
+                        case ShadowTypeEnum.Red:
+                            color = '#E11313E5';
+                            break;
+                        case ShadowTypeEnum.White:
+                            color = '#FFFFFF';
+                            break;
+                        case ShadowTypeEnum.Blue:
+                            color = '#00308F';
+                            break;
+                    }
+
                     //const move = context!.move?.pathHashSet[piece];
 
                     return (
-                        <Paper key={key} sx={{
-                            flex: "1 1 min(9vw, 9vh)",
-                            width: '50px',
-                            height: '50px',
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            backgroundSize: 'cover',
-                            backgroundRepeat: 'no-repeat',
-                            backgroundPosition: "center",
-                            backgroundImage: property && `url(${baseProxy}${property.image})`,
-                            mr: '1px',
-                            borderRadius: 0,
-                            fontSize: cellSize,
-                        }} elevation={0}>
-                            {context!.drawExtra(piece, rowIdx, colIdx)}
-                            {/*{character && <Avatar src={character.avatarUrL}/>}*/}
-                            {/*{!character && move && <LocationOn/>}*/}
-                        </Paper>
+                        <Paper
+                            data-x={colIdx}
+                            data-y={rowIdx}
+                            onClick={context?.onClick}
+                            elevation={0}
+                            key={key}
+                            id={key}
+                            sx={{
+                                flex: "1 1 min(9vw, 9vh)",
+                                width: '50px',
+                                height: '50px',
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                backgroundSize: 'cover',
+                                backgroundRepeat: 'no-repeat',
+                                backgroundPosition: "center",
+                                boxShadow: shadow && ('inset  0px 0px 10px 0px ' + color),
+                                backgroundImage: property && `url(${baseProxy}${property.image})`,
+                                mr: '1px',
+                                borderRadius: 0,
+                                fontSize: cellSize,
+                            }}
+                        />
                     );
                 })
             }

@@ -12,7 +12,7 @@ namespace Magic.Common.Models.Response
         /// <summary>
         /// Результат просчета пути ( удалось пройти или нет )
         /// </summary>
-        public bool Result { get; set; } = true;
+        public bool IsSuccess { get; set; } = true;
         /// <summary>
         /// Список штрафов при проходе по пути
         /// </summary>

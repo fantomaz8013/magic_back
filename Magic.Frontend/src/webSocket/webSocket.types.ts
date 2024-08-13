@@ -12,6 +12,7 @@ export enum WSActions {
     kick = 'Kick',
     requestSaveThrow = 'RequestSaveThrow',
     changeCharacter = 'ChangeCharacter',
+    moveCharacter = 'MoveCharacter',
 }
 
 export enum WSEvents {

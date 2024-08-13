@@ -86,8 +86,7 @@ public class GameSessionService : IGameSessionService
 
         if (gameSession.CreatorUserId == userId)
         {
-            throw new ExceptionWithApplicationCode("Нельзя войти в игровую сессию, если вы ее создатель",
-                ExceptionApplicationCodeEnum.CreatorIdGameSessionEqualsUserIdToEnter);
+            return true;
         }
 
         if (gameSession.GameSessionStatus != GameSessionStatusTypeEnum.WaitingForStart)

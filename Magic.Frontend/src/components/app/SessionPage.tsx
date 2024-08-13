@@ -50,7 +50,7 @@ export default function SessionPage() {
                                     <Row
                                         key={r.id}
                                         id={r.id}
-                                        onClick={(e) => onJoinClick(e)}
+                                        onClick={onJoinClick}
                                     >
                                         <TableCell component="td" scope="row" style={className.longTxt}>
                                             {r.title}
@@ -88,16 +88,11 @@ export default function SessionPage() {
         </Grid>
     );
 
-    function onAskToJoinClick(e: React.MouseEvent<HTMLButtonElement>) {
+    async function onJoinClick(e: React.MouseEvent<HTMLDivElement>) {
         const gameSessionId = e.currentTarget.id;
-        enterSession({gameSessionId}).then((r) => {
+        await enterSession({gameSessionId}).then((r) => {
             r.data?.data && navigate(`${paths.game}/${gameSessionId}`);
         });
-    }
-
-    function onJoinClick(e: any) {
-        const gameSessionId = e.currentTarget.id;
-        navigate(`${paths.game}/${gameSessionId}`);
     }
 
     function onDeleteClick(e: React.MouseEvent<HTMLButtonElement>) {

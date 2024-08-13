@@ -22,6 +22,7 @@ import {
 import {CharacterCharacteristicIds} from "../models/response/characterTemplateResponse";
 import {WSApi, WSEvents, WSActions} from "./webSocket.types";
 import {UnknownAction} from "redux";
+import {LocationRequest} from "../redux/slices/moveSlice";
 
 const wsPath = 'ws';
 export let socket: WSApi | null = null;
@@ -67,6 +68,7 @@ export function useGameSessionWS(logsEnabled?: boolean) {
         unlockCharacter,
         rollSaveDice,
         changeCharacter,
+        moveCharacter,
         state,
     };
 
@@ -125,6 +127,10 @@ export function useGameSessionWS(logsEnabled?: boolean) {
 
     async function changeCharacter(characterId: string, changedFields: Partial<GameSessionCharacter>) {
         await _invoke(WSActions.changeCharacter, characterId, changedFields);
+    }
+
+    async function moveCharacter(characterId: string, path: LocationRequest[]) {
+        await _invoke(WSActions.moveCharacter, characterId, path);
     }
 
     function _onEvent(event: WSEvents, func: () => UnknownAction, ...args: any) {

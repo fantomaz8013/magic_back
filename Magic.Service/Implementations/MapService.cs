@@ -35,11 +35,11 @@ public class MapService : IMapService
     /// <summary>
     /// Расчитать, можно ли пройти по указаному маршруту в карте. path = (индекс пути, LocationRequest) пример: [<0,Location(2,3)>, <1,Location(3,4)>, <2,Location(3,5)>]
     /// </summary>
-    /// <param name="path"> (индекс пути, LocationRequest) пример: [<0,Location(2,3)>, <1,Location(3,4)>, <2,Location(3,5)>]</param>
+    /// <param name="path"> List<LocationRequest> пример: [Location(2,3), Location(3,4), Location(3,5)]</param>
     /// <param name="mapId">Идентификатор карты</param>
     /// <param name="gameSessionCharacterId">Идентификатор игрового персонажа</param>
     /// <returns></returns>
-    public async Task<PathCalculationResponse> PathCalculation(Dictionary<int, LocationRequest> path, Guid mapId, Guid gameSessionCharacterId)
+    public async Task<PathCalculationResponse> PathCalculation(List<LocationRequest> path, Guid mapId, Guid gameSessionCharacterId)
     {
         //Результат просчета пути
         var pathCalculationResponse = new PathCalculationResponse();
@@ -63,7 +63,7 @@ public class MapService : IMapService
 
         if (characterTurnInfo.SkipStepCount > 0)
         {
-            pathCalculationResponse.Result = false;
+            pathCalculationResponse.IsSuccess = false;
             pathCalculationResponse.Message = $"Вы не можете совершить это действие. Количество ходов нейтрализации: {characterTurnInfo.SkipStepCount}";
         }
 
@@ -74,7 +74,7 @@ public class MapService : IMapService
         //Проверка, хватает ли количества ходов для прохода всего пути
         if (characterSpeed < path.Count)
         {
-            pathCalculationResponse.Result = false;
+            pathCalculationResponse.IsSuccess = false;
             pathCalculationResponse.Message = "Не хватает очков передвижения";
             return pathCalculationResponse;
         }
@@ -82,12 +82,12 @@ public class MapService : IMapService
         var firstPoint = path.First();
 
         //Проверка находится ли персонаж рядом с первой точкой пути
-        if (!CalculatePathUtil.IsNeighboringPoint(gameSessionCharacter.PositionX.Value, gameSessionCharacter.PositionY.Value, firstPoint.Value.X, firstPoint.Value.Y))
+        if (!CalculatePathUtil.IsNeighboringPoint(gameSessionCharacter.PositionX.Value, gameSessionCharacter.PositionY.Value, firstPoint.X, firstPoint.Y))
         {
-            pathCalculationResponse.Result = false;
+            pathCalculationResponse.IsSuccess = false;
             pathCalculationResponse.Message = $"Персонаж находится слишком далеко от начальной точкой пути. " +
                 $"Начальная точка: ({gameSessionCharacter.PositionX.Value},{gameSessionCharacter.PositionY.Value}) " +
-                $"следующая точка: ({firstPoint.Value.X},{firstPoint.Value.Y})";
+                $"следующая точка: ({firstPoint.X},{firstPoint.Y})";
             return pathCalculationResponse;
         }
 
@@ -95,23 +95,23 @@ public class MapService : IMapService
         //Проверяем каждый шаг в пути
         foreach (var item in path)
         {
-            var x = item.Value.X;
-            var y = item.Value.Y;
+            var x = item.X;
+            var y = item.Y;
             //Проверка, находится ли точка по соседству с прошлой точкой
-            if (prevLocation != null && !CalculatePathUtil.IsNeighboringPoint(item.Value.X, item.Value.Y, prevLocation.X, prevLocation.Y))
+            if (prevLocation != null && !CalculatePathUtil.IsNeighboringPoint(item.X, item.Y, prevLocation.X, prevLocation.Y))
             {
-                pathCalculationResponse.Result = false;
-                pathCalculationResponse.Message = $"Между точками ({item.Value.X},{item.Value.Y}) и ({prevLocation.X},{prevLocation.Y}) слишком большое растояние!";
+                pathCalculationResponse.IsSuccess = false;
+                pathCalculationResponse.Message = $"Между точками ({item.X},{item.Y}) и ({prevLocation.X},{prevLocation.Y}) слишком большое растояние!";
                 return pathCalculationResponse;
             }
 
-            var tilePropertyId = map.Tiles.ElementAt(x).ElementAt(y);
+            var tilePropertyId = map.Tiles.ElementAt(y).ElementAt(x);
             var tileProperty = await _tilePropertyService.GetTileProperty(tilePropertyId);
 
             //Проверка, можно ли пройти по тайлу
             if (tileProperty.CollisionType != TilePropertyCollisionTypeEnum.None)
             {
-                pathCalculationResponse.Result = false;
+                pathCalculationResponse.IsSuccess = false;
                 pathCalculationResponse.Message = $"По тайлу({x},{y}) невозможно пройти";
                 return pathCalculationResponse;
             }
@@ -127,7 +127,7 @@ public class MapService : IMapService
             }
 
             //Записываем позицию перед следующей итерацией
-            prevLocation = item.Value;
+            prevLocation = item;
             characterSpeed--;
         }
 
@@ -142,7 +142,7 @@ public class MapService : IMapService
         //Проверка, хватает ли очков передвижения с учетом наложеных штрафов. Тут идет в учет уже оставшееся количество очков передвижения после всего пути
         if (characterSpeed - countPenaltySpeed < 0)
         {
-            pathCalculationResponse.Result = false;
+            pathCalculationResponse.IsSuccess = false;
             pathCalculationResponse.Message = $"Не хватает очков передвижения после наложеных штрафов.";
             return pathCalculationResponse;
         }
@@ -150,13 +150,13 @@ public class MapService : IMapService
         //Проверка, хватает ли очков здоровья ( с учетом брони ) после всех штрафов
         if (characterHealth - countPenaltyHealth <= 0)
         {
-            pathCalculationResponse.Result = false;
+            pathCalculationResponse.IsSuccess = false;
             pathCalculationResponse.Message = $"Не хватает очков здоровья после наложеных штрафов.";
             return pathCalculationResponse;
         }
 
         //Если забыли сделать return до этого, то возвращаем, чтобы случайно не записать новую локацию персонажа
-        if (!pathCalculationResponse.Result)
+        if (!pathCalculationResponse.IsSuccess)
         {
             return pathCalculationResponse;
         }

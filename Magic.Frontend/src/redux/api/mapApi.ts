@@ -14,8 +14,14 @@ export const mapApi = createApi({
         getMapList: builder.query<BaseResponse<MapResponse>, void>({
             query: () => `list`,
         }),
-        getTileProperties: builder.query<BaseResponse<TileProperty[]>, void>({
+        getTileProperties: builder.query<Record<string, TileProperty>, void>({
             query: () => `tileProperties`,
+            transformResponse: (baseQueryReturnValue: BaseResponse<TileProperty[]>) => {
+                return baseQueryReturnValue.data!.reduce((pv, cv) => {
+                    pv[cv.id] = cv;
+                    return pv;
+                }, {} as Record<string, TileProperty>);
+            }
         }),
     }),
 })
