@@ -54,6 +54,39 @@ public class GameSessionCharacterTurnInfoService : IGameSessionCharacterTurnInfo
         return await GetCharacterTurnInfo(gameSessionCharacterId);
     }
 
+    public async Task<GameSessionCharacterTurnInfo> UpdateBuffTurnInfo(Guid gameSessionCharacterId, CharacterAbility ability)
+    {
+        var characterTurnInfo = await _dbContext.GameSessionCharacterTurnInfos
+            .AsTracking()
+            .FirstOrDefaultAsync(x => x.GameSessionCharacterId == gameSessionCharacterId);
+
+        if (ability.CharacterBuffId == null || ability.BuffCount == null)
+        {
+            return characterTurnInfo!;
+        }
+
+        switch(ability.CharacterBuff!.BuffType)
+        {
+            case Domain.Enums.BuffTypeEnum.Disable:
+                characterTurnInfo!.SkipStepCount = ability.BuffCount.Value;
+                break;
+            case Domain.Enums.BuffTypeEnum.AddMainAction:
+                characterTurnInfo!.LeftMainAction += ability.BuffCount.Value;
+                break;
+        }
+
+        characterTurnInfo!.BuffCoolDowns.Add(new BuffCoolDowns
+        {
+            BuffId = ability.CharacterBuffId.Value,
+            LeftTurns = ability.BuffCount,
+        });
+
+        _dbContext.Update(characterTurnInfo);
+        await _dbContext.SaveChangesAsync();
+
+        return await GetCharacterTurnInfo(gameSessionCharacterId);
+    }
+
     public async Task<GameSessionCharacterTurnInfo> GetCharacterTurnInfo(Guid gameSessionCharacterId)
     {
         var CharacterTurnInfo = await _dbContext.GameSessionCharacterTurnInfos
@@ -76,9 +109,11 @@ public class GameSessionCharacterTurnInfoService : IGameSessionCharacterTurnInfo
         {
             LeftMainAction = 1,
             LeftBonusAction = 1,
+            SkipStepCount = 0,
             LeftStep = gameSessionCharacter.Speed,
             GameSessionCharacterId = gameSessionCharacter.Id,
-            AbilityCoolDowns = new List<AbilityCoolDowns>()
+            AbilityCoolDowns = new List<AbilityCoolDowns>(),
+            BuffCoolDowns = new List<BuffCoolDowns>()
         });
 
         return result.Entity;
@@ -101,6 +136,8 @@ public class GameSessionCharacterTurnInfoService : IGameSessionCharacterTurnInfo
             .Where(x => x.CharacterAbilityCoolDownTypeEnum != Domain.Enums.CharacterAbilityCoolDownTypeEnum.OnePerGame)
             .Select(x => x.AbilityId)
             .ToList();
+
+        characterTurnInfo.BuffCoolDowns.Clear();
 
         characterTurnInfo.AbilityCoolDowns
             .RemoveAll(x => abilitiesToDelete.Contains(x.AbilityId));
@@ -134,7 +171,14 @@ public class GameSessionCharacterTurnInfoService : IGameSessionCharacterTurnInfo
         }
 
         await ResetCoreInfo(characterTurnInfo, gameSessionCharacterId);
+
+        if (characterTurnInfo.SkipStepCount > 0)
+        {
+            characterTurnInfo.SkipStepCount--;
+        }
+
         List<int> abilitiesToReset = new();
+        List<int> BuffToReset = new();
 
         foreach (var item in characterTurnInfo.AbilityCoolDowns.Where(x => x.CharacterAbilityCoolDownTypeEnum == Domain.Enums.CharacterAbilityCoolDownTypeEnum.InFight))
         {
@@ -145,12 +189,37 @@ public class GameSessionCharacterTurnInfoService : IGameSessionCharacterTurnInfo
             }
         }
 
+        foreach (var item in characterTurnInfo.BuffCoolDowns)
+        {
+            item.LeftTurns--;
+            if (item.LeftTurns == 0)
+            {
+                BuffToReset.Add(item.BuffId);
+            }
+        }
+        
+
         characterTurnInfo.AbilityCoolDowns
             .RemoveAll(x => abilitiesToReset.Contains(x.AbilityId));
+        characterTurnInfo.BuffCoolDowns
+            .RemoveAll(x => BuffToReset.Contains(x.BuffId));
+
         _dbContext.Update(characterTurnInfo);
         await _dbContext.SaveChangesAsync();
 
         return (await _dbContext.GameSessionCharacterTurnInfos
             .FirstOrDefaultAsync(x => x.GameSessionCharacterId == gameSessionCharacterId))!;
+    }
+
+    public async Task<bool> IsDisable(Guid gameSessionCharacterId)
+    {
+        var turnInfo = await GetCharacterTurnInfo(gameSessionCharacterId);
+
+        if (turnInfo.SkipStepCount > 0)
+        {
+            return false;
+        }
+
+        return true;
     }
 }
