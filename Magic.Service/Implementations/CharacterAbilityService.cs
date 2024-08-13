@@ -29,7 +29,14 @@ public class CharacterAbilityService : ICharacterAbilityService
         var result = new ApplyAbilityResponse { IsResult = true };
 
         var caster = await _gameSessionCharacterService.GetGameSessionCharacter(casterGameSessionCharacterId);
-               
+        var turnInfo = await _gameSessionCharacterTurnInfoService.GetCharacterTurnInfo(casterGameSessionCharacterId);
+
+        if (await _gameSessionCharacterTurnInfoService.IsDisable(casterGameSessionCharacterId))
+        {
+            result.IsResult = false;
+            result.Message.Add($"Вы не можете применить способность потому что нейтрализованы. Количество ходов нейтрализации: {turnInfo.SkipStepCount}");
+        }
+
         switch (ability.TargetType)
         {
             case CharacterAbilityTargetTypeEnum.Target:
@@ -50,6 +57,41 @@ public class CharacterAbilityService : ICharacterAbilityService
         if(result.IsResult)
         {
             await _gameSessionCharacterTurnInfoService.UpdateAbilityTurnInfo(caster.Id, ability);
+            result.Message.AddRange(await ApplyBuffToTargets(ability, result.TargetIds));
+        }
+
+        return result;
+    }
+
+    private async Task<List<string>> ApplyBuffToTargets(CharacterAbility ability, List<Guid> targetIds)
+    {
+        var result = new List<string>();
+        if (ability.CharacterBuff == null)
+        {
+            return result;
+        }
+        var targets = await _dbContext.GameSessionCharacters
+            .Include(x => x.CharacterClass)
+            .Where(x => targetIds.Contains(x.Id)).ToListAsync();
+
+        foreach (var target in targets)
+        {
+            if (ability.TargetCharacterCharacteristicId != null)
+            {
+                var rollResult = DiceUtil.RollDice(CubeTypeEnum.D20);
+
+                //Проверка на попадание ( с модификатором главной характеристики класса )
+                var modificator = await _gameSessionCharacterService.GetRollModificator(target.Id, target.CharacterClass.CharacterCharacteristicId);
+                if (rollResult + modificator < 10)
+                {
+                    result.Add($"Персонаж {target.Name} получает {ability.CharacterBuff.Title}");
+                    await _gameSessionCharacterTurnInfoService.UpdateBuffTurnInfo(target.Id, ability);
+                }
+                else
+                {
+                    result.Add($"Персонаж {target.Name} прошел проверку и не получает {ability.CharacterBuff.Title}");
+                }
+            }
         }
 
         return result;
@@ -94,7 +136,6 @@ public class CharacterAbilityService : ICharacterAbilityService
             targetPoints = CalculatePathUtil.CalculatedPointsInArea(x, y, ability.Radius!.Value, gameSession!.Map!.Tiles.First().Count, gameSession.Map!.Tiles.Count);
         }
 
-
         var allTargetsGameSessionCharacter = await _dbContext.GameSessionCharacters
             .Where(x => x.PositionX.HasValue && x.PositionY.HasValue && targetPoints.Where(t => t.X == x.PositionX!.Value).FirstOrDefault() != null && targetPoints.Where(t => t.Y == x.PositionY!.Value).FirstOrDefault() != null)
             .ToListAsync();
@@ -123,6 +164,7 @@ public class CharacterAbilityService : ICharacterAbilityService
                     result.Message.Add($"Персонаж {target.Name} получил защиту в размере: {rollCount}");
                     break;
             }
+            result.TargetIds.Add(target.Id);
         }
 
         return result;
@@ -194,12 +236,18 @@ public class CharacterAbilityService : ICharacterAbilityService
                 break;
         }
 
+        result.TargetIds.Add(target.Id);
+
         return result;
     }
 
     private async Task<CharacterAbility> GetAbility(int characterAbilityId)
     {
         var ability = await _dbContext.CharacterAbilities
+            .Include(x => x.CharacterBuff)
+            .Include(x => x.TargetCharacterCharacteristic)
+            .Include(x => x.CasterCharacterCharacteristic)
+            .Include(x => x.CharacterClass)
             .FirstOrDefaultAsync(x => x.Id == characterAbilityId);
 
         if (ability == null)

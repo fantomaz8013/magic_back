@@ -66,4 +66,7 @@ public class CharacterAbility : BaseEntity<int>
     /// Характеристика, по которой будет выполнена проверка у того, по кому применяют заклинание
     /// </summary>
     public CharacterCharacteristic TargetCharacterCharacteristic { get; set; }
+    public int? BuffCount { get; set; }
+    public int? CharacterBuffId { get; set; }
+    public GameSessionCharacterBuff? CharacterBuff { get; set; }
 }

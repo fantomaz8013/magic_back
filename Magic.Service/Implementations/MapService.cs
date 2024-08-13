@@ -60,6 +60,13 @@ public class MapService : IMapService
 
         var characterTurnInfo = await _gameSessionCharacterTurnInfoService
             .GetCharacterTurnInfo(gameSessionCharacterId);
+
+        if (characterTurnInfo.SkipStepCount > 0)
+        {
+            pathCalculationResponse.Result = false;
+            pathCalculationResponse.Message = $"Вы не можете совершить это действие. Количество ходов нейтрализации: {characterTurnInfo.SkipStepCount}";
+        }
+
         //Количество очков передвижения персонажа
         var characterSpeed = characterTurnInfo.LeftStep;
         //Количество текущего здоровья с учетом брони

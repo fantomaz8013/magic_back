@@ -41,6 +41,7 @@ public class DataBaseContext : DbContext
         modelBuilder.ApplyConfiguration(new CharacterCharacteristicConfiguration());
         modelBuilder.ApplyConfiguration(new CharacterClassConfiguration());
         modelBuilder.ApplyConfiguration(new CharacterRaceConfiguration());
+        modelBuilder.ApplyConfiguration(new GameSessionCharacterBuffConfiguration());
         modelBuilder.ApplyConfiguration(new CharacterAbilityConfiguration());
         modelBuilder.ApplyConfiguration(new GameSessionConfiguration());
         modelBuilder.ApplyConfiguration(new BaseGameSessionMessageConfiguration());

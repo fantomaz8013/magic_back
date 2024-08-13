@@ -16,6 +16,8 @@ public class GameSessionCharacterTurnInfoConfiguration : IEntityTypeConfiguratio
         builder.PropertyWithUnderscore(x => x.LeftStep);
         builder.PropertyWithUnderscore(x => x.LeftMainAction);
         builder.PropertyWithUnderscore(x => x.LeftBonusAction);
+        builder.PropertyWithUnderscore(x => x.SkipStepCount)
+            .HasDefaultValue(0);
 
         builder.PropertyWithUnderscore(x => x.GameSessionCharacterId);
         builder.HasForeignKey(x => x.GameSessionCharacter, x => x.GameSessionCharacterId);
@@ -25,6 +27,11 @@ public class GameSessionCharacterTurnInfoConfiguration : IEntityTypeConfiguratio
         builder.PropertyWithUnderscore(x => x.AbilityCoolDowns).HasConversion(
                 v => JsonSerializer.Serialize(v, serializeOptions),
                 v => JsonSerializer.Deserialize<List<AbilityCoolDowns>>(v, serializeOptions)
+            );
+
+        builder.PropertyWithUnderscore(x => x.BuffCoolDowns).HasConversion(
+                v => JsonSerializer.Serialize(v, serializeOptions),
+                v => JsonSerializer.Deserialize<List<BuffCoolDowns>>(v, serializeOptions)
             );
     }
 }

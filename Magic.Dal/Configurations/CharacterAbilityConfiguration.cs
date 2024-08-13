@@ -29,6 +29,10 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
         builder.HasForeignKey(x => x.CharacterClass, x => x.CharacterClassId);
         builder.HasOne(x => x.CharacterClass);
 
+        builder.PropertyWithUnderscore(x => x.CharacterBuffId).IsRequired(false).HasDefaultValue(null);
+        builder.HasForeignKey(x => x.CharacterBuff, x => x.CharacterBuffId);
+        builder.HasOne(x => x.CharacterBuff);
+
         builder.PropertyWithUnderscore(x => x.CasterCharacterCharacteristicId).IsRequired(false).HasDefaultValue(null);
         builder.HasForeignKey(x => x.CasterCharacterCharacteristic, x => x.CasterCharacterCharacteristicId);
         builder.HasOne(x => x.CasterCharacterCharacteristic);
@@ -75,6 +79,8 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             ActionType = CharacterAbilityActionTypeEnum.AdditionalAction,
             CoolDownType = CharacterAbilityCoolDownTypeEnum.AfterFight,
             CharacterClassId = CharacterClass.Warrior,
+            BuffCount = 1,
+            CharacterBuffId = 3,
         });
 
         builder.HasData(new CharacterAbility
@@ -105,6 +111,8 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CubeType = CubeTypeEnum.D6,
             CubeCount = 2,
             CharacterClassId = CharacterClass.Warrior,
+            BuffCount = 3,
+            CharacterBuffId = 3,
         });
 
         builder.HasData(new CharacterAbility
@@ -137,6 +145,8 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CubeCount = 1,
             TargetCharacterCharacteristicId = CharacterCharacteristic.Wisdom,
             CharacterClassId = CharacterClass.Wizard,
+            BuffCount = 1,
+            CharacterBuffId = 4,
         });
 
         builder.HasData(new CharacterAbility
@@ -166,6 +176,8 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CoolDownType = CharacterAbilityCoolDownTypeEnum.AfterFight,
             Distance = 10,
             CharacterClassId = CharacterClass.Wizard,
+            BuffCount = 1,
+            CharacterBuffId = 2,
         });
 
 
@@ -197,6 +209,8 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CubeType = CubeTypeEnum.D8,
             CubeCount = 1,
             CharacterClassId = CharacterClass.Priest,
+            BuffCount = 1,
+            CharacterBuffId = 1,
         });
 
         builder.HasData(new CharacterAbility
