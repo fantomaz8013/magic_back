@@ -21,6 +21,8 @@ import {EventSnackbar} from "./eventSnackbar/EventSnackbar";
 import {KickHandler} from "./KickHandler";
 import paths from "../../consts/paths";
 import {PlayerActions} from "./playerActions/PlayerActions";
+import className from "./gameSession.style";
+
 
 export interface PlayerInfo {
     id: string;
@@ -53,19 +55,9 @@ export default function GameSession() {
 
     return (
         <Box
-            sx={{
-                backgroundSize: 'cover',
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'center',
-                backgroundImage: 'url(/static/media/fonMain.9f0de8e66c6907066846.jpg)',
-            }}>
+            sx={className.container}>
             <CssBaseline/>
-            <Box sx={{
-                marginTop: 8,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-            }}>
+            <Box sx={className.block}>
                 {renderGameSessionPage()}
                 <MasterUtils anchorEl={ref} onClose={closeMenu}/>
                 <UserUtils/>
@@ -98,11 +90,7 @@ export default function GameSession() {
         return (
             <>
                 <CharactersList/>
-                <Box sx={{
-                    width: '95%',
-                    display: 'flex',
-                    flexDirection: ' row-reverse',
-                }}>
+                <Box sx={className.chat}>
                     <Chat/>
                 </Box>
             </>

@@ -25,6 +25,7 @@ export default function CharacterList() {
     return (
         <Box sx={{
             display: 'flex',
+            width: '100%',
             flexDirection: 'column',
             alignItems: 'center',
         }}>
