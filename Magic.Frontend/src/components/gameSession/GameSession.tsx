@@ -34,7 +34,6 @@ export interface PlayerInfo {
 export default function GameSession() {
     const {state, joinGameSession, leaveGameSession} = useGameSessionWS();
     const {gameSessionId} = useParams();
-    const navigate = useNavigate();
 
     const [ref, setRef] = useState<HTMLElement | null>(null);
 
@@ -45,12 +44,10 @@ export default function GameSession() {
             joinGameSession(gameSessionId)
                 .catch(err => {
                     console.warn(err);
-                    navigate(paths.home);
                 });
         return () => {
-            if (state === "Connected")
-                leaveGameSession()
-                    .catch(err => console.warn(err));
+            leaveGameSession()
+                .catch(err => console.warn(err));
         }
     }, [gameSessionId, state]);
 
@@ -60,7 +57,7 @@ export default function GameSession() {
                 backgroundSize: 'cover',
                 backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'center',
-                backgroundImage: `url(https://www.wargamer.com/wp-content/sites/wargamer/2021/09/dnd-backgrounds-5e-hermit.jpg)`,
+                backgroundImage: 'url(/static/media/fonMain.9f0de8e66c6907066846.jpg)',
             }}>
             <CssBaseline/>
             <Box sx={{
@@ -114,40 +111,28 @@ export default function GameSession() {
 
     function renderInGamePage(characters: NonNullable<GameSessionInfo['characters']>) {
         return (
-            <Grid container spacing={2}>
-                <Grid item xs={1}>
-                    <Box sx={{display: 'flex', flexDirection: 'column'}}>
-                        {characters.map((c: GameSessionCharacter) =>
-                            <CharacterLeftMenu
-                                key={c.id}
-                                onClick={onClick}
-                                character={{...c, name: `${c.name} (${c.ownerId})`}}
-                            />
-                        )}
-                    </Box>
-                </Grid>
-                <Grid item xs={11}>
-                    <Box sx={{
-                        height: '85vh',
-                        display: 'flex',
-                        alignItems: 'end'
-                    }}>
-                        <Grid container>
-                            <PlayerActions/>
-                            <Grid item xs={11}>
-                                <Box sx={{
-                                    width: '95%',
-                                    display: 'flex',
-                                    flexDirection: ' row-reverse',
-                                }}>
-                                    <Chat/>
-                                </Box>
-                            </Grid>
-                        </Grid>
-                    </Box>
-                </Grid>
+            <>
                 <Map/>
-            </Grid>
+                {/*<Chat/>*/}
+                {renderUI(characters)}
+            </>
+        );
+    }
+
+    function renderUI(characters: NonNullable<GameSessionInfo['characters']>) {
+        return (
+            <>
+                <Box sx={{display: 'flex', flexDirection: 'column', position: 'absolute', left: 0}}>
+                    {characters.map((c: GameSessionCharacter) =>
+                        <CharacterLeftMenu
+                            key={c.id}
+                            onClick={onClick}
+                            character={{...c, name: `${c.name} (${c.ownerId})`}}
+                        />
+                    )}
+                </Box>
+                <PlayerActions/>
+            </>
         );
     }
 

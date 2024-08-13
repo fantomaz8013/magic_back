@@ -27,11 +27,10 @@ export default function App() {
                     </Route>
                     <Route element={<RequireAuth/>}>
                         <Route path={paths.profile} element={<Profile/>}/>
-                    </Route>
-                    
-                    <Route element={<Main/>}>
-                        <Route path={paths.default} element={<HomePage/>}/>
-                        <Route path={paths.session} element={<SessionPage/>}/>
+                        <Route element={<Main/>}>
+                            <Route path={paths.default} element={<HomePage/>}/>
+                            <Route path={paths.session} element={<SessionPage/>}/>
+                        </Route>
                     </Route>
                 </Route>
                 <Route element={<RequireAuth/>}>

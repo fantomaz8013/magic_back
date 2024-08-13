@@ -8,15 +8,10 @@ interface BoardProps {
 
 export const Board = ({board}: BoardProps) => {
     return (
-        <Paper sx={{
+        <Paper id={'Board'} sx={{
             maxWidth: '100%',
-            zIndex: '0',
             position: 'absolute',
-            mt: '2%',
-            ml: '20%',
-            display: "flex",
             flexDirection: "column",
-            gridArea: "2 / 2 / span 8 / span 8",
         }} elevation={4}>
             {
                 board.map((row, rowIdx) => {

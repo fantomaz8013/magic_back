@@ -3,8 +3,18 @@ import { MenuBorder } from "../../assets/vector/MenuBorder";
 import className from "./main.style";
 import { NavLink, Outlet } from "react-router-dom";
 import { IconKeyframe, IconSwords } from "@tabler/icons-react";
+import {useDispatch} from "react-redux";
+import {AppDispatch} from "../../redux/redux";
+import {useEffect} from "react";
+import {clearGameSessionData} from "../../redux/slices/gameSessionSlice";
 
 export default function Main() {
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    dispatch(clearGameSessionData());
+  }, []);
+
   return (
     <Grid container spacing={4}>
       <Grid item xs={3}>

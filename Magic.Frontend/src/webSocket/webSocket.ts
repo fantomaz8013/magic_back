@@ -249,20 +249,16 @@ function useSignalR(wsPath: string) {
             });
 
         return () => {
-            if (isConnected()) {
+            if (ws.state !== 'Disconnected' && ws.state !== 'Disconnecting') {
                 ws.stop()
                     .then(() => {
                         setState(ws.state);
                     });
             }
         }
-    }, [wsPath])
+    }, [])
 
     return {ws, state};
-
-    function isConnected() {
-        return state === 'Connected';
-    }
 }
 
 

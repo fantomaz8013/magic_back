@@ -8,13 +8,12 @@ import {ChatBox, ReceiverMessage, SenderMessage} from "mui-chat-box";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import {Accordion, AccordionDetails, AccordionSummary, Avatar} from "@mui/material";
+import {Avatar} from "@mui/material";
 import {useGetCurrentUserQuery} from "../../../redux/api/userApi";
 import Typography from "@mui/material/Typography";
 import {useSelector} from "react-redux";
 import {RootState} from "../../../redux/redux";
 import {socket} from "../../../webSocket/webSocket";
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 
 export default function Chat() {
@@ -30,37 +29,22 @@ export default function Chat() {
     }, [messages]);
 
     return (
-        <Accordion sx={{
-            width: '400px',
-        }}>
-            <AccordionSummary
-                expandIcon={<ExpandMoreIcon/>}
-            >
-                <Typography mb={4} component="h1" variant="h5">
-                    Player's chat
-                </Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-                <Box sx={{height: 300, overflowY: 'scroll'}}>
-                    <ChatBox>
-                        {messages.map(renderMessage)}
-                    </ChatBox>
-                    <div ref={scrollRef}></div>
-                </Box>
-                <Box>
-                    <TextField
-                        type={'text'}
-                        margin="normal"
-                        required
-                        fullWidth
-                        value={currentMessage}
-                        onKeyDown={onKeyDown}
-                        onChange={onMessageChange}
-                    />
-                    <Button onClick={sendMessage}>SEND</Button>
-                </Box>
-            </AccordionDetails>
-        </Accordion>
+        <Box sx={{height: 300, overflowY: 'scroll'}}>
+            <ChatBox>
+                {messages.map(renderMessage)}
+            </ChatBox>
+            <div ref={scrollRef}/>
+            <TextField
+                type={'text'}
+                margin="normal"
+                required
+                fullWidth
+                value={currentMessage}
+                onKeyDown={onKeyDown}
+                onChange={onMessageChange}
+            />
+            <Button onClick={sendMessage}>SEND</Button>
+        </Box>
     );
 
     function renderMessage(baseMessage: BaseGameSessionMessage, i: number) {

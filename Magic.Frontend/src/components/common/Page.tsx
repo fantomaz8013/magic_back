@@ -25,13 +25,6 @@ export default function Page() {
           <Outlet />
         </Box>
       </Container>
-      {/*<Copyright sx={{*/}
-      {/*    position: 'fixed',*/}
-      {/*    bottom: 0,*/}
-      {/*    width: '100%',*/}
-      {/*    height: 40,*/}
-      {/*    textAlign: 'center'*/}
-      {/*}}/>*/}
     </div>
   );
 }
