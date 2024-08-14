@@ -30,20 +30,6 @@ export function Map() {
     const dispatch = useDispatch<AppDispatch>();
     const {data: tileProperties} = useGetTilePropertiesQuery();
 
-    useEffect(() => {
-        document.addEventListener('contextmenu', backTrackMove);
-        return () => {
-            document.removeEventListener('contextmenu', backTrackMove)
-        }
-    }, []);
-
-    function backTrackMove(e: MouseEvent) {
-        if (moveState.path.length > 0) {
-            e.preventDefault();
-            dispatch(backTrackLastMove());
-        }
-    }
-
     if (!gameSessionInfo?.map || !gameSessionInfo.characters || !tileProperties) {
         return (
             <React.Fragment/>
@@ -95,6 +81,7 @@ export function Map() {
                 onClick: _addMove
             }}>
             <Paper
+                onContextMenu={backTrackMove}
                 id={'Board'}
                 elevation={4}
                 sx={{
@@ -138,6 +125,13 @@ export function Map() {
             </Paper>
         </MapContext.Provider>
     );
+
+    function backTrackMove(e: React.MouseEvent<HTMLElement>) {
+        if (moveState.path.length > 0) {
+            e.preventDefault();
+            dispatch(backTrackLastMove());
+        }
+    }
 
     function renderMovingCharacterStartPosition() {
         const {x, y} = convertToRealPosition(movingCharacterPosition!.x, movingCharacterPosition!.y);
