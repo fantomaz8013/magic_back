@@ -8,17 +8,12 @@ import paths from "../../../consts/paths";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/redux";
 import Account from "./account/Account";
-import { Container, PaletteMode } from "@mui/material";
-import ToggleColorMode from "./ToggleColorMode";
+import { Container, } from "@mui/material";
 import { Logo } from "../../../assets/vector/Logo";
 import className from "./header.styles";
 
-interface HeaderProps {
-  mode: PaletteMode;
-  toggleColorMode: () => void;
-}
 
-export default function Header({ mode, toggleColorMode }: HeaderProps) {
+export default function Header() {
   const navigate = useNavigate();
   const isLoggedIn = useSelector(
     (state: RootState) => state.auth.token !== null
@@ -34,7 +29,6 @@ export default function Header({ mode, toggleColorMode }: HeaderProps) {
               <span>Magic</span>
             </Link>
             <Box style={className.rightController}>
-              <ToggleColorMode mode={mode} toggleColorMode={toggleColorMode} />
               {isLoggedIn ? (
                 <Account />
               ) : (
