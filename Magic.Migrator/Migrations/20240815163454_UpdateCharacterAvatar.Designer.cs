@@ -3,6 +3,7 @@ using System;
 using Magic.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Magic.Migrator.Migrations
 {
     [DbContext(typeof(DataBaseContext))]
-    partial class DataBaseContextModelSnapshot : ModelSnapshot
+    [Migration("20240815163454_UpdateCharacterAvatar")]
+    partial class UpdateCharacterAvatar
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -678,10 +681,10 @@ namespace Magic.Migrator.Migrations
                             CharacterClassId = 1,
                             CharacterRaceId = 1,
                             Characteristics = "{\"2\":10,\"6\":20,\"4\":5,\"5\":5,\"3\":20,\"1\":20}",
-                            Description = "Ардан Громовержец — бесстрашный воин, владеющий молотом, вызывающим гром. Его мощь и отвага легендарны, а враги трепещут перед его яростью в бою.",
+                            Description = "A real man with a real COCK",
                             Initiative = 5,
                             MaxHP = 20,
-                            Name = "Ардан Громовержец",
+                            Name = "Conductor Gennady",
                             Speed = 8
                         },
                         new
@@ -693,10 +696,10 @@ namespace Magic.Migrator.Migrations
                             CharacterClassId = 4,
                             CharacterRaceId = 2,
                             Characteristics = "{\"2\":8,\"6\":20,\"4\":12,\"5\":15,\"3\":14,\"1\":5}",
-                            Description = "Каэл Светоносный — мудрый жрец, исцеляющий раны и изгоняющий тьму. Его сила исходит от древних богов, а сердце наполнено милосердием.",
+                            Description = "She had a baby but still remains virgin. Never had sex, but she is your mother. She is definitely not a whore",
                             Initiative = 3,
                             MaxHP = 16,
-                            Name = "Каэл Светоносный",
+                            Name = "Isabella The Lust",
                             Speed = 8
                         },
                         new
@@ -706,12 +709,12 @@ namespace Magic.Migrator.Migrations
                             Armor = 10,
                             AvatarUrL = "storage/character/avatar/3.png",
                             CharacterClassId = 3,
-                            CharacterRaceId = 2,
+                            CharacterRaceId = 3,
                             Characteristics = "{\"2\":16,\"6\":10,\"4\":10,\"5\":10,\"3\":16,\"1\":10}",
-                            Description = "Тарен Лесной Страж — искусный охотник, владеющий луком и кинжалом. Он незаметно передвигается по лесу и всегда попадает в цель.",
+                            Description = "Background: Criminal\r\nMotivation: You left home and found a place in a thieves' guild or some other criminal organization.\r\nOrigin: You always had a way with animals, able to calm them with a soothing word and a touch.\r\nEvents: 1\r\nYou fought in a battle. You escaped the battle unscathed, though many of your friends were injured or lost.",
                             Initiative = 7,
                             MaxHP = 18,
-                            Name = "Тарен Лесной Страж",
+                            Name = "Nolgroug Berylguard",
                             Speed = 8
                         },
                         new
@@ -721,12 +724,12 @@ namespace Magic.Migrator.Migrations
                             Armor = 6,
                             AvatarUrL = "storage/character/avatar/4.png",
                             CharacterClassId = 2,
-                            CharacterRaceId = 1,
+                            CharacterRaceId = 4,
                             Characteristics = "{\"2\":8,\"6\":10,\"4\":20,\"5\":18,\"3\":12,\"1\":8}",
-                            Description = "Элриан Заклинатель — могущественный волшебник, повелевающий стихиями. Его знания древних магий и заклинаний делают его непревзойденным в борьбе с темными силами.",
+                            Description = "Background: Outlander\r\nMotivation: From a young age, you couldn't abide the stink of the cities and preferred to spend your time in nature.\r\nOrigin: You grew up listening to tales of great wizards and knew you wanted to follow their path. You strove to be accepted at an academy of magic and succeeded.\r\nEvents: 2\r\nYou saw a demon and ran away before it could do anything to you.\r\n\r\nYou were accused of Assault. You were caught and convicted. You spent time in jail, chained to an oar, or performing hard labor. You served a sentence of 2 years or succeeded in escaping after that much time.",
                             Initiative = 4,
                             MaxHP = 14,
-                            Name = "Элриан Заклинатель",
+                            Name = "Snugug",
                             Speed = 8
                         });
                 });

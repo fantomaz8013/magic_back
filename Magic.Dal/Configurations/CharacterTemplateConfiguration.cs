@@ -42,9 +42,9 @@ public class CharacterTemplateConfiguration : IEntityTypeConfiguration<Character
         builder.HasData(new CharacterTemplate
         {
             Id = Guid.Parse("1850beb4-ed84-4c7f-9a5c-cd7bce35e5d4"),
-            Name = "Conductor Gennady",
-            Description = "A real man with a real COCK",
-            AvatarUrL = "https://cumm.co.uk/wp-content/uploads/2023/08/00-a-mans-cock.jpg?v=1698757203",
+            Name = "Ардан Громовержец",
+            Description = "Ардан Громовержец — бесстрашный воин, владеющий молотом, вызывающим гром. Его мощь и отвага легендарны, а враги трепещут перед его яростью в бою.",
+            AvatarUrL = "storage/character/avatar/1.png",
             CharacterClassId = CharacterClass.Warrior,
             AbilitieIds = new[]
             {
@@ -69,11 +69,11 @@ public class CharacterTemplateConfiguration : IEntityTypeConfiguration<Character
         builder.HasData(new CharacterTemplate
         {
             Id = Guid.Parse("ce12d784-19c8-4f07-be2c-06e0c853a30e"),
-            Name = "Isabella The Lust",
+            Name = "Каэл Светоносный",
             Description =
-                "She had a baby but still remains virgin. Never had sex, but she is your mother. She is definitely not a whore",
+                "Каэл Светоносный — мудрый жрец, исцеляющий раны и изгоняющий тьму. Его сила исходит от древних богов, а сердце наполнено милосердием.",
             AvatarUrL =
-                "https://source.boomplaymusic.com/group10/M00/02/07/40af9aa9b99e46aa8f205d25fe687fa9_320_320.jpg",
+                "storage/character/avatar/2.png",
             CharacterClassId = CharacterClass.Priest,
             AbilitieIds = new[]
             {
@@ -98,21 +98,17 @@ public class CharacterTemplateConfiguration : IEntityTypeConfiguration<Character
         builder.HasData(new CharacterTemplate
         {
             Id = Guid.Parse("dfc2813c-96c3-497e-8799-ad3aa9de0ae2"),
-            Name = "Nolgroug Berylguard",
-            Description = @"Background: Criminal
-Motivation: You left home and found a place in a thieves' guild or some other criminal organization.
-Origin: You always had a way with animals, able to calm them with a soothing word and a touch.
-Events: 1
-You fought in a battle. You escaped the battle unscathed, though many of your friends were injured or lost.",
+            Name = "Тарен Лесной Страж",
+            Description = @"Тарен Лесной Страж — искусный охотник, владеющий луком и кинжалом. Он незаметно передвигается по лесу и всегда попадает в цель.",
             AvatarUrL =
-                "https://source.boomplaymusic.com/group10/M00/02/07/40af9aa9b99e46aa8f205d25fe687fa9_320_320.jpg",
+                "storage/character/avatar/3.png",
             CharacterClassId = CharacterClass.Hunter,
             AbilitieIds = new[]
             {
                 1, 14, 15, 16, 17
             },
             Armor = 10,
-            CharacterRaceId = CharacterRace.Dwarf,
+            CharacterRaceId = CharacterRace.Elf,
             MaxHP = 18,
             Speed = 8,
             Initiative = 7,
@@ -130,23 +126,17 @@ You fought in a battle. You escaped the battle unscathed, though many of your fr
         builder.HasData(new CharacterTemplate
         {
             Id = Guid.Parse("40078ee4-bfce-4ee3-b54b-ff6974e4bb69"),
-            Name = "Snugug",
-            Description = @"Background: Outlander
-Motivation: From a young age, you couldn't abide the stink of the cities and preferred to spend your time in nature.
-Origin: You grew up listening to tales of great wizards and knew you wanted to follow their path. You strove to be accepted at an academy of magic and succeeded.
-Events: 2
-You saw a demon and ran away before it could do anything to you.
-
-You were accused of Assault. You were caught and convicted. You spent time in jail, chained to an oar, or performing hard labor. You served a sentence of 2 years or succeeded in escaping after that much time.",
+            Name = "Элриан Заклинатель",
+            Description = @"Элриан Заклинатель — могущественный волшебник, повелевающий стихиями. Его знания древних магий и заклинаний делают его непревзойденным в борьбе с темными силами.",
             AvatarUrL =
-                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5DIPHOFPGgT1oS9B78rTLUv9RkVsWKnEccg&s",
+                "storage/character/avatar/4.png",
             CharacterClassId = CharacterClass.Wizard,
             AbilitieIds = new[]
             {
                 1, 6, 7, 8, 9
             },
             Armor = 6,
-            CharacterRaceId = CharacterRace.Orc,
+            CharacterRaceId = CharacterRace.Human,
             MaxHP = 14,
             Speed = 8,
             Initiative = 4,

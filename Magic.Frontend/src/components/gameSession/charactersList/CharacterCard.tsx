@@ -14,6 +14,7 @@ import { useGetCharacteristicsQuery } from "../../../redux/api/characterApi";
 import { className } from "./character.style";
 import { IconBow, IconCross, IconSword, IconWand } from "@tabler/icons-react";
 import { PlayerInfo } from "../GameSession";
+import { baseProxy } from "../../../env";
 
 interface DataCardType {
   user: PlayerInfo;
@@ -77,7 +78,7 @@ export default function CharacterCard({
         </div>
       )}
       <CardMedia
-        image={template.avatarUrL}
+        image={baseProxy + template.avatarUrL}
         sx={{ ...className.cardImage }}
         title={template.name}
       />
