@@ -77,7 +77,7 @@ export default function CharacterCard({
         </div>
       )}
       <CardMedia
-        image={`/mage.png`}
+        image={template.avatarUrL}
         sx={{ ...className.cardImage }}
         title={template.name}
       />
