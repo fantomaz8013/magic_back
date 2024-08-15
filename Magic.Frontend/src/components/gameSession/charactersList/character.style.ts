@@ -1,0 +1,122 @@
+export const className = {
+  card: {
+    maxWidth: 350,
+    width: '100%',
+    maxHeight: '660px',
+    height: "calc(100svh - 201px)",
+    background: "#161617",
+    borderRadius: "8px",
+  },
+  block: {
+    display: "flex",
+  },
+  cardClass: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: ".8em",
+  },
+  cardClassName: {
+    display: "flex",
+    alignItems: "center",
+    gap: ".8em",
+  },
+  cardImage: {
+    boxShadow: "inset 0px 0px 40px 50px #161617",
+    width: "auto",
+    height: "375px",
+  },
+  gamerName: {
+    marginTop: '-.2em',
+    color: "#fff",
+    fontSize: "1.6em",
+    fontWeight: "700",
+  },
+  gamerExpectation: {
+    marginTop: '.4em',
+    color: "#B9B9B9",
+    fontSize: "1.6em",
+    fontWeight: "700",
+  },
+  cardName: {
+    display: "flex",
+    justifyContent: "center",
+    color: "#fff",
+    fontSize: "1.8em",
+    fontWeight: 700,
+  },
+  cardClassIcon: {
+    display: "flex",
+    padding: "0.25em",
+    borderRadius: "0.25em",
+    background: "rgba(255, 255, 255, 0.1)",
+  },
+  chat: {
+    display: "flex",
+    height: "calc(100svh - 81px)",
+    maxWidth: "380px",
+    width: "100%",
+    flexDirection: " row-reverse",
+  },
+  cardContent: {
+    display: "flex",
+    flexDirection: "column",
+    gap: ".8em",
+    overflowY: "auto",
+  },
+  cardDescription: {
+    color: "#888888",
+    margin: "0",
+    WebkitLineClamp: "4",
+    display: "-webkit-box",
+    WebkitBoxOrient: "vertical",
+    overflow: "hidden",
+  },
+  cardClassSkill: {
+    borderRadius: "50%",
+    border: "solid 1px #747B7F",
+    width: "38px",
+    height: "38px",
+  },
+  cardClassTxt: {
+    color: "#888888",
+    fontWeight: 500,
+  },
+  characterList: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "1em",
+  },
+  cardClassSkillContainer: {
+    display: "flex",
+    gap: ".6em",
+  },
+  characterVal: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    fontSize: ".9em",
+    fontWeight: 600,
+    width: "28px",
+    height: "28px",
+    borderRadius: "50%",
+    background: "rgba(255, 255, 255, .1)",
+  },
+  characterItem: {
+    display: "flex",
+    justifyContent: "space-between",
+  },
+  characterContainer: {
+    cursor: "default",
+    display: "flex",
+    gap: ".1em",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  characterTxt: {
+    color: "#888888",
+    textTransform: "uppercase",
+  },
+};
+
