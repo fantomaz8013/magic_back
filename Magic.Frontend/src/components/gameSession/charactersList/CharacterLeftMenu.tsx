@@ -3,6 +3,7 @@ import Card from '@mui/material/Card';
 import CardMedia from '@mui/material/CardMedia';
 import {GameSessionCharacter} from "../../../models/websocket/gameStartedInfo";
 import Typography from "@mui/material/Typography";
+import {baseProxy} from "../../../env";
 
 
 export interface CharacterTemplateProps {
@@ -18,7 +19,7 @@ export default function CharacterLeftMenu({character, onClick}: CharacterTemplat
             </Typography>
             <CardMedia
                 sx={{height: 150}}
-                image={character.avatarUrL}
+                image={baseProxy + character.avatarUrL}
                 title={character.name}
             />
         </Card>

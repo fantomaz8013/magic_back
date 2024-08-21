@@ -8,6 +8,7 @@ import {addMove, backTrackLastMove} from "../../../redux/slices/moveSlice";
 import Paper from "@mui/material/Paper";
 import {Row} from "./Row";
 import {cellKey} from "./map.utils";
+import {baseProxy} from "../../../env";
 
 export interface MapContextType {
     tileProperties: Record<string, TileProperty>;
@@ -105,7 +106,7 @@ export function Map() {
                             const {x, y} = convertToRealPosition(c.positionX!, c.positionY!);
                             return <Avatar
                                 key={c.id}
-                                src={c!.avatarUrL}
+                                src={baseProxy + c!.avatarUrL}
                                 sx={{
                                     position: 'absolute',
                                     top: y,
@@ -138,7 +139,7 @@ export function Map() {
         return (
             <Avatar
                 key={movingCharacter.id + '_temp'}
-                src={movingCharacter.avatarUrL}
+                src={baseProxy + movingCharacter.avatarUrL}
                 sx={{
                     position: 'absolute',
                     top: y,

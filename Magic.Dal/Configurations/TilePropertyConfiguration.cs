@@ -70,11 +70,24 @@ public class TilePropertyConfiguration : IEntityTypeConfiguration<TileProperty>
             Id = 4,
             Title = "Вода",
             Description = "Тут не горит, но ходить сложно",
-            Image = "storage/tiles/3.png",
+            Image = "storage/tiles/4.png",
             CollisionType = Domain.Enums.TilePropertyCollisionTypeEnum.None,
             PenaltyType = Domain.Enums.TilePropertyPenaltyTypeEnum.PenaltySpeed,
             TargetType = Domain.Enums.TilePropertyTargetTypeEnum.None,
             PenaltyValue = 1,
+            Health = null,
+        });
+
+        builder.HasData(new TileProperty
+        {
+            Id = 5,
+            Title = "Трава",
+            Description = "Самая обычная трава ( хих ) ",
+            Image = "storage/tiles/5.png",
+            CollisionType = Domain.Enums.TilePropertyCollisionTypeEnum.None,
+            PenaltyType = Domain.Enums.TilePropertyPenaltyTypeEnum.None,
+            TargetType = Domain.Enums.TilePropertyTargetTypeEnum.None,
+            PenaltyValue = null,
             Health = null,
         });
     }
