@@ -87,8 +87,8 @@ export function ChangeCharacteristicsModal({userId, onCloseModal}: ModalProps) {
         const character = getCharacterByCommandTarget();
         setChangingParameter({
             name: parameterName,
-            initialValue: character[parameterName]?.toString()!,
-            value: character[parameterName]?.toString()! || '',
+            initialValue: JSON.stringify(character[parameterName]),
+            value: JSON.stringify(character[parameterName] || ''),
         });
     }
 

@@ -2,6 +2,7 @@ import {createApi} from '@reduxjs/toolkit/query/react'
 import {fetchBaseQueryWithAuth} from "../utils/baseQueryWithReauth";
 import {apiProxy} from "../../env";
 import {
+    CharacterAbility,
     CharacterCharacteristicResponse, CharacterClass, CharacterRace,
     CharacterTemplateResponse
 } from "../../models/response/characterTemplateResponse";
@@ -25,8 +26,11 @@ export const characterApi = createApi({
             getClasses: builder.query <BaseResponse<CharacterClass>, void>({
                 query: () => `classes`,
             }),
+            getAbilities: builder.query <BaseResponse<CharacterAbility[]>, void>({
+                query: () => `abilities`,
+            }),
         }),
     }
 )
 
-export const {useGetCharacterTemplatesQuery, useGetCharacteristicsQuery} = characterApi
+export const {useGetCharacterTemplatesQuery, useGetCharacteristicsQuery, useGetAbilitiesQuery} = characterApi

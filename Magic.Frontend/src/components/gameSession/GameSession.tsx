@@ -19,7 +19,6 @@ import CssBaseline from "@mui/material/CssBaseline";
 import {UserUtils} from "./playerUtils/userUtils";
 import {EventSnackbar} from "./eventSnackbar/EventSnackbar";
 import {KickHandler} from "./KickHandler";
-import paths from "../../consts/paths";
 import {PlayerActions} from "./playerActions/PlayerActions";
 import className from "./gameSession.style";
 
@@ -40,6 +39,8 @@ export default function GameSession() {
     const [ref, setRef] = useState<HTMLElement | null>(null);
 
     const gameSessionInfo = useSelector((state: RootState) => state.gameSession.gameSessionInfo);
+    const playerInfos = useSelector((state: RootState) => state.gameSession.playerInfos);
+    const gameMasterUserId = Object.values(playerInfos ?? {}).find(i => i.isMaster)?.id;
 
     useEffect(() => {
         if (gameSessionId && state === "Connected")
@@ -111,13 +112,15 @@ export default function GameSession() {
         return (
             <>
                 <Box id={"UI"} sx={{display: 'flex', flexDirection: 'column', position: 'absolute', left: 0}}>
-                    {characters.map((c: GameSessionCharacter) =>
-                        <CharacterLeftMenu
-                            key={c.id}
-                            onClick={onClick}
-                            character={{...c, name: `${c.name} (${c.ownerId})`}}
-                        />
-                    )}
+                    {characters
+                        .filter(c => c.ownerId !== gameMasterUserId)
+                        .map((c: GameSessionCharacter) =>
+                            <CharacterLeftMenu
+                                key={c.id}
+                                onClick={onClick}
+                                character={{...c, name: `${c.name} (${c.ownerId})`}}
+                            />
+                        )}
                 </Box>
                 <PlayerActions/>
             </>

@@ -13,6 +13,10 @@ export enum WSActions {
     requestSaveThrow = 'RequestSaveThrow',
     changeCharacter = 'ChangeCharacter',
     moveCharacter = 'MoveCharacter',
+    useAbility = 'UseAbility',
+    startTurnBased = 'StartTurnBased',
+    endTurnBased = 'EndTurnBased',
+    endTurn = 'EndTurn',
 }
 
 export enum WSEvents {
@@ -35,6 +39,12 @@ export enum WSEvents {
     playerSaveThrow = "playerSaveThrow",
     playerLeft = 'playerLeft',
     playerSaveThrowPassed = 'playerSaveThrowPassed',
+
+    //turn
+    turnBasedInit = "turnBasedInit",
+    turnBasedEnd = "turnBasedEnd",
+    nextTurn = "nextTurn",
+    yourTurnStart = "yourTurnStart"
 }
 
 export type WSApi = ReturnType<typeof useGameSessionWS>;

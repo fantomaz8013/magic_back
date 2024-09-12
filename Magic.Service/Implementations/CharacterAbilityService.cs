@@ -26,15 +26,36 @@ public class CharacterAbilityService : ICharacterAbilityService
     public async Task<ApplyAbilityResponse> ApplyAbility(int characterAbilityId, Guid casterGameSessionCharacterId, int x, int y)
     {
         var ability = await GetAbility(characterAbilityId);
-        var result = new ApplyAbilityResponse { IsResult = true };
+        var result = new ApplyAbilityResponse { IsPossible = true };
 
         var caster = await _gameSessionCharacterService.GetGameSessionCharacter(casterGameSessionCharacterId);
         var turnInfo = await _gameSessionCharacterTurnInfoService.GetCharacterTurnInfo(casterGameSessionCharacterId);
 
         if (await _gameSessionCharacterTurnInfoService.IsDisable(casterGameSessionCharacterId))
         {
-            result.IsResult = false;
-            result.Message.Add($"Вы не можете применить способность потому что нейтрализованы. Количество ходов нейтрализации: {turnInfo.SkipStepCount}");
+            result.IsPossible = false;
+            result.Messages.Add($"Вы не можете применить способность потому что нейтрализованы. Количество ходов нейтрализации: {turnInfo.SkipStepCount}");
+            return result;
+        }
+
+        switch (ability.ActionType)
+        {
+            case CharacterAbilityActionTypeEnum.MainAction:
+                if(turnInfo.LeftMainAction == 0) 
+                {
+                    result.IsPossible = false;
+                    result.Messages.Add($"Не хватает очков основного действия");
+                    return result;
+                }
+                break;
+            case CharacterAbilityActionTypeEnum.AdditionalAction:
+                if(turnInfo.LeftBonusAction == 0) 
+                {
+                    result.IsPossible = false;
+                    result.Messages.Add($"Не хватает очков бонусного действия");
+                    return result;
+                }
+                break;
         }
 
         switch (ability.TargetType)
@@ -44,6 +65,7 @@ public class CharacterAbilityService : ICharacterAbilityService
                 var target = await _dbContext.GameSessionCharacters
                     .Where(c => c.GameSessionId == caster.GameSessionId && c.PositionX.HasValue && c.PositionY.HasValue && c.PositionX.Value == x && c.PositionY.Value == y)
                     .FirstOrDefaultAsync();
+                // здесь внутри проверка на попадания, если не попал тогда IsSuccesful = false
                 result = await ApplyTargetAbility(ability, caster, target);
                 break;
             case CharacterAbilityTargetTypeEnum.Cone:
@@ -54,13 +76,18 @@ public class CharacterAbilityService : ICharacterAbilityService
                 break;
         }
 
-        if(result.IsResult)
+        if(result.IsPossible)
         {
             await _gameSessionCharacterTurnInfoService.UpdateAbilityTurnInfo(caster.Id, ability);
-            result.Message.AddRange(await ApplyBuffToTargets(ability, result.TargetIds));
+            result.Messages.AddRange(await ApplyBuffToTargets(ability, result.TargetIds));
         }
 
         return result;
+    }
+
+    public async Task<List<CharacterAbility>> GetAbilities()
+    {
+        return await _dbContext.CharacterAbilities.ToListAsync();
     }
 
     private async Task<List<string>> ApplyBuffToTargets(CharacterAbility ability, List<Guid> targetIds)
@@ -99,19 +126,19 @@ public class CharacterAbilityService : ICharacterAbilityService
 
     private async Task<ApplyAbilityResponse> ApplyMultiplePointAbility(CharacterAbility ability, GameSessionCharacter caster, int x, int y)
     {
-        var result = new ApplyAbilityResponse { IsResult = true };
+        var result = new ApplyAbilityResponse { IsPossible = true };
 
         if (await _gameSessionCharacterTurnInfoService.IsCoolDownAbility(caster.Id, ability.Id))
         {
-            result.IsResult = false;
-            result.Message.Add($"Способность на перезарядке");
+            result.IsPossible = false;
+            result.Messages.Add($"Способность на перезарядке");
             return result;
         }
 
         if (CalculatePathUtil.Distance(caster.PositionX!.Value, caster.PositionY!.Value, x, y) > ability.Distance)
         {
-            result.IsResult = false;
-            result.Message.Add($"Цель слишком далеко");
+            result.IsPossible = false;
+            result.Messages.Add($"Цель слишком далеко");
             return result;
         }
 
@@ -137,12 +164,12 @@ public class CharacterAbilityService : ICharacterAbilityService
         }
 
         var allTargetsGameSessionCharacter = await _dbContext.GameSessionCharacters
-            .Where(x => x.PositionX.HasValue && x.PositionY.HasValue && targetPoints.Where(t => t.X == x.PositionX!.Value).FirstOrDefault() != null && targetPoints.Where(t => t.Y == x.PositionY!.Value).FirstOrDefault() != null)
+            .Where(x => x.PositionX.HasValue && x.PositionY.HasValue && targetPoints.FirstOrDefault(t => t.X == x.PositionX!.Value) != null && targetPoints.Where(t => t.Y == x.PositionY!.Value).FirstOrDefault() != null)
             .ToListAsync();
 
         var rollCount = 0;
 
-        for (int i = 0; i < ability.CubeCount!.Value; i++)
+        for (var i = 0; i < ability.CubeCount!.Value; i++)
         {
             rollCount += DiceUtil.RollDice(ability.CubeType!.Value);
         }
@@ -153,15 +180,15 @@ public class CharacterAbilityService : ICharacterAbilityService
             {
                 case CharacterAbilityTypeEnum.Attack:
                     await _gameSessionCharacterService.Damage(target.Id, rollCount);
-                    result.Message.Add($"Персонаж {target.Name} получил урон в размере: {rollCount}");
+                    result.Messages.Add($"Персонаж {target.Name} получил урон в размере: {rollCount}");
                     break;
                 case CharacterAbilityTypeEnum.Healing:
                     await _gameSessionCharacterService.Heal(target.Id, rollCount);
-                    result.Message.Add($"Персонаж {target.Name} получил лечение в размере: {rollCount}");
+                    result.Messages.Add($"Персонаж {target.Name} получил лечение в размере: {rollCount}");
                     break;
                 case CharacterAbilityTypeEnum.Protection:
                     await _gameSessionCharacterService.Shield(target.Id, rollCount);
-                    result.Message.Add($"Персонаж {target.Name} получил защиту в размере: {rollCount}");
+                    result.Messages.Add($"Персонаж {target.Name} получил защиту в размере: {rollCount}");
                     break;
             }
             result.TargetIds.Add(target.Id);
@@ -172,50 +199,61 @@ public class CharacterAbilityService : ICharacterAbilityService
 
     private async Task<ApplyAbilityResponse> ApplyTargetAbility(CharacterAbility ability, GameSessionCharacter caster, GameSessionCharacter? target)
     {
-        var result = new ApplyAbilityResponse { IsResult = true };
+        var result = new ApplyAbilityResponse { IsPossible = true };
 
         if (await _gameSessionCharacterTurnInfoService.IsCoolDownAbility(caster.Id, ability.Id))
         {
-            result.IsResult = false;
-            result.Message.Add($"Способность на перезарядке");
+            result.IsPossible = false;
+            result.Messages.Add($"Способность на перезарядке");
             return result;
         }
 
         if (target == null)
         {
-            result.IsResult = false;
-            result.Message.Add($"Тут никого нет, ты чо еблан ?");
+            result.IsPossible = false;
+            result.Messages.Add($"Тут никого нет, ты чо еблан ?");
+            return result;
+        }
+
+        if (ability.TargetType == CharacterAbilityTargetTypeEnum.TargertSelf 
+            && caster.Id != target.Id)
+        {
+            result.IsPossible = false;
+            result.Messages.Add($"Нельзя применить на другого");
             return result;
         }
 
         //Проверка, находится ли таргет в нужной дистанции от кастующего
-        if (CalculatePathUtil.Distance(caster.PositionX!.Value, caster.PositionY!.Value, target.PositionX!.Value, target.PositionY!.Value) > ability.Distance)
+        if (ability.Distance.HasValue && CalculatePathUtil.Distance(caster.PositionX!.Value, caster.PositionY!.Value, target.PositionX!.Value, target.PositionY!.Value) > ability.Distance)
         {
-            result.IsResult = false;
-            result.Message.Add($"Цель слишком далеко");
+            result.IsPossible = false;
+            result.Messages.Add($"Цель слишком далеко");
             return result;
         }
 
-        var rollResult = DiceUtil.RollDice(CubeTypeEnum.D20);
+        var rollHit = DiceUtil.RollDice(CubeTypeEnum.D20);
 
         //Проверка на попадание ( с модификатором главной характеристики класса )
         var modificator = await _gameSessionCharacterService.GetRollModificator(caster.Id, caster.CharacterClass.CharacterCharacteristicId);
-        if (rollResult + modificator < target.Armor)
+        if (rollHit + modificator < target.Armor)
         {
-            result.IsResult = false;
-            result.Message.Add($"Промазал уебище, старайся лучше");
+            result.Messages.Add(
+                $"{caster.Name} не попал по {target.Name} (КБ:{target.Armor}) " +
+                $"способностью {ability.Title} " +
+                $"выкинув {rollHit} к20 + " +
+                $"модификатор {caster.CharacterClass.CharacterCharacteristic.Title} {modificator}");
             return result;
         }
 
-        result.Message.Add(
+        result.Messages.Add(
             $"{caster.Name} попал по {target.Name} (КБ:{target.Armor}) " +
             $"способностью {ability.Title} " +
-            $"выкинув {rollResult} к20 + " +
+            $"выкинув {rollHit} к20 + " +
             $"модификатор {caster.CharacterClass.CharacterCharacteristic.Title} {modificator}");
 
         var rollCount = 0;
 
-        for (int i = 0; i < ability.CubeCount!.Value; i ++)
+        for (var i = 0; i < ability.CubeCount!.Value; i ++)
         {
             rollCount += DiceUtil.RollDice(ability.CubeType!.Value);
         }
@@ -224,15 +262,15 @@ public class CharacterAbilityService : ICharacterAbilityService
         {
             case CharacterAbilityTypeEnum.Attack:
                 await _gameSessionCharacterService.Damage(target.Id, rollCount);
-                result.Message.Add($"Персонаж {target.Name} получил урон в размере: {rollCount}");
+                result.Messages.Add($"Персонаж {target.Name} получил урон в размере: {rollCount}");
                 break;
             case CharacterAbilityTypeEnum.Healing:
                 await _gameSessionCharacterService.Heal(target.Id, rollCount);
-                result.Message.Add($"Персонаж {target.Name} получил лечение в размере: {rollCount}");
+                result.Messages.Add($"Персонаж {target.Name} получил лечение в размере: {rollCount}");
                 break;
             case CharacterAbilityTypeEnum.Protection:
                 await _gameSessionCharacterService.Shield(target.Id, rollCount);
-                result.Message.Add($"Персонаж {target.Name} получил защиту в размере: {rollCount}");
+                result.Messages.Add($"Персонаж {target.Name} получил защиту в размере: {rollCount}");
                 break;
         }
 

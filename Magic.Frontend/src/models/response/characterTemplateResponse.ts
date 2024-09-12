@@ -9,7 +9,6 @@ export interface CharacterTemplate extends BaseEntity<string> {
     avatarUrL: string;
     characterClass: CharacterClass;
     characterClassId: number;
-    abilities: Ability[];
     abilitieIds: number[];
     armor: number;
     characterRaceId: number;
@@ -20,7 +19,54 @@ export interface CharacterTemplate extends BaseEntity<string> {
     characteristics: CharacteristicsMapper;
 }
 
-export interface Ability {
+export interface CharacterAbility extends BaseEntity<number> {
+    title: string;
+    description: string;
+    distance?: number;
+    radius?: number;
+    type: CharacterAbilityTypeEnum;
+    targetType: CharacterAbilityTargetTypeEnum;
+    cubeType?: CubeTypeEnum;
+    actionType: CharacterAbilityActionTypeEnum;
+    coolDownType: CharacterAbilityCoolDownTypeEnum;
+    coolDownCount?: number;
+    cubeCount?: number;
+    characterClassId?: number;
+    characterClass: CharacterClass;
+    casterCharacterCharacteristicId?: number;
+    casterCharacterCharacteristic: CharacterCharacteristic;
+    targetCharacterCharacteristicId?: number;
+    targetCharacterCharacteristic: CharacterCharacteristic;
+    buffCount?: number;
+    characterBuffId?: number;
+    characterBuff?: GameSessionCharacterBuff;
+}
+
+export interface GameSessionCharacterBuff extends BaseEntity<number> {
+    title: string;
+    description: string;
+    isNegative: boolean;
+    buffType: BuffTypeEnum;
+}
+
+export enum BuffTypeEnum
+{
+    /// <summary>
+    /// Нейтрализация персонажа
+    /// </summary>
+    Disable = 1,
+    /// <summary>
+    /// Полет
+    /// </summary>
+    Fly = 2,
+    /// <summary>
+    /// Добавить персонажу основное действие
+    /// </summary>
+    AddMainAction = 3,
+    /// <summary>
+    /// Внушение
+    /// </summary>
+    Suggestion = 4,
 }
 
 export type CharacteristicsMapper = { [key: number]: number };
@@ -119,26 +165,6 @@ export enum CharacterRaces {
     Elf = 2,
     Dwarf = 3,
     Orc = 4,
-}
-
-export interface CharacterAbility extends BaseEntity<number> {
-    title: string;
-    description: string;
-    distance?: number;
-    radius?: number;
-    type: CharacterAbilityTypeEnum;
-    targetType: CharacterAbilityTargetTypeEnum;
-    cubeType: CubeTypeEnum;
-    actionType: CharacterAbilityActionTypeEnum;
-    coolDownType: CharacterAbilityCoolDownTypeEnum;
-    coolDownCount?: number;
-    cubeCount?: number;
-    characterClassId?: number;
-    characterClass: CharacterClass;
-    casterCharacterCharacteristicId?: string;
-    casterCharacterCharacteristic?: CharacterCharacteristic;
-    targetCharacterCharacteristicId?: string;
-    targetCharacterCharacteristic: CharacterCharacteristic;
 }
 
 export interface BaseEntity<T> {

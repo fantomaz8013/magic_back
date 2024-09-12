@@ -17,8 +17,19 @@ public class CharacterService : ICharacterService
         _dbContext = dbContext;
     }
 
-    public async Task<List<GameSessionCharacter>> ChooseCharacters(
-        Dictionary<Guid, Guid> userIdsToCharacterTemplatesIds, Guid gameSessionId)
+    public async Task DeleteNpc(Guid gameSessionId)
+    {
+        var npc = await _dbContext.GameSessionCharacters
+            .Where(c => c.GameSessionId == gameSessionId && c.OwnerId == c.GameSession.CreatorUserId)
+            .ToListAsync();
+
+        _dbContext.GameSessionCharacters.RemoveRange(npc);
+
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<List<GameSessionCharacter>> AddCharactersToGameSession(
+        List<(Guid OwnerId, Guid CharacterTemplateId)> userIdsToCharacterTemplatesIds, Guid gameSessionId)
     {
         var gameSession = await _dbContext.GameSessions
             .FindAsync(gameSessionId);
@@ -28,17 +39,17 @@ public class CharacterService : ICharacterService
             throw new ExceptionWithApplicationCode("Игровая сессия не найдена",
                 Domain.Enums.ExceptionApplicationCodeEnum.GameSessionNotFound);
         }
-
-        if (gameSession.GameSessionStatus != GameSessionStatusTypeEnum.WaitingForStart)
-        {
-            throw new ExceptionWithApplicationCode("Игровая сессия должна иметь статус \"ожидает\"",
-                Domain.Enums.ExceptionApplicationCodeEnum.GameSessionIncorrectStatus);
-        }
+        //
+        // if (gameSession.GameSessionStatus != GameSessionStatusTypeEnum.WaitingForStart)
+        // {
+        //     throw new ExceptionWithApplicationCode("Игровая сессия должна иметь статус \"ожидает\"",
+        //         Domain.Enums.ExceptionApplicationCodeEnum.GameSessionIncorrectStatus);
+        // }
 
         foreach (var item in userIdsToCharacterTemplatesIds)
         {
-            var userId = item.Key;
-            var characterTemplateId = item.Value;
+            var userId = item.OwnerId;
+            var characterTemplateId = item.CharacterTemplateId;
             var user = await _dbContext.User
                 .FindAsync(userId);
 

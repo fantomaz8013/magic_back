@@ -9,10 +9,12 @@ namespace Magic.Api.Controller.User.V1;
 public class CharacterController : V1CharacterControllerBase
 {
     protected readonly ICharacterService _characterService;
+    protected readonly ICharacterAbilityService _characterAbilityService;
 
-    public CharacterController(ICharacterService characterService)
+    public CharacterController(ICharacterService characterService, ICharacterAbilityService characterAbilityService)
     {
         _characterService = characterService;
+        _characterAbilityService = characterAbilityService;
     }
 
     [HttpGet]
@@ -52,6 +54,14 @@ public class CharacterController : V1CharacterControllerBase
     public async Task<IActionResult> Templates()
     {
         var result = await _characterService.GetCharacterTemplates();
+        return Ok(result);
+    }
+    
+    [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseData<List<CharacterAbility>>))]
+    public async Task<IActionResult> Abilities()
+    {
+        var result = await _characterAbilityService.GetAbilities();
         return Ok(result);
     }
 }

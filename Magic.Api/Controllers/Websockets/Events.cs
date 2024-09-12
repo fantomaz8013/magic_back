@@ -10,7 +10,6 @@ public static class Events
     public const string PlayerInfoReceived = "playerInfoReceived";
     public const string GameSessionInfoReceived = "gameSessionInfoReceived";
 
-
     //characters
     public const string CharacterLocked = "characterLocked";
     public const string CharacterUnlocked = "characterUnlocked";
@@ -19,4 +18,10 @@ public static class Events
     public const string PlayerLeft = "playerLeft";
     public const string PlayerSaveThrow = "playerSaveThrow";
     public const string PlayerSaveThrowPassed = "playerSaveThrowPassed";
+    
+    //Turn
+    public const string TurnBasedInit = "turnBasedInit";
+    public const string TurnBasedEnd = "turnBasedEnd";
+    public const string NextTurn = "nextTurn";
+    public const string YourTurnStart = "yourTurnStart";
 }

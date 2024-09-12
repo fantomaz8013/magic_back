@@ -41,5 +41,5 @@ export interface ChangingField {
 }
 
 
-export type UnchangebleFields = Pick<GameSessionCharacter, 'gameSessionId' | 'abilities' | 'characterClass' | 'ownerId' | 'id' | 'characterRace'>;
+export type UnchangebleFields = Pick<GameSessionCharacter, 'gameSessionId' | 'characterClass' | 'ownerId' | 'id' | 'characterRace'>;
 export type ChangebleFields = keyof Omit<GameSessionCharacter, keyof UnchangebleFields>;

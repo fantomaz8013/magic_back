@@ -9,36 +9,34 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Magic.Service.Implementations
+namespace Magic.Service.Implementations;
+
+public class TilePropertyService : ITilePropertyService
 {
+    protected readonly DataBaseContext _dbContext;
 
-    public class TilePropertyService : ITilePropertyService
+    public TilePropertyService(DataBaseContext dbContext)
     {
-        protected readonly DataBaseContext _dbContext;
+        _dbContext = dbContext;
+    }
+    public async Task<List<TileProperty>> GetTileProperties()
+    {
+        return  await _dbContext.TileProperties
+            .ToListAsync();
+    }
 
-        public TilePropertyService(DataBaseContext dbContext)
+    public async Task<TileProperty> GetTileProperty(int id)
+    {
+        var tileProperty = await _dbContext.TileProperties
+            .Include(x => x.TilePropertyIfDestroyed)
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (tileProperty == null)
         {
-            _dbContext = dbContext;
-        }
-        public async Task<List<TileProperty>> GetTileProperties()
-        {
-            return  await _dbContext.TileProperties
-                .ToListAsync();
+            throw new ExceptionWithApplicationCode("Параметры тайла не найдены",
+                Domain.Enums.ExceptionApplicationCodeEnum.TilePropertyNotExist);
         }
 
-        public async Task<TileProperty> GetTileProperty(int id)
-        {
-            var tileProperty = await _dbContext.TileProperties
-                .Include(x => x.TilePropertyIfDestroyed)
-                .FirstOrDefaultAsync(x => x.Id == id);
-
-            if (tileProperty == null)
-            {
-                throw new ExceptionWithApplicationCode("Параметры тайла не найдены",
-               Domain.Enums.ExceptionApplicationCodeEnum.TilePropertyNotExist);
-            }
-
-            return tileProperty;
-        }
+        return tileProperty;
     }
 }

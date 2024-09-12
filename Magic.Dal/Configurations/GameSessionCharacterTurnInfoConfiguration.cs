@@ -20,7 +20,8 @@ public class GameSessionCharacterTurnInfoConfiguration : IEntityTypeConfiguratio
             .HasDefaultValue(0);
 
         builder.PropertyWithUnderscore(x => x.GameSessionCharacterId);
-        builder.HasForeignKey(x => x.GameSessionCharacter, x => x.GameSessionCharacterId);
+        builder.HasForeignKey(x => x.GameSessionCharacter, x => x.GameSessionCharacterId)
+            .OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(x => x.GameSessionCharacter);
 
         var serializeOptions = new JsonSerializerOptions();

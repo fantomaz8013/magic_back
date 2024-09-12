@@ -59,7 +59,11 @@ export function Map() {
     if (movingCharacterPosition && moveState.path.length < movingCharacter.speed) {
         for (let y = -1; y <= 1; y++) {
             for (let x = -1; x <= 1; x++) {
-                const tileId = gameSessionInfo?.map.tiles[movingCharacterPosition.y + y][movingCharacterPosition.x + x];
+                const tileY = movingCharacterPosition.y + y;
+                const tileX = movingCharacterPosition.x + x;
+                if(tileX < 0 || tileY < 0 || tileX > gameSessionInfo?.map.tiles[0].length || tileY > gameSessionInfo?.map.tiles.length)
+                    continue;
+                const tileId = gameSessionInfo?.map.tiles[tileY][tileX];
                 const property = tileProperties[tileId];
                 if ((x === 0 && y === 0) || property.collisionType !== TilePropertyCollisionTypeEnum.None) continue;
                 shadows[cellKey(movingCharacterPosition.y + y, movingCharacterPosition.x + x)] = ShadowTypeEnum.Green;

@@ -1,4 +1,5 @@
 ﻿using Magic.Common;
+using Magic.Domain.Entities;
 using Magic.Service.Implementations;
 using Magic.Service.Interfaces;
 using Magic.Service.Provider;
@@ -27,5 +28,6 @@ public static class ServiceDIExtensions
         services.AddScoped<ITilePropertyService, TilePropertyService>();
         services.AddScoped<IGameSessionCharacterTurnInfoService, GameSessionCharacterTurnInfoService>();
         services.AddScoped<ICharacterAbilityService, CharacterAbilityService>();
+        services.AddScoped<IGameSessionCharacterTurnQueueService, GameSessionCharacterTurnQueueService>();
     }
 }

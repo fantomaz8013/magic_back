@@ -1,5 +1,6 @@
 ﻿using Magic.DAL;
 using Magic.Domain.Entities;
+using Magic.Domain.Enums;
 using Magic.Domain.Exceptions;
 using Magic.Service.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -36,17 +37,25 @@ public class GameSessionCharacterTurnInfoService : IGameSessionCharacterTurnInfo
             .AsTracking()
             .FirstOrDefaultAsync(x => x.GameSessionCharacterId == gameSessionCharacterId);
 
-        if (ability.CoolDownType == Domain.Enums.CharacterAbilityCoolDownTypeEnum.None)
+        if (ability.CoolDownType != CharacterAbilityCoolDownTypeEnum.None)
         {
-            return characterTurnInfo!;
+            characterTurnInfo!.AbilityCoolDowns.Add(new AbilityCoolDowns
+            {
+                AbilityId = ability.Id,
+                LeftTurns = ability.CoolDownCount,
+                CharacterAbilityCoolDownTypeEnum = ability.CoolDownType,
+            });
         }
 
-        characterTurnInfo!.AbilityCoolDowns.Add(new AbilityCoolDowns
+        switch (ability.ActionType)
         {
-            AbilityId = ability.Id,
-            LeftTurns = ability.CoolDownCount,
-            CharacterAbilityCoolDownTypeEnum = ability.CoolDownType,
-        });
+            case CharacterAbilityActionTypeEnum.MainAction:
+                characterTurnInfo.LeftMainAction--;
+                break;
+            case CharacterAbilityActionTypeEnum.AdditionalAction:
+                characterTurnInfo.LeftBonusAction--;
+                break;
+        }
 
         _dbContext.Update(characterTurnInfo);
         await _dbContext.SaveChangesAsync();
@@ -115,6 +124,8 @@ public class GameSessionCharacterTurnInfoService : IGameSessionCharacterTurnInfo
             AbilityCoolDowns = new List<AbilityCoolDowns>(),
             BuffCoolDowns = new List<BuffCoolDowns>()
         });
+
+        await _dbContext.SaveChangesAsync();
 
         return result.Entity;
     }
@@ -217,9 +228,9 @@ public class GameSessionCharacterTurnInfoService : IGameSessionCharacterTurnInfo
 
         if (turnInfo.SkipStepCount > 0)
         {
-            return false;
+            return true;
         }
 
-        return true;
+        return false;
     }
 }

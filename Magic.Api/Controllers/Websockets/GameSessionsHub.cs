@@ -3,6 +3,7 @@ using Magic.Api.Controllers.Websockets.Requests;
 using Magic.Api.Controllers.Websockets.Responses;
 using Magic.Common.Models.Request;
 using Magic.Common.Models.Response;
+using Magic.Domain.Entities;
 using Magic.Domain.Enums;
 using Magic.Service;
 using Magic.Service.Interfaces;
@@ -22,6 +23,8 @@ public class GameSessionsHub : Hub
     private readonly IGameSessionCharacterService _gameSessionCharacterService;
     private readonly IMapService _mapService;
     private readonly IGameSessionCharacterTurnInfoService _gameSessionCharacterTurnInfoService;
+    private readonly ICharacterAbilityService _characterAbilityService;
+    private readonly IGameSessionCharacterTurnQueueService _turnQueueService;
 
     private static readonly ConnectedUsers ConnectedUsers = new();
     private static readonly LockedCharacters LockedCharacters = new();
@@ -32,7 +35,11 @@ public class GameSessionsHub : Hub
         IGameSessionService gameSessionService,
         IGameSessionMessageService gameSessionMessageService,
         ICharacterService characterService,
-        IGameSessionCharacterService gameSessionCharacterService, IMapService mapService, IGameSessionCharacterTurnInfoService gameSessionCharacterTurnInfoService)
+        IGameSessionCharacterService gameSessionCharacterService,
+        IMapService mapService,
+        IGameSessionCharacterTurnInfoService gameSessionCharacterTurnInfoService,
+        ICharacterAbilityService characterAbilityService,
+        IGameSessionCharacterTurnQueueService turnQueueService)
     {
         _userService = userService;
         _gameSessionService = gameSessionService;
@@ -41,6 +48,8 @@ public class GameSessionsHub : Hub
         _gameSessionCharacterService = gameSessionCharacterService;
         _mapService = mapService;
         _gameSessionCharacterTurnInfoService = gameSessionCharacterTurnInfoService;
+        _characterAbilityService = characterAbilityService;
+        _turnQueueService = turnQueueService;
     }
 
     private async Task<(Guid GameSessionId, UserResponse user)> GetConnectionInfoOrThrow()
@@ -243,8 +252,8 @@ public class GameSessionsHub : Hub
             throw new HubException("There is no locked characters, game can not be started");
 
 
-        await _characterService.ChooseCharacters(
-            locks,
+        await _characterService.AddCharactersToGameSession(
+            locks.Select(l => (l.Key, l.Value)).ToList(),
             gameSessionId
         );
         LockedCharacters.UnlockByGameSession(gameSessionId);
@@ -428,6 +437,118 @@ public class GameSessionsHub : Hub
             GameSessionStatusTypeEnum.InGame,
             Clients.Group(gameSessionId.ToString())
         );
+    }
+
+    public async Task UseAbility(int characterAbilityId, Guid casterGameSessionCharacterId, int x, int y)
+    {
+        var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
+
+        var applyAbility =
+            await _characterAbilityService.ApplyAbility(characterAbilityId, casterGameSessionCharacterId, x, y);
+
+        foreach (var message in applyAbility.Messages)
+            if (applyAbility.IsPossible)
+            {
+                await CreateServerMessage_Internal(gameSessionId, message);
+            }
+            else
+            {
+                await Clients.Caller.SendAsync(Events.MessageReceived,
+                    new ServerGameSessionMessageResponse(
+                        new ServerGameSessionMessage
+                        {
+                            GameSessionId = gameSessionId,
+                            Message = message,
+                            CreatedDate = DateTime.UtcNow
+                        })
+                );
+            }
+
+        if (applyAbility.IsPossible)
+            await SendGameSessionInfo(gameSessionId, GameSessionStatusTypeEnum.InGame,
+                Clients.Group(gameSessionId.ToString()));
+    }
+
+    public async Task StartTurnBased(Guid mapId)
+    {
+        var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
+
+        if (!await IsCallerAdmin(gameSessionId, caller))
+            throw new HubException("You have no rights to run this action");
+
+
+        var templates = await _characterService.GetCharacterTemplates();
+        //todo add npcs from argument
+        var npcs = new List<(Guid OwnerId, Guid CharacterTemplateId)>
+        {
+            (caller.Id, templates[2].Id),
+            (caller.Id, templates[3].Id)
+        };
+
+        await _gameSessionService.SetMap(gameSessionId, mapId);
+        await _characterService.AddCharactersToGameSession(
+            npcs,
+            gameSessionId
+        );
+        var characters = await _characterService.GetGameSessionCharacters(gameSessionId);
+        var x = 0;
+        var y = 0;
+        foreach (var character in characters)
+        {
+            //todo set positions from argument
+            await _gameSessionCharacterService.SetPosition(character.Id, ++x, ++y);
+        }
+
+        var turnQueue = await _turnQueueService.InitTurnQueue(gameSessionId);
+
+        var gameSessionProxy = Clients.Group(gameSessionId.ToString());
+        await SendGameSessionInfo(gameSessionId, GameSessionStatusTypeEnum.InGame, gameSessionProxy);
+        await gameSessionProxy.SendAsync(Events.TurnBasedInit, new TurnQueueResponse(turnQueue));
+
+        var newChar = characters.FirstOrDefault(c => c.Id == turnQueue.GameSessionCharacterIds[turnQueue.CurrentIndex]);
+        var nextTurnConnectionId = ConnectedUsers.GetConnectionId(gameSessionId, newChar.OwnerId);
+        var turnInfo = await _gameSessionCharacterTurnInfoService.GetCharacterTurnInfo(newChar.Id);
+        await Clients.Client(nextTurnConnectionId).SendAsync(Events.YourTurnStart, new TurnInfoResponse(turnInfo));
+    }
+
+    public async Task EndTurnBased()
+    {
+        var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
+
+        if (!await IsCallerAdmin(gameSessionId, caller))
+            throw new HubException("You have no rights to run this action");
+
+        await _turnQueueService.EndTurnQueue(gameSessionId);
+        await _gameSessionService.SetMap(gameSessionId, null);
+        await _characterService.DeleteNpc(gameSessionId);
+        
+        var gameSessionProxy = Clients.Group(gameSessionId.ToString());
+        await gameSessionProxy.SendAsync(Events.TurnBasedEnd);
+        //todo send clear map?
+        await SendGameSessionInfo(gameSessionId, GameSessionStatusTypeEnum.InGame, gameSessionProxy);
+    }
+
+    public async Task EndTurn(Guid characterId)
+    {
+        var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
+        var character = await _gameSessionCharacterService.GetGameSessionCharacter(characterId);
+        var turnQueue = await _turnQueueService.GetTurnQueue(gameSessionId);
+        if (character.OwnerId != caller.Id || turnQueue is null)
+        {
+            //todo послать нахуй
+            return;
+        }
+
+        var newIndex = await _turnQueueService.NextTurnQueue(gameSessionId);
+        var gameSessionCharacters = await _characterService.GetGameSessionCharacters(gameSessionId);
+        var newChar = gameSessionCharacters.FirstOrDefault(c => c.Id == turnQueue.GameSessionCharacterIds[newIndex]);
+        var nextTurnConnectionId = ConnectedUsers.GetConnectionId(gameSessionId, newChar.OwnerId);
+        //todo map to response
+        var newTurnInfo = await _gameSessionCharacterTurnInfoService.UpdateTurnInfo(character.Id);
+
+        await Clients.Group(gameSessionId.ToString()).SendAsync(Events.NextTurn, newIndex);
+        //todo send after move, ability and so on
+        await Clients.Client(nextTurnConnectionId).SendAsync(Events.YourTurnStart, new TurnInfoResponse(newTurnInfo));
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)

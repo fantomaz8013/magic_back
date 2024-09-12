@@ -42,6 +42,10 @@ export function useGameSessionWS(logsEnabled?: boolean) {
         ws.on(WSEvents.playerLeft, onPlayerLeft);
         ws.on(WSEvents.playerSaveThrow, onPlayerSaveThrow);
         ws.on(WSEvents.playerSaveThrowPassed, onPlayerSaveThrowPassed);
+        ws.on(WSEvents.turnBasedInit, onTurnBasedInit);
+        ws.on(WSEvents.turnBasedEnd, onTurnBasedEnd);
+        ws.on(WSEvents.nextTurn, onNextTurn);
+        ws.on(WSEvents.yourTurnStart, onYourTurnStart);
 
         return () => {
             ws.off(WSEvents.gameSessionInfoReceived);
@@ -53,6 +57,10 @@ export function useGameSessionWS(logsEnabled?: boolean) {
             ws.off(WSEvents.playerLeft);
             ws.off(WSEvents.playerSaveThrow);
             ws.off(WSEvents.playerSaveThrowPassed);
+            ws.off(WSEvents.turnBasedInit);
+            ws.off(WSEvents.turnBasedEnd);
+            ws.off(WSEvents.nextTurn);
+            ws.off(WSEvents.yourTurnStart);
         }
     }, [ws])
 
@@ -69,6 +77,10 @@ export function useGameSessionWS(logsEnabled?: boolean) {
         rollSaveDice,
         changeCharacter,
         moveCharacter,
+        useAbility,
+        startTurnBased,
+        endTurnBased,
+        endTurn,
         state,
     };
 
@@ -131,6 +143,22 @@ export function useGameSessionWS(logsEnabled?: boolean) {
 
     async function moveCharacter(characterId: string, path: LocationRequest[]) {
         await _invoke(WSActions.moveCharacter, characterId, path);
+    }
+
+    async function useAbility(characterAbilityId: number, casterGameSessionCharacterId: string, x: number, y: number) {
+        await _invoke(WSActions.useAbility, characterAbilityId, casterGameSessionCharacterId, x, y);
+    }
+
+    async function startTurnBased(mapId: string) {
+        await _invoke(WSActions.startTurnBased, mapId);
+    }
+
+    async function endTurnBased() {
+        await _invoke(WSActions.endTurnBased);
+    }
+
+    async function endTurn(characterId: string) {
+        await _invoke(WSActions.endTurn, characterId);
     }
 
     function _onEvent(event: WSEvents, func: () => UnknownAction, ...args: any) {
@@ -212,6 +240,38 @@ export function useGameSessionWS(logsEnabled?: boolean) {
             WSEvents.historyReceived,
             () => setMessages(newMessages),
             newMessages
+        );
+    }
+
+    function onTurnBasedInit(data: any) {
+        _onEvent(
+            WSEvents.turnBasedInit,
+            () => console.log(data) as any,
+            data
+        );
+    }
+
+    function onTurnBasedEnd(data: any) {
+        _onEvent(
+            WSEvents.turnBasedEnd,
+            () => console.log(data) as any,
+            data
+        );
+    }
+
+    function onNextTurn(data: any) {
+        _onEvent(
+            WSEvents.nextTurn,
+            () => console.log(data) as any,
+            data
+        );
+    }
+
+    function onYourTurnStart(data: any) {
+        _onEvent(
+            WSEvents.yourTurnStart,
+            () => console.log(data) as any,
+            data
         );
     }
 }

@@ -184,7 +184,7 @@ public class GameSessionCharacterService : IGameSessionCharacterService
     {
         var gameSessionCharacter = await GetGameSessionCharacter(gameSessionCharacterId);
 
-        gameSessionCharacter.CurrentHP += value;
+        gameSessionCharacter.CurrentHP = Math.Min(gameSessionCharacter.CurrentHP + value, gameSessionCharacter.MaxHP);
         _dbContext.Update(gameSessionCharacter);
         await _dbContext.SaveChangesAsync();
 

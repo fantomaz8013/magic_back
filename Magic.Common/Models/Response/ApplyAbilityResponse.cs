@@ -4,7 +4,10 @@ namespace Magic.Common.Models.Response;
 
 public class ApplyAbilityResponse
 {
-    public bool IsResult { get; set; }
-    public List<string> Message { get; set; } = new();
+    public bool IsPossible { get; set; }
+
+    public List<string> Messages { get; set; } = new();
+
+    //id юнитов, что попали под действие способности
     public List<Guid> TargetIds { get; set; } = new();
 }
