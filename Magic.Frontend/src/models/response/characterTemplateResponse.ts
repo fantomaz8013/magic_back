@@ -21,6 +21,7 @@ export interface CharacterTemplate extends BaseEntity<string> {
 
 export interface CharacterAbility extends BaseEntity<number> {
     title: string;
+    icons: string;
     description: string;
     distance?: number;
     radius?: number;

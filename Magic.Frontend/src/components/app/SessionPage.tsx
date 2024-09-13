@@ -38,7 +38,7 @@ export default function SessionPage() {
 
     return (
         <Grid item xs={9}>
-            <Grid item xs={12} style={className.block}>
+            <Grid item xs={12} style={className.page}>
                 <ContainerTable style={className.tableWrapper}>
                     <Table stickyHeader aria-label="table">
                         <TableHead>

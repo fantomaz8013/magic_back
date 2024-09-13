@@ -18,7 +18,7 @@ export default function CharacterLeftMenu({character, onClick}: CharacterTemplat
                 {character.currentHP}/{character.maxHP}
             </Typography>
             <CardMedia
-                sx={{height: 150}}
+                sx={{height: 150, width:100}}
                 image={baseProxy + character.avatarUrL}
                 title={character.name}
             />

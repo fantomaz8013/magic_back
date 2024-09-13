@@ -8,8 +8,9 @@ const className = {
     backgroundPosition: "center",
     backgroundImage: `url(${bg})`,
   },
-  block: {
+  page: {
     display: "flex",
+    height:'100%'
   },
   chat: {
     display: 'flex',

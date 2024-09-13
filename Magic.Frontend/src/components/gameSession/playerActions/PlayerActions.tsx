@@ -9,6 +9,8 @@ import {AppDispatch, RootState} from "../../../redux/redux";
 import {useGetCurrentUserQuery} from "../../../redux/api/userApi";
 import {socket} from "../../../webSocket/webSocket";
 import {useGetAbilitiesQuery} from "../../../redux/api/characterApi";
+import Avatar from "@mui/material/Avatar";
+import {baseProxy} from "../../../env";
 
 export function PlayerActions() {
     const dispatch = useDispatch<AppDispatch>();
@@ -21,20 +23,22 @@ export function PlayerActions() {
     const isGameMaster = (currentUser && currentUser.data && playerInfos[currentUser.data.id]?.isMaster) || false;
 
     return (
-        <Paper>
-            <Grid
-                item
-                sx={{
-                    display: 'flex',
-                    flexDirection: "column",
-                }}>
-                <Dice/>
-                <Button onClick={onEndTurnClick}>Закончить ход</Button>
-                {renderStartMoving()}
-                {renderAbilities()}
-                {renderMasterActions()}
-            </Grid>
-        </Paper>
+        <Grid
+            item
+            sx={{
+                display: 'flex',
+                gap: '10px',
+                alignItems: 'center',
+                height: '100%',
+                paddingLeft: '50px',
+            }}>
+            {/*<Dice/>*/}
+            {/*<Button onClick={onEndTurnClick}>Закончить ход</Button>*/}
+            {/*{renderStartMoving()}*/}
+            {/*{renderMasterActions()}*/}
+
+            {renderAbilities()}
+        </Grid>
     );
 
     function renderStartMoving() {
@@ -50,7 +54,16 @@ export function PlayerActions() {
         if (!userCharacter) return;
         const _abilities = abilities.data.filter(a => userCharacter.abilitieIds.includes(a.id));
         return _abilities.map(a => (
-            <Button id={a.id.toString()} onClick={onApplyAbilityClick}>Применить {a.title}</Button>
+            <Avatar
+                sx={{
+                    width: '40px',
+                    height: '40px',
+                    border: '1px solid',
+                }}
+                src={baseProxy + a.icons}
+                id={a.id.toString()}
+                onClick={onApplyAbilityClick}
+            />
         ));
     }
 
@@ -75,7 +88,7 @@ export function PlayerActions() {
         }
     }
 
-    async function onApplyAbilityClick(event: React.MouseEvent<HTMLButtonElement>) {
+    async function onApplyAbilityClick(event: React.MouseEvent<HTMLDivElement>) {
         if (!characters || !abilities || !abilities.data) return;
         const userCharacter = characters.find(c => c.ownerId === currentUser!.data!.id);
         if (!userCharacter) return;

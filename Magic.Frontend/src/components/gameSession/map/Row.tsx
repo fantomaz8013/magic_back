@@ -57,6 +57,7 @@ export const Row = ({row, rowIdx,}: RowProps) => {
                             sx={{
                                 flex: "1 1 min(9vw, 9vh)",
                                 width: '50px',
+                                maxWidth: '50px',
                                 height: '50px',
                                 display: "flex",
                                 alignItems: "center",

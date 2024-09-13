@@ -87,12 +87,8 @@ export function Map() {
             }}>
             <Paper
                 onContextMenu={backTrackMove}
-                id={'Board'}
-                elevation={4}
                 sx={{
-                    maxWidth: '100%',
                     position: 'relative',
-                    flexDirection: "column",
                 }}>
                 {
                     gameSessionInfo.map.tiles

@@ -1,5 +1,5 @@
 const className = {
-  block: {
+  page: {
     padding: '2.5em 1.375em',
     height: 'calc(100vh - 12.5625em)',
     display: 'flex',

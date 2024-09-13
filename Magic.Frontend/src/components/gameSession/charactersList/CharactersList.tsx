@@ -61,7 +61,6 @@ export default function CharacterList() {
         )}
       </Box>
       <Box
-        id="lol"
         sx={{
           display: "flex",
           width: "100%",

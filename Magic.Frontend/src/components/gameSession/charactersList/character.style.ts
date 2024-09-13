@@ -7,7 +7,7 @@ export const className = {
     background: "#161617",
     borderRadius: "8px",
   },
-  block: {
+  page: {
     display: "flex",
   },
   cardClass: {
