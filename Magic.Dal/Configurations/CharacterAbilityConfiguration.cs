@@ -24,6 +24,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
         builder.PropertyWithUnderscore(x => x.Distance);
         builder.PropertyWithUnderscore(x => x.CubeCount);
         builder.PropertyWithUnderscore(x => x.CoolDownCount);
+        builder.PropertyWithUnderscore(x => x.Icons);
 
         builder.PropertyWithUnderscore(x => x.CharacterClassId).IsRequired(false).HasDefaultValue(null);
         builder.HasForeignKey(x => x.CharacterClass, x => x.CharacterClassId);
@@ -53,6 +54,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CubeType = CubeTypeEnum.D10,
             Distance = 2,
             CubeCount = 1,
+            Icons = "storage/icons/ability/1.png",
         });
 
         builder.HasData(new CharacterAbility 
@@ -67,6 +69,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CubeType = CubeTypeEnum.D10,
             CubeCount = 1,
             CharacterClassId = CharacterClass.Warrior,
+            Icons = "storage/icons/ability/2.png",
         });
 
         builder.HasData(new CharacterAbility
@@ -81,6 +84,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CharacterClassId = CharacterClass.Warrior,
             BuffCount = 1,
             CharacterBuffId = 3,
+            Icons = "storage/icons/ability/3.png",
         });
 
         builder.HasData(new CharacterAbility
@@ -97,6 +101,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             Distance = 1,
             Radius = 3,
             CharacterClassId = CharacterClass.Warrior,
+            Icons = "storage/icons/ability/4.png",
         });
 
         builder.HasData(new CharacterAbility
@@ -113,6 +118,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CharacterClassId = CharacterClass.Warrior,
             BuffCount = 3,
             CharacterBuffId = 3,
+            Icons = "storage/icons/ability/5.png",
         });
 
         builder.HasData(new CharacterAbility
@@ -129,6 +135,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CubeType = CubeTypeEnum.D10,
             CubeCount = 3,
             CharacterClassId = CharacterClass.Wizard,
+            Icons = "storage/icons/ability/6.png",
         });
 
         builder.HasData(new CharacterAbility
@@ -147,6 +154,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CharacterClassId = CharacterClass.Wizard,
             BuffCount = 1,
             CharacterBuffId = 4,
+            Icons = "storage/icons/ability/7.png",
         });
 
         builder.HasData(new CharacterAbility
@@ -163,6 +171,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CubeCount = 1,
             CharacterClassId = CharacterClass.Wizard,
             CasterCharacterCharacteristicId = CharacterCharacteristic.Wisdom,
+            Icons = "storage/icons/ability/8.png",
         });
 
         builder.HasData(new CharacterAbility
@@ -178,6 +187,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CharacterClassId = CharacterClass.Wizard,
             BuffCount = 1,
             CharacterBuffId = 2,
+            Icons = "storage/icons/ability/9.png",
         });
 
 
@@ -194,6 +204,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CubeType = CubeTypeEnum.D8,
             CubeCount = 1,
             CharacterClassId = CharacterClass.Priest,
+            Icons = "storage/icons/ability/10.png",
         });
 
         builder.HasData(new CharacterAbility
@@ -211,6 +222,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CharacterClassId = CharacterClass.Priest,
             BuffCount = 1,
             CharacterBuffId = 1,
+            Icons = "storage/icons/ability/11.png",
         });
 
         builder.HasData(new CharacterAbility
@@ -226,6 +238,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CubeType = CubeTypeEnum.D20,
             CubeCount = 1,
             CharacterClassId = CharacterClass.Priest,
+            Icons = "storage/icons/ability/12.png",
         });
 
         builder.HasData(new CharacterAbility
@@ -241,6 +254,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CubeType = CubeTypeEnum.D10,
             CubeCount = 1,
             CharacterClassId = CharacterClass.Priest,
+            Icons = "storage/icons/ability/13.png",
         });
 
         builder.HasData(new CharacterAbility
@@ -257,6 +271,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CubeType = CubeTypeEnum.D10,
             CubeCount = 1,
             CharacterClassId = CharacterClass.Hunter,
+            Icons = "storage/icons/ability/14.png",
         });
 
         builder.HasData(new CharacterAbility
@@ -271,6 +286,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CubeType = CubeTypeEnum.D10,
             CubeCount = 1,
             CharacterClassId = CharacterClass.Hunter,
+            Icons = "storage/icons/ability/15.png",
         });
 
         builder.HasData(new CharacterAbility
@@ -286,6 +302,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CubeCount = 1,
             Distance = 30,
             CharacterClassId = CharacterClass.Hunter,
+            Icons = "storage/icons/ability/16.png",
         });
 
         builder.HasData(new CharacterAbility
@@ -301,6 +318,7 @@ public class CharacterAbilityConfiguration : IEntityTypeConfiguration<CharacterA
             CubeCount = 5,
             Distance = 30,
             CharacterClassId = CharacterClass.Hunter,
+            Icons = "storage/icons/ability/17.png",
         });
 
     }

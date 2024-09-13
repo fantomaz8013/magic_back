@@ -69,4 +69,8 @@ public class CharacterAbility : BaseEntity<int>
     public int? BuffCount { get; set; }
     public int? CharacterBuffId { get; set; }
     public GameSessionCharacterBuff? CharacterBuff { get; set; }
+    /// <summary>
+    /// url иконки
+    /// </summary>
+    public string Icons { get; set; }
 }
