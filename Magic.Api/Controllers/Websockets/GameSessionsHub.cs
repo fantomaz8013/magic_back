@@ -1,9 +1,7 @@
 ﻿using Magic.Api.Controllers.Websockets.InMemory;
 using Magic.Api.Controllers.Websockets.Requests;
 using Magic.Api.Controllers.Websockets.Responses;
-using Magic.Common.Models.Request;
 using Magic.Common.Models.Response;
-using Magic.Domain.Entities;
 using Magic.Domain.Enums;
 using Magic.Service;
 using Magic.Service.Interfaces;
@@ -13,8 +11,11 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Magic.Api.Controllers.Websockets;
 
+/// <summary>
+/// В этом файле описываются КОР механики хаба, отправка сообщений, подклечение, броски кубика и т.д
+/// </summary>
 [Authorize]
-public class GameSessionsHub : Hub
+partial class GameSessionsHub : Hub
 {
     private readonly IUserService _userService;
     private readonly IGameSessionService _gameSessionService;
@@ -52,52 +53,12 @@ public class GameSessionsHub : Hub
         _turnQueueService = turnQueueService;
     }
 
-    private async Task<(Guid GameSessionId, UserResponse user)> GetConnectionInfoOrThrow()
-    {
-        var gameSessionId = ConnectedUsers.GetGameSessionId(Context.ConnectionId);
-
-        if (gameSessionId is null)
-            throw new HubException("GameSession not found");
-
-        var caller = await _userService.CurrentUser();
-
-        return (gameSessionId.Value, caller!);
-    }
-
-    public async Task NewMessage(string message)
-    {
-        var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
-        await NewMessage_Internal(gameSessionId, message, caller.Id);
-    }
-
-    private async Task NewMessage_Internal(Guid gameSessionId, string message, Guid userId)
-    {
-        var messageEntity = await _gameSessionMessageService.AddChatMessage(gameSessionId, message, userId);
-        await Clients.Group(gameSessionId.ToString()).SendAsync(Events.MessageReceived, messageEntity);
-    }
-
-    public async Task RollDice(CubeTypeEnum cubeTypeEnum)
-    {
-        var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
-
-        await RollDice_Internal(gameSessionId, cubeTypeEnum, caller);
-    }
-
-    private async Task RollDice_Internal(Guid gameSessionId, CubeTypeEnum cubeTypeEnum, UserResponse caller)
-    {
-        var rollDice = DiceUtil.RollDice(cubeTypeEnum);
-        var messageEntity =
-            await _gameSessionMessageService.AddDiceMessage(gameSessionId, rollDice, cubeTypeEnum, caller.Id);
-        await Clients.Group(gameSessionId.ToString()).SendAsync(Events.MessageReceived, messageEntity);
-    }
-
-    private async Task CreateServerMessage_Internal(Guid gameSessionId, string message)
-    {
-        var messageEntity = await _gameSessionMessageService.AddServerMessage(gameSessionId, message);
-
-        await Clients.Group(gameSessionId.ToString()).SendAsync(Events.MessageReceived, messageEntity);
-    }
-
+    /// <summary>
+    /// Присоединится к игровой комнате
+    /// </summary>
+    /// <param name="gameSessionId"></param>
+    /// <returns></returns>
+    /// <exception cref="HubException"></exception>
     public async Task JoinGameSession(Guid gameSessionId)
     {
         var gameSession = await _gameSessionService.GetById(gameSessionId);
@@ -125,97 +86,11 @@ public class GameSessionsHub : Hub
         await SendGameSessionInfo(gameSession.Id, gameSession.GameSessionStatus, Clients.Caller);
     }
 
-    private async Task ConnectPlayer_Internal(Guid gameSessionId, UserResponse callerUser)
-    {
-        ConnectedUsers.Connect(gameSessionId, callerUser.Id, Context.ConnectionId);
-        await Groups.AddToGroupAsync(Context.ConnectionId, gameSessionId.ToString());
-        await CreateServerMessage_Internal(gameSessionId, $"Player \"{callerUser.Login}\" joined!");
-    }
-
-    private async Task SendHistory(Guid gameSessionId, IClientProxy clientProxy)
-    {
-        var messages = await _gameSessionMessageService.GetMessages(gameSessionId);
-
-        if (messages.Count > 0)
-            await clientProxy.SendAsync(Events.HistoryReceived, messages);
-    }
-
-    private async Task SendPlayerInfos(Domain.Entities.GameSession gameSession, IClientProxy clientProxy)
-    {
-        var locks = LockedCharacters.GetGameSessionLocks(gameSession.Id);
-        var playerInfos = gameSession
-            .Users
-            .Append(gameSession.CreatorUser)
-            .Select(u =>
-                {
-                    var connectionId = ConnectedUsers.GetConnectionId(gameSession.Id, u.Id);
-                    Guid? lockedCharacterId = null;
-                    if (locks != null && locks.TryGetValue(u.Id, out var value))
-                        lockedCharacterId = value;
-                    return new PlayerInfo(
-                        u.Id,
-                        u.Login,
-                        gameSession.CreatorUserId == u.Id,
-                        lockedCharacterId,
-                        connectionId != null
-                    );
-                }
-            )
-            .ToArray();
-        await clientProxy.SendAsync(Events.PlayerInfoReceived, playerInfos);
-    }
-
-    private async Task SendGameSessionInfo(
-        Guid gameSessionId,
-        GameSessionStatusTypeEnum gameSessionStatus,
-        IClientProxy clientProxy)
-    {
-        var gameSessionInfo = new GameSessionInfo(gameSessionStatus);
-        if (gameSessionStatus == GameSessionStatusTypeEnum.InGame)
-        {
-            var gameSession = await _gameSessionService.GetById(gameSessionId);
-            gameSessionInfo = gameSessionInfo with
-            {
-                Characters = await _characterService.GetGameSessionCharacters(gameSessionId),
-                Map = gameSession!.Map != null ? new MapResponse(gameSession.Map) : null,
-            };
-        }
-
-        await clientProxy.SendAsync(Events.GameSessionInfoReceived, gameSessionInfo);
-    }
-
-    public async Task LockCharacter(Guid characterId)
-    {
-        var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
-        var gameSession = await _gameSessionService.GetById(gameSessionId);
-        if (gameSession.CreatorUserId == caller.Id)
-            throw new HubException("GameMaster can't lock characters");
-
-        if (LockedCharacters.IsCharacterLocked(gameSessionId, characterId))
-            throw new HubException("Character already locked");
-
-        await LockCharacter_Internal(gameSessionId, caller.Id, characterId);
-    }
-
-    private async Task LockCharacter_Internal(Guid gameSessionId, Guid callerUserId, Guid characterId)
-    {
-        LockedCharacters.Lock(gameSessionId, callerUserId, characterId);
-        await Clients.Group(gameSessionId.ToString()).SendAsync(Events.CharacterLocked, callerUserId, characterId);
-    }
-
-    public async Task UnlockCharacter()
-    {
-        var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
-
-        await UnlockCharacter_Internal(gameSessionId, caller.Id);
-    }
-
-    private async Task UnlockCharacter_Internal(Guid gameSessionId, Guid callerUserId)
-    {
-        LockedCharacters.UnlockByUser(gameSessionId, callerUserId);
-        await Clients.Group(gameSessionId.ToString()).SendAsync(Events.CharacterUnlocked, callerUserId);
-    }
-
+    /// <summary>
+    /// Выйти из игровой комнаты
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="HubException"></exception>
     public async Task LeaveGameSession()
     {
         var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
@@ -228,327 +103,27 @@ public class GameSessionsHub : Hub
         await LeaveGameSession_Internal(gameSessionId, caller, Context.ConnectionId);
     }
 
-    private async Task LeaveGameSession_Internal(Guid gameSessionId, UserResponse leavingUser, string connectionId)
-    {
-        ConnectedUsers.Disconnect(gameSessionId, leavingUser.Id);
-        LockedCharacters.UnlockByUser(gameSessionId, leavingUser.Id);
-        await CreateServerMessage_Internal(gameSessionId, $"Player \"{leavingUser.Login}\" disconnected");
-        await Clients.Group(gameSessionId.ToString()).SendAsync(Events.PlayerLeft, leavingUser.Id);
-        await Groups.RemoveFromGroupAsync(connectionId, gameSessionId.ToString());
-    }
-
-    public async Task StartGame()
-    {
-        var (gameSessionId, callerUser) = await GetConnectionInfoOrThrow();
-        var gameSession = await _gameSessionService.GetById(gameSessionId);
-
-        if (gameSession == null || gameSession.CreatorUserId != callerUser.Id)
-        {
-            throw new HubException("You have no rights to run this action");
-        }
-
-        var locks = LockedCharacters.GetGameSessionLocks(gameSessionId);
-        if (locks is null)
-            throw new HubException("There is no locked characters, game can not be started");
-
-
-        await _characterService.AddCharactersToGameSession(
-            locks.Select(l => (l.Key, l.Value)).ToList(),
-            gameSessionId
-        );
-        LockedCharacters.UnlockByGameSession(gameSessionId);
-        if (!await _gameSessionService.ChangeGameSessionStatus(gameSessionId, GameSessionStatusTypeEnum.InGame))
-            throw new HubException("Couldn't start game");
-
-        var group = Clients.Group(gameSessionId.ToString());
-        await SendGameSessionInfo(gameSession.Id, GameSessionStatusTypeEnum.InGame, group);
-    }
-
-    public async Task Kick(Guid userId)
-    {
-        var (gameSessionId, callerUser) = await GetConnectionInfoOrThrow();
-        var gameSession = await _gameSessionService.GetById(gameSessionId);
-
-        if (!IsCallerAdmin(gameSession, callerUser.Id))
-            throw new HubException("You have no rights to run this action");
-
-        var userToKick = gameSession.Users.FirstOrDefault(u => u.Id == userId);
-        var connectionId = ConnectedUsers.GetConnectionId(gameSessionId, userToKick.Id);
-        if (userToKick is not null)
-            await LeaveGameSession_Internal(gameSessionId, new UserResponse(userToKick), connectionId);
-    }
-
-    public async Task RequestSaveThrow(Guid userId, int characterCharacteristicId, int value)
-    {
-        var (gameSessionId, callerUser) = await GetConnectionInfoOrThrow();
-        var gameSession = await _gameSessionService.GetById(gameSessionId);
-
-        if (gameSession == null || gameSession.CreatorUserId != callerUser.Id)
-        {
-            throw new HubException("You have no rights to run this action");
-        }
-
-        var connectionId = ConnectedUsers.GetConnectionId(gameSessionId, userId);
-
-        if (connectionId is null)
-        {
-            throw new HubException("User not connected");
-        }
-
-        var userToRequest = gameSession.Users.FirstOrDefault(u => u.Id == userId);
-        var requestedSaveThrow = new RequestedSaveThrow(characterCharacteristicId, value, callerUser.Id, userId);
-        if (userToRequest is not null)
-            await RequestSaveThrow_Internal(connectionId, requestedSaveThrow);
-    }
-
-    private async Task RequestSaveThrow_Internal(
-        string connectionId,
-        RequestedSaveThrow requestedSaveThrow
-    )
-    {
-        RequestedSaveThrows.RequestSaveThrow(connectionId, requestedSaveThrow);
-        await Clients
-            .Client(connectionId)
-            .SendAsync(Events.PlayerSaveThrow, requestedSaveThrow);
-    }
-
-    public async Task RollSaveDice()
+    /// <summary>
+    /// Отправка сообщения в чат
+    /// </summary>
+    /// <param name="message"></param>
+    /// <returns></returns>
+    public async Task NewMessage(string message)
     {
         var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
-        var requestSaveThrow = RequestedSaveThrows.PassSaveThrow(Context.ConnectionId);
-        if (requestSaveThrow is null)
-        {
-            throw new HubException("No save throws requested");
-        }
-
-        await RollSaveDice_Internal(gameSessionId, caller, requestSaveThrow);
+        await NewMessage_Internal(gameSessionId, message, caller.Id);
     }
 
-    private async Task RollSaveDice_Internal(
-        Guid gameSessionId,
-        UserResponse caller,
-        RequestedSaveThrow requestSaveThrow)
-    {
-        var characteristics = await _characterService.GetCharacterCharacteristics();
-        var characteristic = characteristics.FirstOrDefault(c => c.Id == requestSaveThrow.CharacterCharacteristicId);
-        var modificator =
-            await GetModificator(gameSessionId, requestSaveThrow.UserId, requestSaveThrow.CharacterCharacteristicId);
-
-        var rollDice = DiceUtil.RollDice(CubeTypeEnum.D20);
-        var resultRollDice = rollDice + modificator;
-
-        var messageEntity =
-            await _gameSessionMessageService.AddDiceMessage(gameSessionId, resultRollDice, CubeTypeEnum.D20, caller.Id);
-        await Clients.Group(gameSessionId.ToString()).SendAsync(Events.MessageReceived, messageEntity);
-        var message =
-            BuildSaveThrowMessage(requestSaveThrow, rollDice, caller.Login, characteristic!.Title, modificator);
-        await Clients.Group(gameSessionId.ToString()).SendAsync(Events.PlayerSaveThrowPassed,
-            new RequestedSaveThrowPassed(requestSaveThrow, resultRollDice));
-        await CreateServerMessage_Internal(gameSessionId, message);
-    }
-
-    private async Task<int> GetModificator(Guid gameSessionId, Guid userId, int characterCharacteristicId)
-    {
-        var gameSessionCharacters = await _characterService.GetGameSessionCharacters(gameSessionId);
-        var gameSessionCharacter = gameSessionCharacters.FirstOrDefault(c => c.OwnerId == userId)!;
-        return await _gameSessionCharacterService.GetRollModificator(gameSessionCharacter.Id,
-            characterCharacteristicId);
-    }
-
-    private string BuildSaveThrowMessage(
-        RequestedSaveThrow requestSaveThrow,
-        int rollDice,
-        string callerLogin,
-        string characteristicTitle,
-        int modificator)
-    {
-        var hasPassed = rollDice + modificator >= requestSaveThrow.Value;
-        var passedMessage = hasPassed ? "прошёл" : "провалил";
-        return
-            @$"Игрок {callerLogin} {passedMessage} проверку на {characteristicTitle} сложностью в {requestSaveThrow.Value}, выбросив {rollDice} с модификатором {modificator} (={rollDice + modificator}).";
-    }
-
-    public async Task ChangeCharacter(Guid characterId, Dictionary<string, string> changedCharacterFields)
-    {
-        var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
-        if (!await IsCallerAdmin(gameSessionId, caller))
-            throw new HubException("You have no rights to run this action");
-
-        var gameSessionCharacters = await _characterService.GetGameSessionCharacters(gameSessionId);
-        var gameSessionCharacter = gameSessionCharacters.FirstOrDefault(c => c.Id == characterId);
-        await _gameSessionCharacterService.Change(gameSessionCharacter, changedCharacterFields);
-        await SendGameSessionInfo(
-            gameSessionId,
-            GameSessionStatusTypeEnum.InGame,
-            Clients.Group(gameSessionId.ToString())
-        );
-    }
-
-    private async Task<bool> IsCallerAdmin(Guid gameSessionId, UserResponse caller)
-    {
-        var gameSession = await _gameSessionService.GetById(gameSessionId);
-
-        return IsCallerAdmin(gameSession, caller.Id);
-    }
-
-    private bool IsCallerAdmin(Domain.Entities.GameSession? gameSession, Guid callerId)
-    {
-        return gameSession != null && gameSession.CreatorUserId == callerId;
-    }
-
-    public async Task MoveCharacter(Guid characterId, List<LocationRequest> path)
-    {
-        var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
-        var character = await _gameSessionCharacterService.GetGameSessionCharacter(characterId);
-        var gameSession = await _gameSessionService.GetById(gameSessionId);
-        if (caller.Id != character.OwnerId)
-        {
-            throw new HubException("You have no rights to run this command");
-        }
-
-        if (!gameSession.MapId.HasValue)
-        {
-            throw new HubException("There is no map");
-        }
-
-        var pathCalc = await _mapService.PathCalculation(path, gameSession.MapId.Value, characterId);
-        if (pathCalc.IsSuccess)
-        {
-            await _gameSessionCharacterService.SetPosition
-            (characterId,
-                pathCalc.NewCharacterPosition.X,
-                pathCalc.NewCharacterPosition.Y
-            );
-        }
-        else
-        {
-            throw new HubException("Incorrect path");
-        }
-
-        if (pathCalc.Penalties.Count > 0)
-        {
-            await _gameSessionCharacterService.Damage(characterId, pathCalc.Penalties
-                .Where(p => p.PenaltyType == TilePropertyPenaltyTypeEnum.PenaltyHealth)
-                .Sum(p => p.Value));
-        }
-
-        await SendGameSessionInfo(
-            gameSessionId,
-            GameSessionStatusTypeEnum.InGame,
-            Clients.Group(gameSessionId.ToString())
-        );
-    }
-
-    public async Task UseAbility(int characterAbilityId, Guid casterGameSessionCharacterId, int x, int y)
+    /// <summary>
+    /// Кинуть кубик
+    /// </summary>
+    /// <param name="cubeTypeEnum"></param>
+    /// <returns></returns>
+    public async Task RollDice(CubeTypeEnum cubeTypeEnum)
     {
         var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
 
-        var applyAbility =
-            await _characterAbilityService.ApplyAbility(characterAbilityId, casterGameSessionCharacterId, x, y);
-
-        foreach (var message in applyAbility.Messages)
-            if (applyAbility.IsPossible)
-            {
-                await CreateServerMessage_Internal(gameSessionId, message);
-            }
-            else
-            {
-                await Clients.Caller.SendAsync(Events.MessageReceived,
-                    new ServerGameSessionMessageResponse(
-                        new ServerGameSessionMessage
-                        {
-                            GameSessionId = gameSessionId,
-                            Message = message,
-                            CreatedDate = DateTime.UtcNow
-                        })
-                );
-            }
-
-        if (applyAbility.IsPossible)
-            await SendGameSessionInfo(gameSessionId, GameSessionStatusTypeEnum.InGame,
-                Clients.Group(gameSessionId.ToString()));
-    }
-
-    public async Task StartTurnBased(Guid mapId)
-    {
-        var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
-
-        if (!await IsCallerAdmin(gameSessionId, caller))
-            throw new HubException("You have no rights to run this action");
-
-
-        var templates = await _characterService.GetCharacterTemplates();
-        //todo add npcs from argument
-        var npcs = new List<(Guid OwnerId, Guid CharacterTemplateId)>
-        {
-            (caller.Id, templates[2].Id),
-            (caller.Id, templates[3].Id)
-        };
-
-        await _gameSessionService.SetMap(gameSessionId, mapId);
-        await _characterService.AddCharactersToGameSession(
-            npcs,
-            gameSessionId
-        );
-        var characters = await _characterService.GetGameSessionCharacters(gameSessionId);
-        var x = 0;
-        var y = 0;
-        foreach (var character in characters)
-        {
-            //todo set positions from argument
-            await _gameSessionCharacterService.SetPosition(character.Id, ++x, ++y);
-        }
-
-        var turnQueue = await _turnQueueService.InitTurnQueue(gameSessionId);
-
-        var gameSessionProxy = Clients.Group(gameSessionId.ToString());
-        await SendGameSessionInfo(gameSessionId, GameSessionStatusTypeEnum.InGame, gameSessionProxy);
-        await gameSessionProxy.SendAsync(Events.TurnBasedInit, new TurnQueueResponse(turnQueue));
-
-        var newChar = characters.FirstOrDefault(c => c.Id == turnQueue.GameSessionCharacterIds[turnQueue.CurrentIndex]);
-        var nextTurnConnectionId = ConnectedUsers.GetConnectionId(gameSessionId, newChar.OwnerId);
-        var turnInfo = await _gameSessionCharacterTurnInfoService.GetCharacterTurnInfo(newChar.Id);
-        await Clients.Client(nextTurnConnectionId).SendAsync(Events.YourTurnStart, new TurnInfoResponse(turnInfo));
-    }
-
-    public async Task EndTurnBased()
-    {
-        var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
-
-        if (!await IsCallerAdmin(gameSessionId, caller))
-            throw new HubException("You have no rights to run this action");
-
-        await _turnQueueService.EndTurnQueue(gameSessionId);
-        await _gameSessionService.SetMap(gameSessionId, null);
-        await _characterService.DeleteNpc(gameSessionId);
-        
-        var gameSessionProxy = Clients.Group(gameSessionId.ToString());
-        await gameSessionProxy.SendAsync(Events.TurnBasedEnd);
-        //todo send clear map?
-        await SendGameSessionInfo(gameSessionId, GameSessionStatusTypeEnum.InGame, gameSessionProxy);
-    }
-
-    public async Task EndTurn(Guid characterId)
-    {
-        var (gameSessionId, caller) = await GetConnectionInfoOrThrow();
-        var character = await _gameSessionCharacterService.GetGameSessionCharacter(characterId);
-        var turnQueue = await _turnQueueService.GetTurnQueue(gameSessionId);
-        if (character.OwnerId != caller.Id || turnQueue is null)
-        {
-            //todo послать нахуй
-            return;
-        }
-
-        var newIndex = await _turnQueueService.NextTurnQueue(gameSessionId);
-        var gameSessionCharacters = await _characterService.GetGameSessionCharacters(gameSessionId);
-        var newChar = gameSessionCharacters.FirstOrDefault(c => c.Id == turnQueue.GameSessionCharacterIds[newIndex]);
-        var nextTurnConnectionId = ConnectedUsers.GetConnectionId(gameSessionId, newChar.OwnerId);
-        //todo map to response
-        var newTurnInfo = await _gameSessionCharacterTurnInfoService.UpdateTurnInfo(character.Id);
-
-        await Clients.Group(gameSessionId.ToString()).SendAsync(Events.NextTurn, newIndex);
-        //todo send after move, ability and so on
-        await Clients.Client(nextTurnConnectionId).SendAsync(Events.YourTurnStart, new TurnInfoResponse(newTurnInfo));
+        await RollDice_Internal(gameSessionId, cubeTypeEnum, caller);
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
